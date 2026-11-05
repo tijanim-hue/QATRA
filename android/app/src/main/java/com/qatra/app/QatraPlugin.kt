@@ -7,17 +7,10 @@ import android.provider.Settings
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
 import com.getcapacitor.PluginMethod
-import com.getcapacitor.annotation.Permission
+
 
 @CapacitorPlugin(
-    name = "QatraNative",
-    permissions = [
-        Permission(
-            alias = "notifications",
-            strings = [android.Manifest.permission.POST_NOTIFICATIONS]
-        )
-    ]
-)
+    name = "QatraNative")
 class QatraPlugin : Plugin() {
 
     @PluginMethod
