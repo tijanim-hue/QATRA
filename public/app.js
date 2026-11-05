@@ -1,4 +1,3 @@
-
 "use strict";
 
 /* =========================
@@ -122,6 +121,28 @@ let state = loadState();
 let selectedDays = new Set([0, 1, 2, 3, 4, 5, 6]);
 let toastTimer = null;
 let floatingTimer = null;
+
+/* Native Android bridge */
+const QatraNative = window.Capacitor?.Plugins?.QatraNative || null;
+async function nativeCall(method, options = {}) {
+  if (!QatraNative || typeof QatraNative[method] !== "function") return null;
+  try { return await QatraNative[method](options); }
+  catch (error) { console.warn(`QatraNative.${method} failed`, error); return null; }
+}
+function syncNativeSchedules() {
+  if (!QatraNative) return;
+  state.schedules.forEach(async schedule => {
+    await nativeCall("cancel", { id: schedule.id });
+    if (!state.remindersEnabled || !schedule.enabled) return;
+    const modes = schedule.mode || "both";
+    const effectiveMode = (!state.notificationEnabled && !state.floatingEnabled) ? "none" :
+      (state.notificationEnabled && state.floatingEnabled ? modes :
+      (state.notificationEnabled ? "notification" : "floating"));
+    if (effectiveMode === "none") return;
+    await nativeCall("schedule", { id: schedule.id, time: schedule.time, days: schedule.days, mode: effectiveMode, quote: getRandomQuote().text });
+  });
+}
+
 
 /* =========================
    Storage
@@ -434,6 +455,7 @@ function saveSchedule(event) {
   state.remindersEnabled = true;
 
   saveState();
+  syncNativeSchedules();
   syncSettingsUI();
   renderSchedules();
   closeScheduleModal();
@@ -444,7 +466,9 @@ function saveSchedule(event) {
 function deleteSchedule(id) {
   state.schedules = state.schedules.filter(item => item.id !== id);
 
+  nativeCall("cancel", { id });
   saveState();
+  syncNativeSchedules();
   renderSchedules();
 
   showToast("تم حذف الموعد");
@@ -456,6 +480,7 @@ function toggleSchedule(id, enabled) {
   );
 
   saveState();
+  syncNativeSchedules();
   renderSchedules();
 }
 
@@ -603,7 +628,7 @@ document.getElementById("showDrop").addEventListener("click", () => {
   const quote = setDailyQuote();
 
   if (state.floatingEnabled) {
-    showFloatingPreview(quote.text);
+    nativeCall("showDrop", { text: quote.text }).then(result => { if (!result) showFloatingPreview(quote.text); });
   } else {
     showToast("تم اختيار قطرتك الجديدة");
   }
@@ -676,6 +701,7 @@ document.getElementById("remindersEnabled").addEventListener("change", event => 
   state.remindersEnabled = event.target.checked;
 
   saveState();
+  syncNativeSchedules();
   syncSettingsUI();
 
   showToast(
@@ -689,6 +715,7 @@ document.getElementById("notificationSetting").addEventListener("change", event 
   state.notificationEnabled = event.target.checked;
 
   saveState();
+  syncNativeSchedules();
 
   showToast(
     state.notificationEnabled
@@ -701,6 +728,7 @@ document.getElementById("floatingSetting").addEventListener("change", event => {
   state.floatingEnabled = event.target.checked;
 
   saveState();
+  syncNativeSchedules();
 
   showToast(
     state.floatingEnabled
@@ -728,7 +756,7 @@ document.getElementById("previewFloating").addEventListener("click", () => {
   }
 
   const quote = getRandomQuote();
-  showFloatingPreview(quote.text);
+  nativeCall("showDrop", { text: quote.text }).then(result => { if (!result) showFloatingPreview(quote.text); });
 });
 
 document.getElementById("closeFloating").addEventListener("click", () => {
@@ -786,6 +814,7 @@ function initializeApp() {
   syncSettingsUI();
 
   setMotionEnabled(state.motionEnabled);
+  syncNativeSchedules();
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
