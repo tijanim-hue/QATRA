@@ -35,10 +35,7 @@ jobs:
           packages: 'platform-tools'
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Add Android platform
-        run: npx cap add android
+        run: npm ci
 
       - name: Sync Capacitor
         run: npx cap sync android
