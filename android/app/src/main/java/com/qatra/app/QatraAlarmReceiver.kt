@@ -16,21 +16,26 @@ class QatraAlarmReceiver : BroadcastReceiver() {
         val mode = intent.getStringExtra("mode") ?: "both"
         val quote = intent.getStringExtra("quote") ?: "حان وقت التأمل"
 
-        // استدعاء القطرة العائمة بطريقة آمنة
+        // تشغيل القطرة العائمة (الآن كخدمة أمامية محصنة)
         if (mode == "floating" || mode == "both") {
             val serviceIntent = Intent(context, QatraOverlayService::class.java).apply {
                 putExtra("quote", quote)
             }
-            // استخدام startService مسموح هنا لأننا نملك إذن SYSTEM_ALERT_WINDOW
-            context.startService(serviceIntent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                try {
+                    context.startForegroundService(serviceIntent)
+                } catch (e: Exception) {
+                    context.startService(serviceIntent)
+                }
+            } else {
+                context.startService(serviceIntent)
+            }
         }
 
-        // إرسال الإشعار
         if (mode == "notification" || mode == "both") {
             showNotification(context, id, quote)
         }
 
-        // إعادة الجدولة
         if (jsDay != -1) {
             QatraNotifications.scheduleSingleDay(context, id, jsDay, time, mode, quote)
         }
