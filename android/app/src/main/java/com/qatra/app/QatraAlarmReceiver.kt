@@ -1,52 +1,51 @@
 package com.qatra.app
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 
 class QatraAlarmReceiver : BroadcastReceiver() {
-
     override fun onReceive(context: Context, intent: Intent) {
-        val scheduleId = intent.getStringExtra("scheduleId") ?: "qatra"
-        val day = intent.getIntExtra("day", 0)
-        val id = 31 * scheduleId.hashCode() + day
+        val id = intent.getIntExtra("id", 0)
+        val jsDay = intent.getIntExtra("jsDay", -1)
+        val time = intent.getStringExtra("time") ?: return
         val mode = intent.getStringExtra("mode") ?: "notification"
-        val quote = intent.getStringExtra("quote") ?: "حان وقت قطرة"
+        val quote = intent.getStringExtra("quote") ?: "حان وقت التأمل"
 
         if (mode == "floating") {
             val serviceIntent = Intent(context, QatraOverlayService::class.java).apply {
-                action = QatraOverlayService.ACTION_SHOW
                 putExtra("quote", quote)
             }
-
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(serviceIntent)
-                } else {
-                    context.startService(serviceIntent)
-                }
-            } catch (_: Exception) {
-            }
+            context.startService(serviceIntent)
         } else {
-            val notification = NotificationCompat.Builder(
-                context,
-                "qatra_channel"
-            )
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("قطرة")
-                .setContentText(quote)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setAutoCancel(true)
-                .build()
-
-            try {
-                NotificationManagerCompat.from(context)
-                    .notify(id, notification)
-            } catch (_: SecurityException) {
-            }
+            showNotification(context, id, quote)
         }
+
+        if (jsDay != -1) {
+            QatraNotifications.scheduleSingleDay(context, id, jsDay, time, mode, quote)
+        }
+    }
+
+    private fun showNotification(context: Context, id: Int, quote: String) {
+        val channelId = "qatra_channel"
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "QATRA Reminders", NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val builder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(android.R.drawable.ic_popup_reminder)
+            .setContentTitle("قطرة (QATRA)")
+            .setContentText(quote)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+
+        notificationManager.notify(id, builder.build())
     }
 }

@@ -5,107 +5,120 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.Calendar
 
 object QatraNotifications {
+    private const val PREFS_NAME = "QatraAlarmsPrefs"
+    private const val ALARMS_KEY = "alarms_list"
 
-    fun schedule(
-        context: Context,
-        id: String,
-        time: String,
-        days: com.getcapacitor.JSArray?,
-        mode: String,
-        quote: String
-    ) {
-        cancel(context, id)
-
-        val parts = time.split(":")
-        val hour = parts.getOrNull(0)?.toIntOrNull() ?: 9
-        val minute = parts.getOrNull(1)?.toIntOrNull() ?: 0
-
-        val dayList = mutableListOf<Int>()
-
-        if (days != null) {
-            for (i in 0 until days.length()) {
-                val day = days.optInt(i, -1)
-                if (day in 0..6) dayList.add(day)
-            }
+    fun scheduleSingleDay(context: Context, id: Int, jsDay: Int, time: String, mode: String, quote: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
+            putExtra("id", id)
+            putExtra("jsDay", jsDay)
+            putExtra("time", time)
+            putExtra("mode", mode)
+            putExtra("quote", quote)
         }
 
-        if (dayList.isEmpty()) return
+        val uniqueId = (id * 10) + jsDay
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, uniqueId, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
-        val alarmManager =
-            context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val targetTime = calculateNextTime(time, jsDay)
 
-        dayList.forEach { day ->
-
-            val requestCode = id.hashCode() * 31 + day
-
-            val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
-                putExtra("scheduleId", id)
-                putExtra("day", day)
-                putExtra("time", time)
-                putExtra("days", dayList.toIntArray())
-                putExtra("mode", mode)
-                putExtra("quote", quote)
-            }
-
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                requestCode,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            val calendar = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, hour)
-                set(Calendar.MINUTE, minute)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-
-                val targetDay = day + 1
-
-                while (
-                    get(Calendar.DAY_OF_WEEK) != targetDay ||
-                    timeInMillis <= System.currentTimeMillis()
-                ) {
-                    add(Calendar.DAY_OF_YEAR, 1)
-                }
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
-            } else {
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, targetTime, 1000 * 60 * 5, pendingIntent)
+        } else {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetTime, pendingIntent)
         }
     }
 
-    fun cancel(context: Context, id: String) {
-        val alarmManager =
-            context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private fun calculateNextTime(time: String, jsDay: Int): Long {
+        val parts = time.split(":")
+        val hour = parts[0].toInt()
+        val minute = parts[1].toInt()
 
-        for (day in 0..6) {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, hour)
+        calendar.set(Calendar.MINUTE, minute)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+
+        val targetDay = jsDay + 1
+        while (calendar.get(Calendar.DAY_OF_WEEK) != targetDay || calendar.timeInMillis <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return calendar.timeInMillis
+    }
+
+    fun cancelAlarm(context: Context, id: Int) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        for (jsDay in 0..6) {
+            val uniqueId = (id * 10) + jsDay
             val intent = Intent(context, QatraAlarmReceiver::class.java)
-
             val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                id.hashCode() * 31 + day,
-                intent,
-                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+                context, uniqueId, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+            alarmManager.cancel(pendingIntent)
+        }
+        removeAlarmFromPrefs(context, id)
+    }
 
-            if (pendingIntent != null) {
-                alarmManager.cancel(pendingIntent)
-                pendingIntent.cancel()
+    fun saveAlarmToPrefs(context: Context, id: Int, time: String, days: List<Int>, mode: String, quote: String) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val alarmsStr = prefs.getString(ALARMS_KEY, "[]")
+        val array = JSONArray(alarmsStr)
+        val newArray = JSONArray()
+        
+        for (i in 0 until array.length()) {
+            val obj = array.getJSONObject(i)
+            if (obj.getInt("id") != id) newArray.put(obj)
+        }
+
+        val newObj = JSONObject().apply {
+            put("id", id)
+            put("time", time)
+            put("mode", mode)
+            put("quote", quote)
+            put("days", JSONArray(days))
+        }
+        newArray.put(newObj)
+        prefs.edit().putString(ALARMS_KEY, newArray.toString()).apply()
+    }
+
+    private fun removeAlarmFromPrefs(context: Context, id: Int) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val alarmsStr = prefs.getString(ALARMS_KEY, "[]")
+        val array = JSONArray(alarmsStr)
+        val newArray = JSONArray()
+        for (i in 0 until array.length()) {
+            val obj = array.getJSONObject(i)
+            if (obj.getInt("id") != id) newArray.put(obj)
+        }
+        prefs.edit().putString(ALARMS_KEY, newArray.toString()).apply()
+    }
+
+    fun restoreAlarms(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val alarmsStr = prefs.getString(ALARMS_KEY, "[]")
+        val array = JSONArray(alarmsStr)
+
+        for (i in 0 until array.length()) {
+            val obj = array.getJSONObject(i)
+            val id = obj.getInt("id")
+            val time = obj.getString("time")
+            val mode = obj.getString("mode")
+            val quote = obj.getString("quote")
+            val daysArray = obj.getJSONArray("days")
+
+            for (j in 0 until daysArray.length()) {
+                scheduleSingleDay(context, id, daysArray.getInt(j), time, mode, quote)
             }
         }
     }

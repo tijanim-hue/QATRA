@@ -1,23 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.qatra.app">
 
-    <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Floating overlay -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
-    <!-- Foreground service -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <!-- Restart reminders after reboot -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- Scheduled reminders -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -28,55 +19,27 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:name="com.qatra.app.MainActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+            android:exported="true"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
-            android:exported="true">
-
+            android:theme="@style/AppTheme.NoActionBarLaunch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
-        <!-- Floating drop service -->
-        <service
-            android:name=".QatraOverlayService"
-            android:exported="false" />
-
-        <!-- Reminder alarm receiver -->
-        <receiver
-            android:name=".QatraAlarmReceiver"
-            android:exported="false" />
-
-        <!-- Restore reminders after reboot -->
-        <receiver
-            android:name=".QatraBootReceiver"
-            android:enabled="true"
-            android:exported="true">
-
+        <receiver android:name=".QatraAlarmReceiver" android:exported="false" />
+        
+        <receiver android:name=".QatraBootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
-
         </receiver>
 
-        <!-- File provider -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-
-        </provider>
-
+        <service android:name=".QatraOverlayService" android:exported="false" />
     </application>
-
 </manifest>
