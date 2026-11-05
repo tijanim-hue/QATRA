@@ -17,6 +17,7 @@ jobs:
       - name: Install dependencies & Sync Capacitor
         run: |
           npm install
+          npx cap copy android
           npx cap sync android
 
       - name: Setup Java
