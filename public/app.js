@@ -129,17 +129,34 @@ async function nativeCall(method, options = {}) {
   try { return await QatraNative[method](options); }
   catch (error) { console.warn(`QatraNative.${method} failed`, error); return null; }
 }
+
 function syncNativeSchedules() {
   if (!QatraNative) return;
   state.schedules.forEach(async schedule => {
+    // إلغاء الموعد القديم قبل إضافة الجديد
     await nativeCall("cancel", { id: schedule.id });
+    
     if (!state.remindersEnabled || !schedule.enabled) return;
+    
     const modes = schedule.mode || "both";
-    const effectiveMode = (!state.notificationEnabled && !state.floatingEnabled) ? "none" :
-      (state.notificationEnabled && state.floatingEnabled ? modes :
-      (state.notificationEnabled ? "notification" : "floating"));
+    let effectiveMode = "both";
+    if (!state.notificationEnabled && !state.floatingEnabled) {
+      effectiveMode = "none";
+    } else if (state.notificationEnabled && !state.floatingEnabled) {
+      effectiveMode = "notification";
+    } else if (!state.notificationEnabled && state.floatingEnabled) {
+      effectiveMode = "floating";
+    }
+
     if (effectiveMode === "none") return;
-    await nativeCall("schedule", { id: schedule.id, time: schedule.time, days: schedule.days, mode: effectiveMode, quote: getRandomQuote().text });
+    
+    await nativeCall("schedule", { 
+      id: schedule.id, 
+      time: schedule.time, 
+      days: schedule.days, 
+      mode: effectiveMode, 
+      quote: getRandomQuote().text 
+    });
   });
 }
 
@@ -156,9 +173,21 @@ function loadState() {
       return structuredClone(DEFAULT_STATE);
     }
 
+    const parsedState = JSON.parse(saved);
+    
+    // إصلاح معرفات المواعيد القديمة لتصبح أرقام صحيحة بدلاً من نصوص لتتوافق مع Kotlin
+    if (parsedState.schedules) {
+      parsedState.schedules = parsedState.schedules.map(s => {
+        if (typeof s.id === 'string') {
+          s.id = Math.floor(Math.random() * 2147483647);
+        }
+        return s;
+      });
+    }
+
     return {
       ...structuredClone(DEFAULT_STATE),
-      ...JSON.parse(saved)
+      ...parsedState
     };
   } catch (error) {
     console.warn("Could not load QATRA settings:", error);
@@ -338,7 +367,7 @@ function renderSchedules() {
             <input
               type="checkbox"
               data-action="toggle-schedule"
-              data-id="${escapeHTML(schedule.id)}"
+              data-id="${schedule.id}"
               ${schedule.enabled ? "checked" : ""}
             >
             <span class="toggle-track"></span>
@@ -347,14 +376,14 @@ function renderSchedules() {
           <button
             class="small-icon"
             data-action="edit-schedule"
-            data-id="${escapeHTML(schedule.id)}"
+            data-id="${schedule.id}"
             aria-label="تعديل الموعد"
           >✎</button>
 
           <button
             class="small-icon"
             data-action="delete-schedule"
-            data-id="${escapeHTML(schedule.id)}"
+            data-id="${schedule.id}"
             aria-label="حذف الموعد"
           >×</button>
         </div>
@@ -421,7 +450,9 @@ function renderDayChips() {
 function saveSchedule(event) {
   event.preventDefault();
 
-  const id = document.getElementById("scheduleId").value;
+  const rawId = document.getElementById("scheduleId").value;
+  // تحويل الـ ID ليكون رقماً صحيحاً فقط لتوافق الأندرويد
+  const id = rawId ? parseInt(rawId, 10) : createId();
   const time = document.getElementById("scheduleTime").value;
   const mode = document.getElementById("scheduleMode").value;
   const days = [...selectedDays].sort((a, b) => a - b);
@@ -437,14 +468,14 @@ function saveSchedule(event) {
   }
 
   const schedule = {
-    id: id || createId(),
+    id: id,
     time,
     mode,
     days,
     enabled: true
   };
 
-  if (id) {
+  if (rawId) {
     state.schedules = state.schedules.map(item =>
       item.id === id ? schedule : item
     );
@@ -460,7 +491,7 @@ function saveSchedule(event) {
   renderSchedules();
   closeScheduleModal();
 
-  showToast("تم حفظ الموعد");
+  showToast("تم حفظ الموعد بنجاح");
 }
 
 function deleteSchedule(id) {
@@ -484,8 +515,9 @@ function toggleSchedule(id, enabled) {
   renderSchedules();
 }
 
+// توليد رقم صحيح عشوائي بدلاً من نص
 function createId() {
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return Math.floor(Math.random() * 2147483647);
 }
 
 /* =========================
@@ -676,14 +708,15 @@ document.getElementById("scheduleList").addEventListener("click", event => {
   }
 
   const { action, id } = button.dataset;
-  const schedule = state.schedules.find(item => item.id === id);
+  const parsedId = parseInt(id, 10);
+  const schedule = state.schedules.find(item => item.id === parsedId);
 
   if (action === "edit-schedule" && schedule) {
     openScheduleModal(schedule);
   }
 
   if (action === "delete-schedule") {
-    deleteSchedule(id);
+    deleteSchedule(parsedId);
   }
 });
 
@@ -694,7 +727,8 @@ document.getElementById("scheduleList").addEventListener("change", event => {
     return;
   }
 
-  toggleSchedule(input.dataset.id, input.checked);
+  const parsedId = parseInt(input.dataset.id, 10);
+  toggleSchedule(parsedId, input.checked);
 });
 
 document.getElementById("remindersEnabled").addEventListener("change", event => {
@@ -807,7 +841,7 @@ document.getElementById("libraryGrid").addEventListener("click", event => {
    Initialization
    ========================= */
 
-function initializeApp() {
+async function initializeApp() {
   renderCategories();
   renderSchedules();
   setDailyQuote();
@@ -815,38 +849,15 @@ function initializeApp() {
 
   setMotionEnabled(state.motionEnabled);
   syncNativeSchedules();
+
+  // طلب الأذونات فور فتح التطبيق
+  if (window.Capacitor && Capacitor.Plugins.QatraNative) {
+    try {
+      await Capacitor.Plugins.QatraNative.requestOverlayPermission();
+    } catch (e) {
+      console.error("Permission request failed", e);
+    }
+  }
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
-
-// --- الأكواد المضافة لربط الواجهة بنظام Android ---
-async function initQatraApp() {
-    if (window.Capacitor && Capacitor.Plugins.QatraNative) {
-        try {
-            await Capacitor.Plugins.QatraNative.requestOverlayPermission();
-        } catch (e) {
-            console.error("Permission request failed", e);
-        }
-    }
-}
-// طلب الصلاحيات فور فتح التطبيق
-document.addEventListener('DOMContentLoaded', initQatraApp);
-
-// دالة إرسال الموعد للنظام
-async function saveAlarmNative(timeString, quoteText) {
-    if (window.Capacitor && Capacitor.Plugins.QatraNative) {
-        let uniqueId = Math.floor(Math.random() * 10000);
-        try {
-            await Capacitor.Plugins.QatraNative.schedule({
-                id: uniqueId,
-                time: timeString, // مثال: "21:09"
-                days: [0,1,2,3,4,5,6],
-                mode: "floating",
-                quote: quoteText
-            });
-            console.log("تم حفظ الموعد في النظام!");
-        } catch (e) {
-            console.error("Failed to schedule alarm", e);
-        }
-    }
-}
