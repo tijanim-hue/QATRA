@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path android:pathData="M50,10 C50,10 20,55 20,75 A30,30 0 0,0 80,75 C80,55 50,10 50,10 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="40"
+                android:centerY="70"
+                android:gradientRadius="50">
+                <item android:offset="0" android:color="#80E0FF" />
+                <item android:offset="0.7" android:color="#2A75D3" />
+                <item android:offset="1" android:color="#003366" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- لمعة الإضاءة لإعطاء تأثير ثلاثي الأبعاد -->
+    <path
+        android:fillColor="#66FFFFFF"
+        android:pathData="M35,60 A10,15 0 0,0 25,75 A10,15 0 0,1 35,60 Z" />
+</vector>

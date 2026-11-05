@@ -818,3 +818,35 @@ function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
+
+// --- الأكواد المضافة لربط الواجهة بنظام Android ---
+async function initQatraApp() {
+    if (window.Capacitor && Capacitor.Plugins.QatraNative) {
+        try {
+            await Capacitor.Plugins.QatraNative.requestOverlayPermission();
+        } catch (e) {
+            console.error("Permission request failed", e);
+        }
+    }
+}
+// طلب الصلاحيات فور فتح التطبيق
+document.addEventListener('DOMContentLoaded', initQatraApp);
+
+// دالة إرسال الموعد للنظام
+async function saveAlarmNative(timeString, quoteText) {
+    if (window.Capacitor && Capacitor.Plugins.QatraNative) {
+        let uniqueId = Math.floor(Math.random() * 10000);
+        try {
+            await Capacitor.Plugins.QatraNative.schedule({
+                id: uniqueId,
+                time: timeString, // مثال: "21:09"
+                days: [0,1,2,3,4,5,6],
+                mode: "floating",
+                quote: quoteText
+            });
+            console.log("تم حفظ الموعد في النظام!");
+        } catch (e) {
+            console.error("Failed to schedule alarm", e);
+        }
+    }
+}
