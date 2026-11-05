@@ -1,6 +1,8 @@
 package com.qatra.app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -21,15 +23,10 @@ class QatraPlugin : Plugin() {
         val quote = call.getString("quote") ?: return call.reject("Quote is missing")
 
         val days = mutableListOf<Int>()
-        for (i in 0 until daysArray.length()) {
-            days.add(daysArray.getInt(i))
-        }
+        for (i in 0 until daysArray.length()) { days.add(daysArray.getInt(i)) }
 
         QatraNotifications.saveAlarmToPrefs(context, id, time, days, mode, quote)
-        
-        for (day in days) {
-            QatraNotifications.scheduleSingleDay(context, id, day, time, mode, quote)
-        }
+        for (day in days) { QatraNotifications.scheduleSingleDay(context, id, day, time, mode, quote) }
         call.resolve()
     }
 
@@ -42,10 +39,18 @@ class QatraPlugin : Plugin() {
 
     @PluginMethod
     fun requestOverlayPermission(call: PluginCall) {
+        // 1. طلب إذن الظهور فوق التطبيقات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
+        }
+        
+        // 2. طلب إذن الإشعارات لأندرويد 13 فما فوق
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+            }
         }
         call.resolve()
     }
