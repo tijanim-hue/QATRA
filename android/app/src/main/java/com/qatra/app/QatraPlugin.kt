@@ -10,13 +10,24 @@ import com.getcapacitor.PluginMethod
 
 @CapacitorPlugin(name = "QatraNative")
 class QatraPlugin : Plugin() {
+
     @PluginMethod
     fun requestOverlayPermission(call: PluginCall) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
-            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            !Settings.canDrawOverlays(context)
+        ) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:${context.packageName}")
+            )
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             activity.startActivity(intent)
-            call.resolve(JSObject().put("granted", false).put("openedSettings", true))
+
+            call.resolve(
+                JSObject()
+                    .put("granted", false)
+                    .put("openedSettings", true)
+            )
         } else {
             call.resolve(JSObject().put("granted", true))
         }
@@ -25,22 +36,35 @@ class QatraPlugin : Plugin() {
     @PluginMethod
     fun showDrop(call: PluginCall) {
         val text = call.getString("text") ?: "خذ لحظة هدوء."
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            !Settings.canDrawOverlays(context)
+        ) {
             call.reject("يرجى السماح لقطرة بالظهور فوق التطبيقات أولاً")
             return
         }
-        val i = Intent(context, QatraOverlayService::class.java).apply {
+
+        val intent = Intent(context, QatraOverlayService::class.java).apply {
             action = QatraOverlayService.ACTION_SHOW
             putExtra("quote", text)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(i) else context.startService(i)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
+            context.startService(intent)
+        }
+
         call.resolve()
     }
 
     @PluginMethod
     fun hideDrop(call: PluginCall) {
-        val i = Intent(context, QatraOverlayService::class.java).apply { action = QatraOverlayService.ACTION_HIDE }
-        context.startService(i)
+        val intent = Intent(context, QatraOverlayService::class.java).apply {
+            action = QatraOverlayService.ACTION_HIDE
+        }
+
+        context.startService(intent)
         call.resolve()
     }
 
@@ -51,6 +75,7 @@ class QatraPlugin : Plugin() {
         val days = call.getArray("days")
         val mode = call.getString("mode") ?: "both"
         val quote = call.getString("quote") ?: "امنح نفسك لحظة هدوء."
+
         QatraNotifications.schedule(context, id, time, days, mode, quote)
         call.resolve()
     }
@@ -64,14 +89,21 @@ class QatraPlugin : Plugin() {
 
     @PluginMethod
     fun requestNotificationPermission(call: PluginCall) {
-        if (Build.VERSION.SDK_INT >= 33) {
-            permission台(call)
-        } else call.resolve(JSObject().put("granted", true))
+        if (Build.VERSION.SDK_INT < 33) {
+            call.resolve(JSObject().put("granted", true))
+            return
+        }
+
+        if (getPermissionState("notifications") == PermissionState.GRANTED) {
+            call.resolve(JSObject().put("granted", true))
+        } else {
+            requestPermissionForAlias("notifications", call, "notificationPermissionCallback")
+        }
     }
 
-    private fun permission台(call: PluginCall) {
-        // Permission prompt is requested by the app's Activity through the Capacitor permission flow.
-        // Keep result explicit rather than falsely reporting that permission has been granted.
-        call.resolve(JSObject().put("required", true).put("granted", false).put("note", "اطلب POST_NOTIFICATIONS من واجهة Android"))
+    @PermissionCallback
+    private fun notificationPermissionCallback(call: PluginCall) {
+        val granted = getPermissionState("notifications") == PermissionState.GRANTED
+        call.resolve(JSObject().put("granted", granted))
     }
 }
