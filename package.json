@@ -1,0 +1,17 @@
+
+{
+  "name": "qatra",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QATRA - Gentle self-care reminders",
+  "scripts": {
+    "build": "echo Static web app - ready"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/android": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  }
+}
