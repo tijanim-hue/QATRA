@@ -6,6 +6,7 @@ import android.os.Build
 import android.provider.Settings
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
+import com.getcapacitor.annotation.PermissionCallback
 import com.getcapacitor.PluginMethod
 
 
