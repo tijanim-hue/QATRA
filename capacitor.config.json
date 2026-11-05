@@ -1,0 +1,7 @@
+
+{
+  "appId": "com.qatra.app",
+  "appName": "قطرة",
+  "webDir": "public",
+  "bundledWebRuntime": false
+}
