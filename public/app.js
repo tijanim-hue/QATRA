@@ -840,7 +840,6 @@ document.getElementById("libraryGrid").addEventListener("click", event => {
 /* =========================
    Initialization
    ========================= */
-
 async function initializeApp() {
   renderCategories();
   renderSchedules();
@@ -849,6 +848,21 @@ async function initializeApp() {
 
   setMotionEnabled(state.motionEnabled);
   syncNativeSchedules();
+
+  // تحريك شريط التحميل
+  setTimeout(() => {
+    const progressBar = document.getElementById('splash-progress');
+    if(progressBar) progressBar.style.width = '100%';
+  }, 100);
+
+  // إخفاء شاشة الإقلاع بعد 2.5 ثانية
+  setTimeout(() => {
+    const splash = document.getElementById('splash-screen');
+    if(splash) {
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 600); // إزالة العنصر بعد انتهاء الشفافية
+    }
+  }, 2500);
 
   // طلب الأذونات فور فتح التطبيق
   if (window.Capacitor && Capacitor.Plugins.QatraNative) {
@@ -861,3 +875,4 @@ async function initializeApp() {
 }
 
 document.addEventListener("DOMContentLoaded", initializeApp);
+
