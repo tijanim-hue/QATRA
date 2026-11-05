@@ -1,7 +1,6 @@
-
 {
   "appId": "com.qatra.app",
-  "appName": "قطرة",
+  "appName": "QATRA",
   "webDir": "public",
   "bundledWebRuntime": false
 }
