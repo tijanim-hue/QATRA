@@ -1,0 +1,31 @@
+node_modules/
+.DS_Store
+
+# Android local configuration
+android/local.properties
+
+# Android build outputs
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+
+# Temporary files
+*.log
+cd ~/projects/QATRA
+
+cat > .gitignore <<'EOF'
+node_modules/
+.DS_Store
+
+# Android local configuration
+android/local.properties
+
+# Android build outputs
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+
+# Temporary files
+*.log
