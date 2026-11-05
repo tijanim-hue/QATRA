@@ -6,7 +6,7 @@ import android.os.Build
 import android.provider.Settings
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
-import com.getcapacitor.annotation.PluginMethod
+import com.getcapacitor.PluginMethod
 
 @CapacitorPlugin(name = "QatraNative")
 class QatraPlugin : Plugin() {
