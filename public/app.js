@@ -1,8 +1,8 @@
 "use strict";
 
-const STORE_KEY = "qatra_premium_v13";
+const STORE_KEY = "qatra_premium_v14";
 
-// 1. توليد مكتبة ضخمة (مئات العناصر)
+// 1. توليد مكتبة ضخمة جداً
 const generateArray = (base, count) => Array.from({length: count}, (_, i) => `${base} ${i+1}`);
 const QUOTES_DB = {
   dhikr: { titleAr: "أذكار وأدعية 🤲", titleEn: "Dhikr & Dua", icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', items: ["سبحان الله وبحمده، سبحان الله العظيم.", "لا إله إلا أنت سبحانك إني كنت من الظالمين.", "اللهم إنك عفو تحب العفو فاعف عني.", "يا حي يا قيوم برحمتك أستغيث.", "اللهم صل وسلم وبارك على نبينا محمد.", ...generateArray("دعاء مخصص للهدوء والسكينة رقم", 45)] },
@@ -68,7 +68,6 @@ scrollContent.addEventListener('touchend', e => {
       document.documentElement.style.setProperty('--primary', randColor.p);
       document.documentElement.style.setProperty('--secondary', randColor.s);
       
-      // تحديث الأيقونات بـ CSS variable
       document.querySelectorAll('.card-icon-wrap, .action-icon').forEach(el => {
         el.style.color = randColor.p;
         el.style.background = `rgba(${hexToRgb(randColor.p)}, 0.1)`;
@@ -104,11 +103,7 @@ function renderGarden() {
   let stage = GARDEN_STAGES[0];
   let nextGoal = 5;
   for (let i = 0; i < GARDEN_STAGES.length; i++) {
-    if (drops < GARDEN_STAGES[i].max) {
-      stage = GARDEN_STAGES[i];
-      nextGoal = GARDEN_STAGES[i].max;
-      break;
-    }
+    if (drops < GARDEN_STAGES[i].max) { stage = GARDEN_STAGES[i]; nextGoal = GARDEN_STAGES[i].max; break; }
   }
   const prevMax = stage === GARDEN_STAGES[0] ? 0 : GARDEN_STAGES[GARDEN_STAGES.indexOf(stage)-1].max;
   const progress = ((drops - prevMax) / (nextGoal - prevMax)) * 100;
@@ -141,7 +136,6 @@ function renderCategories() {
 window.openCategory = (id) => {
   const cat = QUOTES_DB[id];
   document.getElementById('catSheetTitle').innerText = state.lang === 'ar' ? cat.titleAr : cat.titleEn;
-  // إظهار 50 عنصر فقط كعينة لتجنب بطء الشاشة، يمكن للمستخدم تحديد الكل لاحقاً
   const displayItems = cat.items.slice(0, 50); 
   document.getElementById('catSheetContent').innerHTML = displayItems.map(q => {
     const checked = state.selectedQuotes.includes(q) ? "checked" : "";
@@ -168,7 +162,6 @@ async function fireCinematic() {
   }
 }
 document.getElementById('triggerCinematic').onclick = fireCinematic;
-document.getElementById('previewFloatingBtn').onclick = fireCinematic;
 
 document.getElementById('notifModeSetting').onchange = e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); };
 document.getElementById('dropDurationSetting').onchange = e => { state.duration = parseInt(e.target.value); applyState(); syncNativeAlarms(); };
@@ -197,8 +190,8 @@ window.deleteSchedule = (i) => { state.schedules.splice(i,1); applyState(); rend
 
 function syncNativeAlarms() {
   if(!QatraNative) return;
-  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote() }).catch(e=>console.log(e));
-  state.schedules.forEach(s => QatraNative.schedule({id: s.id, time: s.time, mode: state.mode, duration: state.duration, quote: getRandomQuote()}).catch(e=>console.log(e)));
+  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote() }).catch(e=>{});
+  state.schedules.forEach(s => QatraNative.schedule({id: s.id, time: s.time, mode: state.mode, duration: state.duration, quote: getRandomQuote()}).catch(e=>{}));
 }
 
 // --- التأمل ---
@@ -212,17 +205,18 @@ document.getElementById('playRandomAudioBtn').onclick = () => {
   }
 };
 
+// --- الإقلاع الآمن وإخفاء الشاشة باستقلالية تامة ---
 window.onload = () => {
   applyState(); renderSchedules();
   document.getElementById('dailyQuoteText').textContent = `"${getRandomQuote()}"`;
   
-  // شاشة إقلاع مؤمنة تختفي تلقائياً وبسلاسة
+  // 1. الإخفاء الإجباري للشاشة السوداء بعد ثانية ونصف
   setTimeout(() => {
     const splash = document.getElementById('splash');
     if (splash) { splash.style.opacity = '0'; setTimeout(()=> splash.remove(), 800); }
   }, 1500);
 
-  // طلب الأذونات يعمل في الخلفية 
+  // 2. طلب الأذونات يعمل في الخلفية بسلام تام
   if (QatraNative) {
     setTimeout(() => { QatraNative.askPermissions().catch(e => console.log(e)); }, 2000);
   }
