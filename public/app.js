@@ -120,7 +120,7 @@ window.selectQuote = (q) => { document.getElementById('dailyQuoteText').textCont
 
 // --- البداية ---
 window.onload = () => {
-  if (QatraNative) QatraNative.requestPermissions();
+  if (QatraNative) QatraNative.askPermissions();
   saveAndApply();
   renderLibrary();
   document.getElementById('dailyQuoteText').textContent = getRandomQuote();
