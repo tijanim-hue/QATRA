@@ -20,7 +20,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
-import com.qatra.app.R // هذا هو السطر الذي أصلح المشكلة
+import com.qatra.app.R // استيراد مسار R
 
 class QatraOverlayService : Service() {
     private var windowManager: WindowManager? = null

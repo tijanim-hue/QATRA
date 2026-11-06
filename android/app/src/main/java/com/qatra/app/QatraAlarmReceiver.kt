@@ -9,7 +9,7 @@ import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.qatra.app.R // هذا هو السطر الذي أصلح المشكلة
+import com.qatra.app.R // استيراد مسار R
 
 class QatraAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -41,7 +41,7 @@ class QatraAlarmReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_popup_reminder)
+            .setSmallIcon(android.R.drawable.ic_popup_reminder) // أيقونة الإشعار الافتراضية
             .setContentTitle("قطرة (QATRA)")
             .setContentText(quote)
             .setSound(soundUri)
