@@ -21,13 +21,13 @@ class QatraPlugin : Plugin() {
     @PluginMethod
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
-        // طلب إذن الظهور فوق التطبيقات أولاً
+        // الظهور فوق التطبيقات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
-        // طلب إذن المنبهات الدقيقة
+        // المنبهات الدقيقة
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -36,7 +36,7 @@ class QatraPlugin : Plugin() {
                 context.startActivity(intent)
             }
         }
-        // طلب إذن الإشعارات
+        // الإشعارات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
@@ -55,10 +55,7 @@ class QatraPlugin : Plugin() {
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
-            putExtra("id", id)
-            putExtra("mode", mode)
-            putExtra("duration", duration)
-            putExtra("quote", quote)
+            putExtra("id", id); putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote)
         }
         val pendingIntent = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
@@ -66,16 +63,14 @@ class QatraPlugin : Plugin() {
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, parts[0].toInt())
             set(Calendar.MINUTE, parts[1].toInt())
-            set(Calendar.SECOND, 0) // الضبط التام عند بداية الدقيقة
+            set(Calendar.SECOND, 0) // ضبط الثانية لـ 0 تماماً
             set(Calendar.MILLISECOND, 0)
             if (before(Calendar.getInstance())) add(Calendar.DATE, 1)
         }
         
         try {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        } catch (e: SecurityException) {
-            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000*60, pendingIntent)
-        }
+        } catch (e: Exception) {}
         call.resolve()
     }
 
@@ -84,8 +79,7 @@ class QatraPlugin : Plugin() {
         val quote = call.getString("quote") ?: "سبحان الله"
         val duration = call.getInt("duration") ?: 10000
         val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { 
-            putExtra("quote", quote)
-            putExtra("duration", duration)
+            putExtra("quote", quote); putExtra("duration", duration)
         }
         context.startService(serviceIntent)
         call.resolve()
@@ -99,18 +93,8 @@ class QatraPlugin : Plugin() {
             putExtra("minutes", minutes)
             putExtra("audioUrl", audioUrl)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent)
-        } else {
-            context.startService(serviceIntent)
-        }
-        call.resolve()
-    }
-
-    @PluginMethod
-    fun stopPomodoro(call: PluginCall) {
-        val serviceIntent = Intent(context, PomodoroService::class.java)
-        context.stopService(serviceIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(serviceIntent)
+        else context.startService(serviceIntent)
         call.resolve()
     }
 }

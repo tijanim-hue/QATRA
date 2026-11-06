@@ -42,5 +42,6 @@
             </intent-filter>
         </receiver>
         <service android:name=".QatraOverlayService" android:exported="false" />
+        <service android:name=".PomodoroService" android:exported="false" />
     </application>
 </manifest>

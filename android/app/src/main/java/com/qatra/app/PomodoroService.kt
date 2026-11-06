@@ -22,29 +22,31 @@ class PomodoroService : Service() {
         val minutes = intent?.getIntExtra("minutes", 25) ?: 25
         val audioUrl = intent?.getStringExtra("audioUrl") ?: ""
         
-        createNotificationChannel()
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE)
+        val channelId = "pomodoro_channel"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "جلسة تركيز", NotificationManager.IMPORTANCE_LOW)
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        }
 
-        val notification = NotificationCompat.Builder(this, "pomodoro_channel")
+        // إشعار يشبه قارئ الموسيقى به عداد تنازلي
+        val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("جلسة تركيز وهدوء")
-            .setContentText("جارٍ الاستماع والتركيز...")
+            .setContentText("جارٍ الاسترخاء...")
             .setSmallIcon(android.R.drawable.ic_media_play)
-            .setContentIntent(pendingIntent)
+            .setUsesChronometer(true)
+            .setChronometerCountDown(true) // عد تنازلي
+            .setWhen(System.currentTimeMillis() + (minutes * 60 * 1000L))
             .setOngoing(true)
             .build()
 
-        startForeground(1, notification)
+        startForeground(1993, notification)
 
-        if (audioUrl.isNotEmpty()) {
+        if (audioUrl.isNotEmpty() && audioUrl != "none") {
             try {
                 mediaPlayer = MediaPlayer().apply {
                     setDataSource(audioUrl)
                     prepareAsync()
-                    setOnPreparedListener { 
-                        it.isLooping = true
-                        it.start() 
-                    }
+                    setOnPreparedListener { it.isLooping = true; it.start() }
                 }
             } catch (e: Exception) {}
         }
@@ -55,13 +57,6 @@ class PomodoroService : Service() {
         }.start()
 
         return START_NOT_STICKY
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel("pomodoro_channel", "Pomodoro Session", NotificationManager.IMPORTANCE_LOW)
-            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
-        }
     }
 
     override fun onDestroy() {
