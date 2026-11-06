@@ -1,6 +1,6 @@
 "use strict";
 
-const STORE_KEY = "qatra_premium_v11"; // مفتاح جديد لضمان تحديث الإعدادات
+const STORE_KEY = "qatra_premium_v12"; // التحديث الأخير
 const QUOTES_DB = {
   dhikr: { titleAr: "أذكار وأدعية", titleEn: "Dhikr & Dua", icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', items: ["سبحان الله وبحمده، سبحان الله العظيم.", "لا إله إلا أنت سبحانك إني كنت من الظالمين."] },
   motivation: { titleAr: "تحفيز وإيجابية", titleEn: "Motivation", icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>', items: ["الهدوء ليس ضعفاً، بل هو قوة التحكم في الذات.", "لا يلزم أن تكون كل خطواتك كبيرة؛ المهم أن تواصل السير."] },
@@ -16,8 +16,8 @@ const QatraNative = window.Capacitor?.Plugins?.QatraNative;
 
 // --- اللغات والترجمة ---
 const dict = {
-  ar: { app_title: "قطرة", focus_session: "جلسة تركيز", quote_of_day: "اقتباس اليوم", upcoming: "مواعيدك", activity: "النشاط", meditation: "تأمل واسترخاء", qatra_settings: "القطرة السينمائية", quotes: "المكتبة" },
-  en: { app_title: "Qatra", focus_session: "Focus Session", quote_of_day: "Daily Inspiration", upcoming: "Upcoming", activity: "Activity", meditation: "Meditate", qatra_settings: "Cinematic Drop", quotes: "Quotes Library" }
+  ar: { app_title: "قطرة", focus_session: "جلسة تركيز", quote_of_day: "اقتباس اليوم", upcoming: "مواعيدك", activity: "النشاط", meditation: "تأمل واسترخاء", qatra_settings: "القطرة السينمائية", quotes: "المكتبة", glass_mode: "تأثير الزجاج 💎", dark_mode: "الوضع الداكن 🌙", language: "لغة التطبيق:", stats: "الإحصائيات 📈", drop_mode: "طريقة الظهور:", mode_both: "قطرة مائية + إشعار", mode_floating: "القطرة المائية فقط", mode_notif: "إشعار فقط", drop_duration: "مدة بقاء القطرة:", drop_interval: "التكرار التلقائي للقطرة:", no_repeat: "بدون تكرار", custom_time: "إضافة موعد محدد:", save_time: "حفظ الموعد", preview_drop: "معاينة القطرة الآن 🎬", stat_days: "أيام الاستخدام:", stat_notifs: "الإشعارات المستلمة:", stat_drops: "القطرات السينمائية:" },
+  en: { app_title: "Qatra", home: "Home", meditation: "Meditate", qatra_settings: "Drop", quotes: "Quotes", focus_session: "Focus & Calm", quote_of_day: "Daily Quote", upcoming: "Upcoming", activity: "Activity", glass_mode: "Glass Effect 💎", dark_mode: "Dark Mode 🌙", language: "Language:", stats: "Stats 📈", drop_mode: "Notification Mode:", mode_both: "Cinematic Drop + Notif", mode_floating: "Cinematic Drop Only", mode_notif: "Notification Only", drop_duration: "Drop Duration:", drop_interval: "Auto Repeat Interval:", no_repeat: "No Repeat", custom_time: "Set Custom Time:", save_time: "Save Schedule", preview_drop: "Preview Drop Now 🎬", stat_days: "Active Days:", stat_notifs: "Notifications Received:", stat_drops: "Cinematic Drops:" }
 };
 
 function applyState() {
@@ -25,39 +25,34 @@ function applyState() {
   document.body.classList.toggle('light-mode', !state.dark);
   document.body.classList.toggle('glass-active', state.glass);
   
-  // حماية التحديثات باستخدام دالة تأكد من وجود العنصر
-  const safeSetChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
-  const safeSetValue = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-  const safeSetText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
-
-  safeSetChecked('darkToggle', state.dark);
-  safeSetChecked('glassToggle', state.glass);
-  safeSetValue('langSelect', state.lang);
-  safeSetValue('notifModeSetting', state.mode);
-  safeSetValue('dropDurationSetting', state.duration);
-  safeSetValue('intervalSelect', state.interval);
+  const setEl = (id, prop, val) => { const el = document.getElementById(id); if (el) el[prop] = val; };
+  setEl('darkToggle', 'checked', state.dark);
+  setEl('glassToggle', 'checked', state.glass);
+  setEl('langSelect', 'value', state.lang);
+  setEl('notifModeSetting', 'value', state.mode);
+  setEl('dropDurationSetting', 'value', state.duration);
+  setEl('intervalSelect', 'value', state.interval);
 
   document.documentElement.dir = (state.lang === 'ar') ? 'rtl' : 'ltr';
   document.querySelectorAll('[data-i18n]').forEach(el => {
     if(dict[state.lang] && dict[state.lang][el.getAttribute('data-i18n')]) el.textContent = dict[state.lang][el.getAttribute('data-i18n')];
   });
   
-  safeSetText('statDrops', state.stats.drops);
-  safeSetText('statNotifs', state.stats.notifs);
-  safeSetText('statDays', state.stats.days);
+  setEl('statDrops', 'innerText', state.stats.drops);
+  setEl('statNotifs', 'innerText', state.stats.notifs);
+  setEl('statDays', 'innerText', state.stats.days);
   renderCategories();
 }
 
 // --- التنقل ---
-document.getElementById('openSettingsSheet').onclick = () => document.getElementById('settingsSheet').classList.add('show');
 document.getElementById('darkToggle').onchange = e => { state.dark = e.target.checked; applyState(); };
 document.getElementById('glassToggle').onchange = e => { state.glass = e.target.checked; applyState(); };
 document.getElementById('langSelect').onchange = e => { state.lang = e.target.value; applyState(); };
 
-document.querySelectorAll('.nav-btn').forEach(btn => {
+document.querySelectorAll('.nav-item').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(btn.dataset.view).classList.add('active');
     btn.classList.add('active');
   };
@@ -70,15 +65,15 @@ function renderCategories() {
   container.innerHTML = Object.keys(QUOTES_DB).map(key => {
     const cat = QUOTES_DB[key];
     const title = state.lang === 'ar' ? cat.titleAr : cat.titleEn;
-    return `<div class="cat-item" onclick="openCategory('${key}')">
-      <div style="width:40px; height:40px; border-radius:12px; background:rgba(0,240,255,0.1); color:var(--primary); display:grid; place-items:center;">
-        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;">${cat.icon}</svg>
+    return `<div class="card action-row" onclick="openCategory('${key}')" style="margin-bottom:12px;">
+      <div class="action-icon" style="background:rgba(0,240,255,0.1); color:var(--cyan);">
+        <svg viewBox="0 0 24 24">${cat.icon}</svg>
       </div>
-      <div style="flex:1;">
-        <div style="font-weight:700; font-size:16px;">${title}</div>
-        <div style="font-size:12px; color:var(--text-dim);">${cat.items.length} ${state.lang==='ar'?'عبارة':'items'}</div>
+      <div class="action-info">
+        <div class="action-title">${title}</div>
+        <div class="action-sub">${cat.items.length} ${state.lang==='ar'?'عبارة':'items'}</div>
       </div>
-      <div style="color:var(--text-dim); font-size:20px;">›</div>
+      <div style="color:var(--muted); font-size:24px;">›</div>
     </div>`;
   }).join('');
 }
@@ -88,9 +83,9 @@ window.openCategory = (id) => {
   document.getElementById('catSheetTitle').innerText = state.lang === 'ar' ? cat.titleAr : cat.titleEn;
   document.getElementById('catSheetContent').innerHTML = cat.items.map(q => {
     const checked = state.selectedQuotes.includes(q) ? "checked" : "";
-    return `<div class="checkbox-row">
+    return `<div class="check-row">
       <input type="checkbox" value="${q}" ${checked} onchange="if(this.checked) state.selectedQuotes.push(this.value); else state.selectedQuotes = state.selectedQuotes.filter(x=>x!==this.value); applyState(); syncNativeAlarms();">
-      <div style="font-size:15px; font-weight:600;">${q}</div>
+      <div style="font-size:15px; font-weight:700;">${q}</div>
     </div>`;
   }).join('');
   document.getElementById('categorySheet').classList.add('show');
@@ -111,6 +106,7 @@ async function fireCinematic() {
   }
 }
 document.getElementById('triggerCinematic').onclick = fireCinematic;
+document.getElementById('previewFloatingBtn').onclick = fireCinematic;
 
 document.getElementById('notifModeSetting').onchange = e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); };
 document.getElementById('dropDurationSetting').onchange = e => { state.duration = parseInt(e.target.value); applyState(); syncNativeAlarms(); };
@@ -120,7 +116,7 @@ function renderSchedules() {
   const list = document.getElementById('savedSchedulesList');
   if(!list) return;
   list.innerHTML = state.schedules.map((s, i) => 
-    `<div class="modern-row" style="background:rgba(0,0,0,0.2); padding:15px; border-radius:16px; margin-bottom:10px;">
+    `<div class="control-row" style="background:rgba(0,0,0,0.2); padding:15px; border-radius:16px; margin-bottom:10px;">
       <strong style="font-size:18px;">${s.time}</strong>
       <button onclick="deleteSchedule(${i})" style="background:none;border:none;color:#ff4d4d;font-weight:bold;cursor:pointer;">X</button>
     </div>`
@@ -158,33 +154,28 @@ document.getElementById('startPomodoroBtn').onclick = () => {
 const randomAudios = ["https://actions.google.com/sounds/v1/water/rain_on_roof.ogg", "https://server8.mp3quran.net/afs/001.mp3"];
 let randPlayer = new Audio(); let isRandPlaying = false;
 document.getElementById('playRandomAudioBtn').onclick = () => {
-  if (isRandPlaying) { randPlayer.pause(); isRandPlaying = false; document.getElementById('playRandomAudioBtn').textContent = state.lang==='ar'?"▶ تشغيل محتوى عشوائي":"▶ Play Ambient"; document.getElementById('audioStatus').textContent = state.lang==='ar'?"متوقف":"Stopped"; }
+  if (isRandPlaying) { randPlayer.pause(); isRandPlaying = false; document.getElementById('playRandomAudioBtn').textContent = state.lang==='ar'?"▶ تشغيل محتوى عشوائي":"▶ Play Ambient"; document.getElementById('audioStatus').textContent = state.lang==='ar'?"تم الإيقاف":"Stopped"; }
   else {
     randPlayer.src = randomAudios[Math.floor(Math.random() * randomAudios.length)];
-    randPlayer.play(); isRandPlaying = true; document.getElementById('playRandomAudioBtn').textContent = "⏸"; document.getElementById('audioStatus').textContent = state.lang==='ar'?"جارٍ الاسترخاء...":"Relaxing...";
+    randPlayer.play(); isRandPlaying = true; document.getElementById('playRandomAudioBtn').textContent = "⏸ إيقاف"; document.getElementById('audioStatus').textContent = state.lang==='ar'?"جارٍ الاسترخاء...":"Relaxing...";
   }
 };
 
-// --- الإقلاع الآمن ---
+// --- الإقلاع الآمن جداً (محمي من التعليق) ---
 window.onload = () => {
   applyState(); 
   renderSchedules();
   const qt = document.getElementById('dailyQuoteText');
   if(qt) qt.textContent = `"${getRandomQuote()}"`;
   
-  // 1. إخفاء شاشة الإقلاع بشكل مستقل لتفادي أي تجميد
+  // إخفاء إجباري بعد ثانيتين مهما حدث لضمان عمل الواجهة
   setTimeout(() => {
     const splash = document.getElementById('splash');
-    if (splash) {
-      splash.style.opacity = '0';
-      setTimeout(()=> splash.remove(), 600);
-    }
-  }, 1500);
+    if (splash) { splash.style.opacity = '0'; setTimeout(()=> splash.remove(), 600); }
+  }, 2000);
 
-  // 2. طلب الأذونات بدون أن تؤثر على إخفاء شاشة الإقلاع
+  // طلب الأذونات يعمل في الخلفية ولن يعطل الشاشة
   if (QatraNative) {
-    setTimeout(() => {
-      QatraNative.askPermissions().catch(e => console.log("Permissions prompt dismissed/failed", e));
-    }, 1800);
+    setTimeout(() => { QatraNative.askPermissions().catch(e => console.log(e)); }, 2500);
   }
 };
