@@ -17,7 +17,6 @@ import java.util.Calendar
 
 @CapacitorPlugin(name = "QatraNative")
 class QatraPlugin : Plugin() {
-
     @PluginMethod
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
@@ -48,19 +47,15 @@ class QatraPlugin : Plugin() {
         val mode = call.getString("mode") ?: "both"
         val duration = call.getInt("duration") ?: 10000
         val quote = call.getString("quote") ?: "حان وقت التأمل"
-        
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
             putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote)
         }
         val pendingIntent = PendingIntent.getBroadcast(context, 99999, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        
         if (intervalMinutes > 0) {
             val intervalMillis = intervalMinutes * 60 * 1000L
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + intervalMillis, intervalMillis, pendingIntent)
-        } else {
-            alarmManager.cancel(pendingIntent)
-        }
+        } else alarmManager.cancel(pendingIntent)
         call.resolve()
     }
 
@@ -71,27 +66,19 @@ class QatraPlugin : Plugin() {
         val mode = call.getString("mode") ?: "both"
         val duration = call.getInt("duration") ?: 10000
         val quote = call.getString("quote") ?: "تأمل"
-
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
             putExtra("id", id); putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote)
         }
         val pendingIntent = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
         val parts = time.split(":")
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, parts[0].toInt())
-            set(Calendar.MINUTE, parts[1].toInt())
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
+            set(Calendar.HOUR_OF_DAY, parts[0].toInt()); set(Calendar.MINUTE, parts[1].toInt())
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
             if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DATE, 1)
         }
-        
-        try {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        } catch (e: Exception) {
-            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000*60, pendingIntent)
-        }
+        try { alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent) } 
+        catch (e: Exception) { alarmManager.setWindow(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000*60, pendingIntent) }
         call.resolve()
     }
 
@@ -99,14 +86,19 @@ class QatraPlugin : Plugin() {
     fun showDrop(call: PluginCall) {
         val quote = call.getString("quote") ?: "سبحان الله"
         val duration = call.getInt("duration") ?: 10000
-        val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { 
-            putExtra("quote", quote); putExtra("duration", duration)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent)
-        } else {
-            context.startService(serviceIntent)
-        }
+        val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { putExtra("quote", quote); putExtra("duration", duration) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(serviceIntent)
+        else context.startService(serviceIntent)
+        call.resolve()
+    }
+
+    @PluginMethod
+    fun startPomodoro(call: PluginCall) {
+        val minutes = call.getInt("minutes") ?: 25
+        val audioUrl = call.getString("audioUrl") ?: ""
+        val serviceIntent = Intent(context, PomodoroService::class.java).apply { putExtra("minutes", minutes); putExtra("audioUrl", audioUrl) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(serviceIntent)
+        else context.startService(serviceIntent)
         call.resolve()
     }
 }
