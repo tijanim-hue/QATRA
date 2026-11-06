@@ -29,72 +29,60 @@ class QatraOverlayService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val quote = intent?.getStringExtra("quote") ?: "الحمد لله"
-        playCinematicAnimation(quote)
+        val duration = intent?.getIntExtra("duration", 10000) ?: 10000
+        playCinematicAnimation(quote, duration.toLong())
         return START_NOT_STICKY
     }
 
-    private fun playCinematicAnimation(quote: String) {
+    private fun playCinematicAnimation(quote: String, displayDuration: Long) {
         if (overlayContainer != null) return
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        
         val displayMetrics = resources.displayMetrics
         val screenHeight = displayMetrics.heightPixels.toFloat()
-        // نقطة القاع التي ستصطدم بها القطرة (أسفل الشاشة بمسافة قليلة)
-        val bottomLandingY = screenHeight - 350f 
 
-        // التعتيم الزجاجي الخلفي
-        overlayContainer = FrameLayout(this).apply {
-            setBackgroundColor(Color.parseColor("#99030610"))
-        }
-
-        val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND
+        overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#99030610")) }
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
-            flags, PixelFormat.TRANSLUCENT
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+            PixelFormat.TRANSLUCENT
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) params.blurBehindRadius = 40
 
-        // 1. دوائر الماء (Ripples) عند الارتطام
+        // 1. الدوائر المائية (في الأسفل)
         val ripple = View(this).apply {
-            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#8000e5ff")) }
+            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#8000d2ff")) }
             alpha = 0f
-            translationY = bottomLandingY - (screenHeight / 2f) + 150f // ضبط الموقع أسفل الشاشة
+            translationY = screenHeight / 2.5f // موضعها في الأسفل
         }
-        val rippleParams = FrameLayout.LayoutParams(120, 60).apply { gravity = Gravity.CENTER }
+        val rippleParams = FrameLayout.LayoutParams(100, 50).apply { gravity = Gravity.CENTER }
 
-        // 2. القطرة المائية العمودية الحقيقية
-        val dropSize = 120
+        // 2. القطرة المائية العمودية
+        val dropSize = 100
         val dropView = View(this).apply {
             background = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE
-                val r = dropSize / 2f
-                cornerRadii = floatArrayOf(0f, 0f, r, r, r, r, r, r) // رأس حاد
-                colors = intArrayOf(Color.parseColor("#ffffff"), Color.parseColor("#00e5ff"), Color.parseColor("#0066ff"))
+                shape = GradientDrawable.RECTANGLE; val r = dropSize / 2f
+                cornerRadii = floatArrayOf(0f, 0f, r, r, r, r, r, r)
+                colors = intArrayOf(Color.parseColor("#ffffff"), Color.parseColor("#00d2ff"))
             }
-            rotation = 45f // لتبدو عمودية
+            rotation = 45f
             elevation = 30f
         }
         val dropParams = FrameLayout.LayoutParams(dropSize, dropSize).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL }
 
-        // 3. العبارة بدون إطار (نص نقي بخط أنيق وظل واضح)
+        // 3. النص (العبارة)
         val quoteText = TextView(this).apply {
             text = quote
             setTextColor(Color.WHITE)
-            textSize = 28f
+            textSize = 26f
             gravity = Gravity.CENTER
-            setShadowLayer(25f, 0f, 10f, Color.parseColor("#00e5ff")) // ظل نيون قوي للوضوح
+            setShadowLayer(20f, 0f, 0f, Color.parseColor("#00d2ff"))
             setTypeface(null, Typeface.BOLD)
             alpha = 0f
         }
         val textParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
-            gravity = Gravity.CENTER
-            setMargins(40, 0, 40, 0)
+            gravity = Gravity.CENTER; setMargins(40, 0, 40, 0)
         }
 
         overlayContainer?.addView(ripple, rippleParams)
@@ -102,72 +90,54 @@ class QatraOverlayService : Service() {
         overlayContainer?.addView(quoteText, textParams)
         windowManager?.addView(overlayContainer, params)
 
-        // ===================================
-        // السحر الحركي (الأنيميشن)
-        // ===================================
         val handler = Handler(Looper.getMainLooper())
-
-        // 1. سقوط القطرة لأسفل الهاتف
+        
+        // الأنيميشن: السقوط نحو القاع
+        val fallDistance = screenHeight - 400f // السقوط لأسفل الهاتف
         dropView.translationY = -300f
-        ObjectAnimator.ofFloat(dropView, "translationY", -300f, bottomLandingY).apply {
-            duration = 1000
-            interpolator = AccelerateInterpolator() // تسارع الجاذبية
-            start()
+        ObjectAnimator.ofFloat(dropView, "translationY", -300f, fallDistance).apply {
+            duration = 1000; interpolator = AccelerateInterpolator(); start()
         }
 
-        // 2. لحظة الارتطام
+        // لحظة الاصطدام بالقاع
         handler.postDelayed({
-            dropView.visibility = View.GONE // اختفاء القطرة
-            playSound() // صوت الارتطام
+            dropView.visibility = View.GONE
+            try {
+                val notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                RingtoneManager.getRingtone(applicationContext, notification)?.play()
+            } catch (e: Exception) {}
 
-            // تأثير دوائر الماء (Ripple Effect)
+            // تموجات الماء
             ripple.alpha = 1f
-            val rScaleX = ObjectAnimator.ofFloat(ripple, "scaleX", 1f, 12f).setDuration(800)
-            val rScaleY = ObjectAnimator.ofFloat(ripple, "scaleY", 1f, 12f).setDuration(800)
+            val rScaleX = ObjectAnimator.ofFloat(ripple, "scaleX", 1f, 10f).setDuration(800)
+            val rScaleY = ObjectAnimator.ofFloat(ripple, "scaleY", 1f, 10f).setDuration(800)
             val rFade = ObjectAnimator.ofFloat(ripple, "alpha", 1f, 0f).setDuration(800)
             AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 
-            // 3. خروج النص من القاع وصعوده للمنتصف
-            quoteText.translationY = (bottomLandingY / 2f)
-            quoteText.scaleX = 0.3f
-            quoteText.scaleY = 0.3f
-
-            val tRise = ObjectAnimator.ofFloat(quoteText, "translationY", (bottomLandingY / 2f), 0f).setDuration(2500)
-            tRise.interpolator = DecelerateInterpolator(1.2f) // تباطؤ عند الوصول للمنتصف
-            val tGrowX = ObjectAnimator.ofFloat(quoteText, "scaleX", 0.3f, 1f).setDuration(2500)
-            val tGrowY = ObjectAnimator.ofFloat(quoteText, "scaleY", 0.3f, 1f).setDuration(2500)
+            // خروج النص من القاع وصعوده
+            quoteText.translationY = fallDistance / 2f
+            quoteText.scaleX = 0.2f
+            quoteText.scaleY = 0.2f
+            
+            val tRise = ObjectAnimator.ofFloat(quoteText, "translationY", fallDistance / 2f, 0f).setDuration(2500)
+            tRise.interpolator = DecelerateInterpolator()
+            val tGrowX = ObjectAnimator.ofFloat(quoteText, "scaleX", 0.2f, 1f).setDuration(2500)
+            val tGrowY = ObjectAnimator.ofFloat(quoteText, "scaleY", 0.2f, 1f).setDuration(2500)
             val tFade = ObjectAnimator.ofFloat(quoteText, "alpha", 0f, 1f).setDuration(1500)
-
+            
             AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade); start() }
 
         }, 1000)
 
-        // 4. وميض واستقرار النص
+        // اختفاء حسب المدة المحددة من المستخدم
         handler.postDelayed({
-            val pulseX = ObjectAnimator.ofFloat(quoteText, "scaleX", 1f, 1.05f, 1f).setDuration(1500)
-            val pulseY = ObjectAnimator.ofFloat(quoteText, "scaleY", 1f, 1.05f, 1f).setDuration(1500)
-            AnimatorSet().apply { playTogether(pulseX, pulseY); start() }
-        }, 3800)
-
-        // 5. اختفاء الشاشة تلقائياً بعد 10 ثوانٍ
-        handler.postDelayed({
-            ObjectAnimator.ofFloat(overlayContainer, "alpha", 1f, 0f).setDuration(1000).start()
-            handler.postDelayed({ stopSelf() }, 1000)
-        }, 10000)
-    }
-
-    private fun playSound() {
-        try {
-            val notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-            RingtoneManager.getRingtone(applicationContext, notification)?.play()
-        } catch (e: Exception) {}
+            ObjectAnimator.ofFloat(overlayContainer, "alpha", 1f, 0f).setDuration(800).start()
+            handler.postDelayed({ stopSelf() }, 800)
+        }, displayDuration)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (overlayContainer != null) {
-            windowManager?.removeView(overlayContainer)
-            overlayContainer = null
-        }
+        if (overlayContainer != null) { windowManager?.removeView(overlayContainer); overlayContainer = null }
     }
 }
