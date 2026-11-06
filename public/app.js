@@ -1,132 +1,128 @@
 "use strict";
 
-const STORAGE_KEY = "qatra_pro_v3";
+const STORE_KEY = "qatra_pro_final";
+let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
+  lang: 'ar', dark: true, glass: true, notif: true, interval: '0', schedules: []
+};
 
-const CATEGORIES = [
-  { id: "hope", name: "الأمل", emoji: "🌱", type: "quote", quotes: ["لا يلزم أن تكون كل خطواتك كبيرة؛ المهم أن تواصل السير.", "قد يحمل الغد بابًا لم تره اليوم."] },
-  { id: "calm", name: "الهدوء", emoji: "🌊", type: "quote", quotes: ["ليس عليك أن تحمل كل شيء في هذه اللحظة.", "تمهّل، فلكل مرحلة حكمتها."] },
-  { id: "dhikr", name: "الأذكار والأدعية", emoji: "🤲", type: "dhikr", quotes: ["سبحان الله وبحمده، سبحان الله العظيم.", "اللهم إني أسألك العفو والعافية.", "لا إله إلا أنت سبحانك إني كنت من الظالمين."] }
+// --- نظام اللغات (يحفظ تلقائياً) ---
+const dict = {
+  ar: { app_title: "قطرة", quote_of_day: "اقتباس اليوم", send_drop: "أرسل لي قطرة الآن ✦", activity_week: "نشاط هذا الأسبوع", meditation: "تأمل", settings: "إعدادات", library: "اقتباسات", home: "الرئيسية", qatra: "قطرة", quotes: "اقتباسات", glass_mode: "تأثير الزجاج", dark_mode: "الوضع الداكن", language: "لغة التطبيق", enable_notifications: "تفعيل الإشعارات" },
+  en: { app_title: "Qatra", quote_of_day: "Quote of the Day", send_drop: "Send Drop Now ✦", activity_week: "This Week's Activity", meditation: "Meditate", settings: "Settings", library: "Library", home: "Home", qatra: "Qatra", quotes: "Quotes", glass_mode: "Glass Effect", dark_mode: "Dark Mode", language: "Language", enable_notifications: "Enable Notifications" },
+  fr: { app_title: "Qatra", quote_of_day: "Citation du Jour", send_drop: "Envoyer une Goutte ✦", activity_week: "Activité de la Semaine", meditation: "Méditer", settings: "Paramètres", library: "Bibliothèque", home: "Accueil", qatra: "Qatra", quotes: "Citations", glass_mode: "Effet Verre", dark_mode: "Mode Sombre", language: "Langue", enable_notifications: "Activer les Notifications" },
+  es: { app_title: "Qatra", quote_of_day: "Frase del Día", send_drop: "Enviar Gota Ahora ✦", activity_week: "Actividad de la Semana", meditation: "Meditar", settings: "Ajustes", library: "Biblioteca", home: "Inicio", qatra: "Qatra", quotes: "Frases", glass_mode: "Efecto Cristal", dark_mode: "Modo Oscuro", language: "Idioma", enable_notifications: "Activar Notificaciones" },
+  de: { app_title: "Qatra", quote_of_day: "Zitat des Tages", send_drop: "Tropfen Senden ✦", activity_week: "Aktivität der Woche", meditation: "Meditieren", settings: "Einstellungen", library: "Bibliothek", home: "Start", qatra: "Qatra", quotes: "Zitate", glass_mode: "Glaseffekt", dark_mode: "Dunkelmodus", language: "Sprache", enable_notifications: "Benachrichtigungen Aktivieren" }
+};
+
+function applyLang() {
+  document.documentElement.dir = (state.lang === 'ar') ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = dict[state.lang][el.getAttribute('data-i18n')] || el.textContent;
+  });
+}
+
+// --- مكتبة ضخمة للأذكار والعبارات ---
+const libraryContent = [
+  "سبحان الله وبحمده، سبحان الله العظيم.", "لا إله إلا أنت سبحانك إني كنت من الظالمين.", "اللهم إنك عفو تحب العفو فاعف عني.",
+  "حسبي الله لا إله إلا هو، عليه توكلت وهو رب العرش العظيم.", "لا حول ولا قوة إلا بالله.", "اللهم صل وسلم وبارك على نبينا محمد.",
+  "استغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه.", "يا حي يا قيوم برحمتك أستغيث.", "اللهم إني أسألك الجنة وأعوذ بك من النار.",
+  "لا يلزم أن تكون كل خطواتك كبيرة؛ المهم أن تواصل السير.", "تمهّل، فلكل مرحلة حكمتها.", "القليل المستمر يصنع أثرًا عميقًا.",
+  "كل يوم هو فرصة جديدة لتكون أفضل.", "الهدوء ليس ضعفاً، بل هو قوة التحكم في الذات.", "ابتسم، فخلف الغيوم شمس ساطعة."
+  // ... يمكنك إضافة المئات هنا بسهولة
 ];
 
-let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-  isDarkMode: true, isGlassmorphism: false, contentType: 'all', notificationEnabled: true
-};
+function getRandomQuote() { return libraryContent[Math.floor(Math.random() * libraryContent.length)]; }
 
-const QatraNative = window.Capacitor?.Plugins?.QatraNative;
-
-/* --- دوال الواجهة والثيم --- */
-function applyTheme() {
-  document.body.classList.toggle('dark-mode', state.isDarkMode);
-  document.body.classList.toggle('glass-effect', state.isGlassmorphism);
-  document.getElementById('glassmorphismToggle').checked = state.isGlassmorphism;
-  document.getElementById('contentTypeSetting').value = state.contentType;
-  document.getElementById('notificationSetting').checked = state.notificationEnabled;
+// --- تهيئة الواجهة ---
+function saveAndApply() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  document.body.classList.toggle('light-mode', !state.dark);
+  document.body.classList.toggle('glass-effect', state.glass);
+  document.getElementById('darkToggle').checked = state.dark;
+  document.getElementById('glassToggle').checked = state.glass;
+  document.getElementById('notifToggle').checked = state.notif;
+  document.getElementById('intervalSelect').value = state.interval;
+  applyLang();
+  renderSchedules();
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  applyTheme();
-}
+// --- التفاعل مع الأزرار القائمة الجانبية والسفلية ---
+document.getElementById('openSidebar').onclick = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('show'); };
+document.getElementById('closeSidebar').onclick = document.getElementById('sidebarOverlay').onclick = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); };
 
-function getRandomQuote() {
-  let contentList = CATEGORIES.flatMap(c => c.quotes);
-  if (state.contentType === 'quotes') contentList = CATEGORIES.filter(c => c.type === 'quote').flatMap(c => c.quotes);
-  if (state.contentType === 'dhikr') contentList = CATEGORIES.find(c => c.type === 'dhikr').quotes;
-  return contentList[Math.floor(Math.random() * contentList.length)] || "الحمد لله";
-}
+document.getElementById('darkToggle').onchange = e => { state.dark = e.target.checked; saveAndApply(); };
+document.getElementById('glassToggle').onchange = e => { state.glass = e.target.checked; saveAndApply(); };
+document.getElementById('notifToggle').onchange = e => { state.notif = e.target.checked; saveAndApply(); };
+document.getElementById('intervalSelect').onchange = e => { state.interval = e.target.value; saveAndApply(); };
 
-/* --- القائمة الجانبية (Hamburger) والزجاج والداكن --- */
-document.getElementById('openSidebar').onclick = () => {
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('sidebarOverlay').classList.add('show');
-};
-document.getElementById('closeSidebar').onclick = document.getElementById('sidebarOverlay').onclick = () => {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
+document.getElementById('btnLang').onclick = () => {
+  const langs = ['ar', 'en', 'fr', 'es', 'de'];
+  let currentIdx = langs.indexOf(state.lang);
+  state.lang = langs[(currentIdx + 1) % langs.length];
+  saveAndApply();
 };
 
-document.getElementById('darkModeBtn').onclick = () => {
-  state.isDarkMode = !state.isDarkMode;
-  saveState();
-};
-document.getElementById('glassmorphismToggle').onchange = (e) => {
-  state.isGlassmorphism = e.target.checked;
-  saveState();
-};
-
-/* --- أزرار القائمة الجانبية --- */
-document.getElementById('btnShare').onclick = () => navigator.share && navigator.share({ title: 'قطرة', text: 'تطبيق قطرة للوعي والأذكار' });
-document.getElementById('btnAbout').onclick = () => alert("تطبيق قطرة: مصمم لمنحك لحظة هدوء وسط ضجيج الحياة.");
-document.getElementById('btnPrivacy').onclick = () => alert("لا يتم جمع أي بيانات شخصية.");
-document.getElementById('btnLang').onclick = () => alert("اللغة العربية مدعومة حالياً.");
-
-/* --- التنقل السفلي (Bottom Nav) --- */
 document.querySelectorAll('.nav-item').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById(btn.dataset.view).classList.add('active');
     btn.classList.add('active');
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 });
 
-/* --- مؤقت التركيز (Timer) --- */
-let timerInterval;
-let timeLeft = 25 * 60;
-let isTimerRunning = false;
-const display = document.getElementById('timerDisplay');
-const playBtn = document.getElementById('timerPlayBtn');
-
-function updateTimerDisplay() {
-  const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-  const s = (timeLeft % 60).toString().padStart(2, '0');
-  display.textContent = `${m}:${s}`;
+// --- طلب الأذونات والتشغيل السينمائي ---
+const QatraNative = window.Capacitor?.Plugins?.QatraNative;
+async function fireCinematic() {
+  const quote = getRandomQuote();
+  document.getElementById('dailyQuoteText').textContent = quote;
+  if (QatraNative) await QatraNative.showDrop({ quote: quote });
 }
-playBtn.onclick = () => {
-  if (isTimerRunning) {
-    clearInterval(timerInterval);
-    playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
-  } else {
-    timerInterval = setInterval(() => {
-      if (timeLeft > 0) { timeLeft--; updateTimerDisplay(); }
-      else { clearInterval(timerInterval); alert("انتهت جلسة التركيز!"); }
-    }, 1000);
-    playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+document.getElementById('triggerCinematic').onclick = fireCinematic;
+document.getElementById('previewFloatingBtn').onclick = fireCinematic;
+
+// --- الصوتيات العشوائية للاسترخاء ---
+const audioTracks = [
+  "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg",
+  "https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg",
+  "https://actions.google.com/sounds/v1/ambiences/birds_in_forest.ogg"
+];
+let player = new Audio();
+let isPlaying = false;
+document.getElementById('playAudioBtn').onclick = () => {
+  if (isPlaying) { player.pause(); isPlaying = false; document.getElementById('playAudioBtn').textContent = "▶ تشغيل"; document.getElementById('audioStatus').textContent = "متوقف"; }
+  else {
+    player.src = audioTracks[Math.floor(Math.random() * audioTracks.length)];
+    player.play(); isPlaying = true; document.getElementById('playAudioBtn').textContent = "⏸ إيقاف"; document.getElementById('audioStatus').textContent = "جارٍ التشغيل...";
   }
-  isTimerRunning = !isTimerRunning;
 };
 
-/* --- السحر السينمائي (القطرة) --- */
-async function fireCinematicDrop() {
-  const quote = getRandomQuote();
-  if (QatraNative && QatraNative.showDrop) {
-    await QatraNative.showDrop({ quote: quote });
-  } else {
-    alert("سيتم عرض التأثير السينمائي المذهل في تطبيق الأندرويد.");
-  }
+// --- المواعيد والمكتبة ---
+function renderSchedules() {
+  document.getElementById('schedulesList').innerHTML = state.schedules.map((time, i) => 
+    `<div class="glass-card" style="padding:10px; display:flex; justify-content:space-between; margin-bottom:5px;">
+      <span>${time}</span><button onclick="deleteTime(${i})" style="color:#ff4d4d; background:none; border:none; font-weight:bold;">X</button>
+    </div>`
+  ).join('');
 }
+document.getElementById('addScheduleBtn').onclick = () => {
+  const t = document.getElementById('customTime').value;
+  if(t) { state.schedules.push(t); saveAndApply(); document.getElementById('customTime').value = ""; }
+};
+window.deleteTime = (i) => { state.schedules.splice(i, 1); saveAndApply(); };
 
-// تشغيل التأثير عند الضغط على "اقتباس اليوم" أو زر المعاينة
-document.getElementById('triggerCinematicDrop').onclick = fireCinematicDrop;
-document.getElementById('previewFloatingSetting').onclick = fireCinematicDrop;
+function renderLibrary() {
+  document.getElementById('libraryContent').innerHTML = libraryContent.map(q => 
+    `<div class="glass-card" style="padding:15px; cursor:pointer;" onclick="selectQuote('${q}')">${q}</div>`
+  ).join('');
+}
+window.selectQuote = (q) => { document.getElementById('dailyQuoteText').textContent = q; alert("تم تحديد العبارة!"); };
 
-/* --- إعدادات المحتوى والإشعارات --- */
-document.getElementById('contentTypeSetting').onchange = (e) => { state.contentType = e.target.value; saveState(); };
-document.getElementById('notificationSetting').onchange = (e) => { state.notificationEnabled = e.target.checked; saveState(); };
-
-// تحميل مكتبة الاقتباسات
-const libContainer = document.getElementById('libraryGrid');
-CATEGORIES.forEach(cat => {
-  libContainer.innerHTML += `
-    <div class="category-card glass-panel">
-      <div class="category-emoji">${cat.emoji}</div>
-      <div style="font-weight:700; font-size:14px;">${cat.name}</div>
-      <div style="font-size:10px; color:var(--muted);">${cat.quotes.length} عبارات</div>
-    </div>`;
-});
-
-/* --- تهيئة التطبيق --- */
-document.getElementById('dailyQuoteText').textContent = getRandomQuote();
-applyTheme();
-updateTimerDisplay();
+// --- البداية ---
+window.onload = () => {
+  if (QatraNative) QatraNative.requestPermissions();
+  saveAndApply();
+  renderLibrary();
+  document.getElementById('dailyQuoteText').textContent = getRandomQuote();
+  setTimeout(() => { document.getElementById('splash').style.opacity = '0'; setTimeout(()=> document.getElementById('splash').remove(), 800); }, 2500);
+};
