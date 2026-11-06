@@ -1,8 +1,8 @@
 "use strict";
 
-const STORE_KEY = "qatra_premium_final_v3";
+const STORE_KEY = "qatra_premium_final_v4";
 
-// توليد مكتبة ضخمة جداً (100 عنصر لكل قسم)
+// 1. توليد مكتبة ضخمة جداً (100 عنصر لكل قسم)
 const generateArray = (base, count) => Array.from({length: count}, (_, i) => `${base} ${i+1}`);
 const QUOTES_DB = {
   selfDev: { title: "تطوير الذات", icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>', items: ["الهدوء ليس ضعفاً، بل هو قوة التحكم في الذات.", "لا يلزم أن تكون كل خطواتك كبيرة؛ المهم أن تواصل السير.", "القليل المستمر يصنع أثرًا عميقًا.", ...generateArray("فكرة وخطوة في تطوير الذات رقم", 97)] },
@@ -19,10 +19,19 @@ let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
 
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
 
+// دالة آمنة لربط الأحداث لتجنب انهيار التطبيق
+function safeAddListener(id, eventType, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(eventType, handler);
+}
+
 function applyState() {
   localStorage.setItem(STORE_KEY, JSON.stringify(state));
-  if (state.dark) { document.body.classList.add('dark-mode'); } 
-  else { document.body.classList.remove('dark-mode'); }
+  if (state.dark) {
+    document.body.classList.add('dark-mode');
+  } else {
+    document.body.classList.remove('dark-mode');
+  }
   document.body.classList.toggle('glass-active', state.glass);
   
   const c = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
@@ -35,14 +44,15 @@ function applyState() {
 }
 
 // --- التنقل ---
-document.getElementById('darkToggle').onchange = e => { state.dark = e.target.checked; applyState(); };
-document.getElementById('glassToggle').onchange = e => { state.glass = e.target.checked; applyState(); };
+safeAddListener('darkToggle', 'change', e => { state.dark = e.target.checked; applyState(); });
+safeAddListener('glassToggle', 'change', e => { state.glass = e.target.checked; applyState(); });
 
 document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
-    document.getElementById(btn.dataset.view).classList.add('active');
+    const targetView = document.getElementById(btn.dataset.view);
+    if (targetView) targetView.classList.add('active');
     btn.classList.add('active');
   };
 });
@@ -52,7 +62,9 @@ const WEEK_DAYS = [{ id: 0, name: "أحد" }, { id: 1, name: "إثن" }, { id: 2
 let currentSelectedDays = new Set([0,1,2,3,4,5,6]);
 
 function renderDaysGrid() {
-  document.getElementById('daysGrid').innerHTML = WEEK_DAYS.map(d => 
+  const grid = document.getElementById('daysGrid');
+  if(!grid) return;
+  grid.innerHTML = WEEK_DAYS.map(d => 
     `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.name}</div>`
   ).join('');
 }
@@ -77,11 +89,14 @@ function renderGarden() {
   const prevMax = stage === GARDEN[0] ? 0 : GARDEN[GARDEN.indexOf(stage)-1].max;
   const progress = ((drops - prevMax) / (nextGoal - prevMax)) * 100;
   
-  document.getElementById('treeEmoji').innerText = stage.emoji;
-  document.getElementById('treeLevelName').innerText = stage.name;
-  document.getElementById('treeDesc').innerText = stage.desc;
-  document.getElementById('treeProgress').style.width = `${progress}%`;
-  document.getElementById('treeStats').innerText = `القطرات المقروءة: ${drops} / ${nextGoal}`;
+  const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+  setTxt('treeEmoji', stage.emoji);
+  setTxt('treeLevelName', stage.name);
+  setTxt('treeDesc', stage.desc);
+  setTxt('treeStats', `القطرات المقروءة: ${drops} / ${nextGoal}`);
+  
+  const progEl = document.getElementById('treeProgress');
+  if(progEl) progEl.style.width = `${progress}%`;
 }
 
 // --- الأقسام والمكتبة ---
@@ -103,17 +118,23 @@ function renderCategories() {
 
 window.openCategory = (id) => {
   const cat = QUOTES_DB[id];
-  document.getElementById('catSheetTitle').innerText = cat.title;
-  // عرض 50 عنصر لتجنب تجميد الشاشة
-  document.getElementById('catSheetContent').innerHTML = cat.items.slice(0, 50).map(q => {
-    const checked = state.selectedQuotes.includes(q) ? "checked" : "";
-    return `<div style="display:flex; align-items:flex-start; gap:12px; padding:15px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-      <input type="checkbox" style="width:22px; height:22px; accent-color:var(--cyan); margin-top:2px; flex-shrink:0;" value="${q}" ${checked} 
-        onchange="if(this.checked) state.selectedQuotes.push(this.value); else state.selectedQuotes = state.selectedQuotes.filter(x=>x!==this.value); applyState(); syncNativeAlarms();">
-      <div style="font-size:15px; font-weight:700;">${q}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('categorySheet').classList.add('show');
+  const titleEl = document.getElementById('catSheetTitle');
+  if(titleEl) titleEl.innerText = cat.title;
+  
+  const contentEl = document.getElementById('catSheetContent');
+  if(contentEl) {
+    // عرض 50 عنصر لتجنب تجميد الشاشة
+    contentEl.innerHTML = cat.items.slice(0, 50).map(q => {
+      const checked = state.selectedQuotes.includes(q) ? "checked" : "";
+      return `<div style="display:flex; align-items:flex-start; gap:12px; padding:15px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <input type="checkbox" style="width:22px; height:22px; accent-color:var(--cyan); margin-top:2px; flex-shrink:0;" value="${q}" ${checked} 
+          onchange="if(this.checked) state.selectedQuotes.push(this.value); else state.selectedQuotes = state.selectedQuotes.filter(x=>x!==this.value); applyState(); syncNativeAlarms();">
+        <div style="font-size:15px; font-weight:700;">${q}</div>
+      </div>`;
+    }).join('');
+  }
+  const sheet = document.getElementById('categorySheet');
+  if(sheet) sheet.classList.add('show');
 };
 
 // --- القطرة والمواعيد ---
@@ -124,17 +145,19 @@ function getRandomQuote() {
 
 window.fireCinematic = async () => {
   const quote = getRandomQuote();
-  document.getElementById('dailyQuoteText').textContent = `"${quote}"`;
+  const qtEl = document.getElementById('dailyQuoteText');
+  if (qtEl) qtEl.textContent = `"${quote}"`;
+  
   if (QatraNative) {
     state.stats.drops++; applyState();
-    await QatraNative.showDrop({ quote: quote, duration: state.duration });
+    await QatraNative.showDrop({ quote: quote, duration: state.duration }).catch(e=>{});
   }
 };
-document.getElementById('previewFloatingBtn').onclick = fireCinematic;
 
-document.getElementById('notifModeSetting').onchange = e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); };
-document.getElementById('dropDurationSetting').onchange = e => { state.duration = parseInt(e.target.value); applyState(); syncNativeAlarms(); };
-document.getElementById('intervalSelect').onchange = e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); renderSchedules(); };
+safeAddListener('previewFloatingBtn', 'click', window.fireCinematic);
+safeAddListener('notifModeSetting', 'change', e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); });
+safeAddListener('dropDurationSetting', 'change', e => { state.duration = parseInt(e.target.value); applyState(); syncNativeAlarms(); });
+safeAddListener('intervalSelect', 'change', e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); renderSchedules(); });
 
 function renderSchedules() {
   const list = document.getElementById('savedSchedulesList');
@@ -147,20 +170,25 @@ function renderSchedules() {
   ).join('');
   
   const txt = document.getElementById('nextReminderText');
-  if(state.interval !== '0') txt.innerText = `تكرار مفعل (كل ${state.interval} دقيقة)`;
-  else if(state.schedules.length > 0) txt.innerText = `لديك ${state.schedules.length} مواعيد مبرمجة`;
-  else txt.innerText = "لم يتم تحديد مواعيد";
+  if(txt) {
+    if(state.interval !== '0') txt.innerText = `تكرار مفعل (كل ${state.interval} دقيقة)`;
+    else if(state.schedules.length > 0) txt.innerText = `لديك ${state.schedules.length} مواعيد مبرمجة`;
+    else txt.innerText = "لم يتم تحديد مواعيد";
+  }
 }
 
-document.getElementById('saveScheduleBtn').onclick = () => {
-  const t = document.getElementById('customTime').value;
+safeAddListener('saveScheduleBtn', 'click', () => {
+  const tEl = document.getElementById('customTime');
+  if(!tEl) return;
+  const t = tEl.value;
   if(t && currentSelectedDays.size > 0) { 
     state.schedules.push({id: Math.floor(Math.random()*10000), time: t, days: Array.from(currentSelectedDays)}); 
     applyState(); renderSchedules(); syncNativeAlarms();
   } else {
     alert("الرجاء اختيار الوقت ويوم واحد على الأقل.");
   }
-};
+});
+
 window.deleteSchedule = (i) => { 
   if(QatraNative && state.schedules[i]) QatraNative.cancel({id: state.schedules[i].id}).catch(e=>{});
   state.schedules.splice(i,1); applyState(); renderSchedules(); syncNativeAlarms(); 
@@ -175,27 +203,40 @@ function syncNativeAlarms() {
 // --- التأمل ---
 const randomAudios = ["https://actions.google.com/sounds/v1/water/rain_on_roof.ogg", "https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg", "https://server8.mp3quran.net/afs/001.mp3"];
 let randPlayer = new Audio(); let isRandPlaying = false;
-document.getElementById('playAudioBtn').onclick = () => {
-  if (isRandPlaying) { randPlayer.pause(); isRandPlaying = false; document.getElementById('playAudioBtn').textContent = "▶ تشغيل الآن"; document.getElementById('audioStatus').textContent = "استعد للهدوء"; }
-  else {
+safeAddListener('playAudioBtn', 'click', () => {
+  const btn = document.getElementById('playAudioBtn');
+  const status = document.getElementById('audioStatus');
+  if (isRandPlaying) { 
+    randPlayer.pause(); isRandPlaying = false; 
+    if(btn) btn.textContent = "▶ تشغيل الآن"; 
+    if(status) status.textContent = "استعد للهدوء"; 
+  } else {
     randPlayer.src = randomAudios[Math.floor(Math.random() * randomAudios.length)];
-    randPlayer.play(); isRandPlaying = true; document.getElementById('playAudioBtn').textContent = "⏸ إيقاف"; document.getElementById('audioStatus').textContent = "جارٍ الاسترخاء...";
+    randPlayer.play(); isRandPlaying = true; 
+    if(btn) btn.textContent = "⏸ إيقاف"; 
+    if(status) status.textContent = "جارٍ الاسترخاء...";
   }
-};
+});
 
-// --- الإقلاع الآمن وطلب الأذونات ---
 window.onload = () => {
+  // تشغيل الوظائف بأمان
   applyState(); renderSchedules(); renderDaysGrid();
-  document.getElementById('dailyQuoteText').textContent = `"${getRandomQuote()}"`;
+  const qtEl = document.getElementById('dailyQuoteText');
+  if(qtEl) qtEl.textContent = `"${getRandomQuote()}"`;
   
-  // 1. الإخفاء الإجباري لشاشة الإقلاع (مستقل تماماً عن الأذونات لتفادي التعليق)
+  // 1. الإخفاء الإجباري لشاشة الإقلاع - مستقل تماماً عن أي كود آخر!
   setTimeout(() => {
     const splash = document.getElementById('splash');
-    if (splash) { splash.style.opacity = '0'; setTimeout(()=> splash.remove(), 800); }
-  }, 2500); // 2.5 ثانية لعرض شريط التحميل بوضوح
+    if (splash) { 
+      splash.style.opacity = '0'; 
+      setTimeout(() => splash.remove(), 600); 
+    }
+  }, 2500); // إظهار الشاشة لثانيتين ونصف لكي يقرأ المطور واسم التطبيق بوضوح
 
-  // 2. طلب الأذونات يبدأ في الخلفية بهدوء ولا يعطل الواجهة
+  // 2. طلب الأذونات يعمل في الخلفية بهدوء بعد زوال الشاشة
   if (QatraNative) {
-    setTimeout(() => { QatraNative.askPermissions().catch(e => console.log(e)); }, 3500);
+    setTimeout(() => { 
+      QatraNative.askPermissions().catch(e => console.log(e)); 
+    }, 3500);
   }
 };
