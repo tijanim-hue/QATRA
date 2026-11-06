@@ -1,8 +1,8 @@
 "use strict";
 
-const STORE_KEY = "qatra_premium_final_v1";
+const STORE_KEY = "qatra_premium_final_v3";
 
-// توليد مكتبة ضخمة جداً (100 عنصر لكل قسم كما طلبت)
+// توليد مكتبة ضخمة جداً (100 عنصر لكل قسم)
 const generateArray = (base, count) => Array.from({length: count}, (_, i) => `${base} ${i+1}`);
 const QUOTES_DB = {
   selfDev: { title: "تطوير الذات", icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>', items: ["الهدوء ليس ضعفاً، بل هو قوة التحكم في الذات.", "لا يلزم أن تكون كل خطواتك كبيرة؛ المهم أن تواصل السير.", "القليل المستمر يصنع أثرًا عميقًا.", ...generateArray("فكرة وخطوة في تطوير الذات رقم", 97)] },
@@ -21,11 +21,8 @@ const QatraNative = window.Capacitor?.Plugins?.QatraNative;
 
 function applyState() {
   localStorage.setItem(STORE_KEY, JSON.stringify(state));
-  if (state.dark) {
-    document.body.classList.add('dark-mode');
-  } else {
-    document.body.classList.remove('dark-mode');
-  }
+  if (state.dark) { document.body.classList.add('dark-mode'); } 
+  else { document.body.classList.remove('dark-mode'); }
   document.body.classList.toggle('glass-active', state.glass);
   
   const c = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
@@ -186,18 +183,19 @@ document.getElementById('playAudioBtn').onclick = () => {
   }
 };
 
+// --- الإقلاع الآمن وطلب الأذونات ---
 window.onload = () => {
   applyState(); renderSchedules(); renderDaysGrid();
   document.getElementById('dailyQuoteText').textContent = `"${getRandomQuote()}"`;
   
-  // شاشة إقلاع آمنة 100% لا تعلق أبداً وتختفي بشكل مستقل
+  // 1. الإخفاء الإجباري لشاشة الإقلاع (مستقل تماماً عن الأذونات لتفادي التعليق)
   setTimeout(() => {
     const splash = document.getElementById('splash');
-    if (splash) { splash.style.opacity = '0'; setTimeout(()=> splash.remove(), 600); }
-  }, 1500);
+    if (splash) { splash.style.opacity = '0'; setTimeout(()=> splash.remove(), 800); }
+  }, 2500); // 2.5 ثانية لعرض شريط التحميل بوضوح
 
-  // طلب الأذونات يعمل في الخلفية بهدوء
+  // 2. طلب الأذونات يبدأ في الخلفية بهدوء ولا يعطل الواجهة
   if (QatraNative) {
-    setTimeout(() => { QatraNative.askPermissions().catch(e => console.log(e)); }, 2000);
+    setTimeout(() => { QatraNative.askPermissions().catch(e => console.log(e)); }, 3500);
   }
 };
