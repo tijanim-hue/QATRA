@@ -21,13 +21,11 @@ class QatraPlugin : Plugin() {
     @PluginMethod
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
-        // 1. إذن الظهور فوق التطبيقات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
-        // 2. إذن المنبهات الدقيقة (مهم جداً)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -36,7 +34,6 @@ class QatraPlugin : Plugin() {
                 context.startActivity(intent)
             }
         }
-        // 3. إذن الإشعارات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
@@ -115,11 +112,8 @@ class QatraPlugin : Plugin() {
         val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { 
             putExtra("quote", quote); putExtra("duration", duration)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent)
-        } else {
-            context.startService(serviceIntent)
-        }
+        // الإصلاح: استخدام startService العادي المعفى من القيود
+        context.startService(serviceIntent)
         call.resolve()
     }
 }

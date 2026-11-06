@@ -2,8 +2,6 @@ package com.qatra.app
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.graphics.Color
@@ -22,7 +20,6 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.core.app.NotificationCompat
 
 class QatraOverlayService : Service() {
     private var windowManager: WindowManager? = null
@@ -35,18 +32,7 @@ class QatraOverlayService : Service() {
         val quote = intent?.getStringExtra("quote") ?: "الحمد لله"
         val duration = intent?.getIntExtra("duration", 10000) ?: 10000
         
-        val channelId = "qatra_overlay_channel"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "Cinematic Drop", NotificationManager.IMPORTANCE_MIN)
-            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
-        }
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("قطرة")
-            .setContentText("يتم عرض القطرة السينمائية...")
-            .setSmallIcon(android.R.drawable.ic_popup_reminder)
-            .build()
-        startForeground(999, notification)
-
+        // الإصلاح: تمت إزالة startForeground لمنع انهيار التطبيق
         playCinematicAnimation(quote, duration.toLong())
         return START_NOT_STICKY
     }
@@ -143,7 +129,8 @@ class QatraOverlayService : Service() {
 
         handler.postDelayed({
             ObjectAnimator.ofFloat(overlayContainer, "alpha", 1f, 0f).setDuration(800).start()
-            handler.postDelayed({ stopForeground(true); stopSelf() }, 800)
+            // الإصلاح: تمت إزالة stopForeground
+            handler.postDelayed({ stopSelf() }, 800)
         }, displayDuration)
     }
 

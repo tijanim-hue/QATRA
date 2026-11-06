@@ -9,7 +9,6 @@ import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 
 class QatraAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -22,7 +21,10 @@ class QatraAlarmReceiver : BroadcastReceiver() {
                 putExtra("quote", quote)
                 putExtra("duration", duration)
             }
-            ContextCompat.startForegroundService(context, serviceIntent)
+            // الإصلاح: استخدام startService العادي
+            try {
+                context.startService(serviceIntent)
+            } catch (e: Exception) {}
         }
         if (mode == "notification" || mode == "both") {
             showNotificationWithDropSound(context, quote)
