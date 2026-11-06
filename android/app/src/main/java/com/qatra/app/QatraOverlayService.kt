@@ -37,106 +37,90 @@ class QatraOverlayService : Service() {
         if (overlayContainer != null) return
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
-        // حاوية الشاشة مع تعتيم خفيف يميل للأزرق الداكن
-        overlayContainer = FrameLayout(this).apply {
-            setBackgroundColor(Color.parseColor("#80060A14")) 
-        }
+        // خلفية زجاجية مظللة
+        overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#99060A14")) }
 
         val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND // سر الاحترافية: تأثير الزجاج الحقيقي للنظام
+                WindowManager.LayoutParams.FLAG_BLUR_BEHIND
 
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
-            flags,
-            PixelFormat.TRANSLUCENT
+            flags, PixelFormat.TRANSLUCENT
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            params.blurBehindRadius = 40
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) params.blurBehindRadius = 50
 
-        // 1. تصميم القطرة المائية العمودية الحقيقية
-        val dropSize = 150
+        // شكل القطرة العمودية الواقعية
+        val dropSize = 130
         val dropView = View(this).apply {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 val r = dropSize / 2f
-                // زاوية حادة علوية لتكوين رأس القطرة
-                cornerRadii = floatArrayOf(0f, 0f, r, r, r, r, r, r)
+                cornerRadii = floatArrayOf(0f, 0f, r, r, r, r, r, r) // رأس حاد في الأعلى
                 colors = intArrayOf(Color.parseColor("#ffffff"), Color.parseColor("#00d2ff"), Color.parseColor("#4da6ff"))
             }
-            rotation = 45f // تدوير لتصبح عمودية ورأسها للأعلى
-            elevation = 50f
+            rotation = 45f // لتبدو عمودية
+            elevation = 30f
         }
 
-        // 2. تصميم العبارة بدون إطار، خط أنيق وظل عميق
+        // العبارة (بدون إطار، خط جميل وظل)
         val quoteText = TextView(this).apply {
             text = quote
             setTextColor(Color.WHITE)
             textSize = 28f
             gravity = Gravity.CENTER
-            setShadowLayer(25f, 0f, 10f, Color.BLACK)
+            setShadowLayer(15f, 0f, 0f, Color.parseColor("#00d2ff"))
             setTypeface(null, Typeface.BOLD)
             alpha = 0f
-            scaleX = 0.3f
-            scaleY = 0.3f
+            scaleX = 0.2f
+            scaleY = 0.2f
         }
 
         val dropParams = FrameLayout.LayoutParams(dropSize, dropSize).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL }
         val textParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
             gravity = Gravity.CENTER
-            setMargins(60, 0, 60, 0)
+            setMargins(50, 0, 50, 0)
         }
 
         overlayContainer?.addView(dropView, dropParams)
         overlayContainer?.addView(quoteText, textParams)
         windowManager?.addView(overlayContainer, params)
 
-        // ===================================
-        // السحر الحركي (الأنيميشن)
-        // ===================================
+        // الأنيميشن
         val handler = Handler(Looper.getMainLooper())
 
-        // سقوط القطرة بشكل عمودي وسريع
-        dropView.translationY = -600f
-        ObjectAnimator.ofFloat(dropView, "translationY", -600f, 1200f).apply {
-            duration = 1000
-            interpolator = AccelerateInterpolator()
-            start()
+        // 1. سقوط القطرة
+        dropView.translationY = -500f
+        ObjectAnimator.ofFloat(dropView, "translationY", -500f, 1500f).apply {
+            duration = 900; interpolator = AccelerateInterpolator(); start()
         }
 
-        // لحظة الارتطام
+        // 2. فرقعة، صوت، وصعود العبارة وتكبيرها
         handler.postDelayed({
             playSound()
-            dropView.visibility = View.GONE // تفرقع القطرة
+            dropView.visibility = View.GONE
 
-            // صعود العبارة ببطء مع تغيير الحجم تدريجياً
-            quoteText.translationY = 500f
-            val textRise = ObjectAnimator.ofFloat(quoteText, "translationY", 500f, 0f).setDuration(2800)
-            textRise.interpolator = DecelerateInterpolator(1.5f)
-            
-            val textGrowX = ObjectAnimator.ofFloat(quoteText, "scaleX", 0.3f, 1f).setDuration(2800)
-            val textGrowY = ObjectAnimator.ofFloat(quoteText, "scaleY", 0.3f, 1f).setDuration(2800)
-            val textFade = ObjectAnimator.ofFloat(quoteText, "alpha", 0f, 1f).setDuration(2000)
+            quoteText.translationY = 600f
+            val rise = ObjectAnimator.ofFloat(quoteText, "translationY", 600f, 0f).setDuration(3000)
+            rise.interpolator = DecelerateInterpolator()
+            val growX = ObjectAnimator.ofFloat(quoteText, "scaleX", 0.2f, 1f).setDuration(3000)
+            val growY = ObjectAnimator.ofFloat(quoteText, "scaleY", 0.2f, 1f).setDuration(3000)
+            val fadeIn = ObjectAnimator.ofFloat(quoteText, "alpha", 0f, 1f).setDuration(2000)
 
-            AnimatorSet().apply {
-                playTogether(textRise, textGrowX, textGrowY, textFade)
-                start()
-            }
-        }, 1000)
+            AnimatorSet().apply { playTogether(rise, growX, growY, fadeIn); start() }
+        }, 850)
 
-        // وميض استقرار العبارة
+        // 3. وميض واستقرار
         handler.postDelayed({
-            val pulseX = ObjectAnimator.ofFloat(quoteText, "scaleX", 1f, 1.05f, 1f).setDuration(1200)
-            val pulseY = ObjectAnimator.ofFloat(quoteText, "scaleY", 1f, 1.05f, 1f).setDuration(1200)
+            val pulseX = ObjectAnimator.ofFloat(quoteText, "scaleX", 1f, 1.05f, 1f).setDuration(1500)
+            val pulseY = ObjectAnimator.ofFloat(quoteText, "scaleY", 1f, 1.05f, 1f).setDuration(1500)
             AnimatorSet().apply { playTogether(pulseX, pulseY); start() }
-        }, 3800)
+        }, 4000)
 
-        // اختفاء المشهد بسلاسة
+        // 4. اختفاء الشاشة
         handler.postDelayed({
             ObjectAnimator.ofFloat(overlayContainer, "alpha", 1f, 0f).setDuration(1000).start()
             handler.postDelayed({ stopSelf() }, 1000)
@@ -147,14 +131,11 @@ class QatraOverlayService : Service() {
         try {
             val notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             RingtoneManager.getRingtone(applicationContext, notification)?.play()
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {}
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (overlayContainer != null) {
-            windowManager?.removeView(overlayContainer)
-            overlayContainer = null
-        }
+        if (overlayContainer != null) { windowManager?.removeView(overlayContainer); overlayContainer = null }
     }
 }
