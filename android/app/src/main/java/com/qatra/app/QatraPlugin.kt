@@ -17,7 +17,7 @@ import com.getcapacitor.annotation.CapacitorPlugin
 class QatraPlugin : Plugin() {
 
     @PluginMethod
-    fun requestPermissions(call: PluginCall) {
+    fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
         
         // إذن الظهور فوق التطبيقات
@@ -57,7 +57,6 @@ class QatraPlugin : Plugin() {
     @PluginMethod
     fun schedule(call: PluginCall) {
         val id = call.getInt("id") ?: return call.reject("ID missing")
-        // هنا يمكن إضافة كود المنبهات المتكررة باستخدام AlarmManager.setRepeating
         call.resolve()
     }
 }
