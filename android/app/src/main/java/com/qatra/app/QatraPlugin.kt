@@ -21,13 +21,11 @@ class QatraPlugin : Plugin() {
     @PluginMethod
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
-        // الظهور فوق التطبيقات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
-        // المنبهات الدقيقة
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -36,11 +34,34 @@ class QatraPlugin : Plugin() {
                 context.startActivity(intent)
             }
         }
-        // الإشعارات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
             }
+        }
+        call.resolve()
+    }
+
+    @PluginMethod
+    fun scheduleInterval(call: PluginCall) {
+        val intervalMinutes = call.getInt("intervalMinutes") ?: 0
+        val mode = call.getString("mode") ?: "both"
+        val duration = call.getInt("duration") ?: 10000
+        val quote = call.getString("quote") ?: "حان وقت التأمل"
+        
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
+            putExtra("mode", mode)
+            putExtra("duration", duration)
+            putExtra("quote", quote)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(context, 99999, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        
+        if (intervalMinutes > 0) {
+            val intervalMillis = intervalMinutes * 60 * 1000L
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + intervalMillis, intervalMillis, pendingIntent)
+        } else {
+            alarmManager.cancel(pendingIntent)
         }
         call.resolve()
     }
@@ -63,14 +84,16 @@ class QatraPlugin : Plugin() {
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, parts[0].toInt())
             set(Calendar.MINUTE, parts[1].toInt())
-            set(Calendar.SECOND, 0) // ضبط الثانية لـ 0 تماماً
+            set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
-            if (before(Calendar.getInstance())) add(Calendar.DATE, 1)
+            if (timeInMillis <= System.currentTimeMillis()) add(Calendar.DATE, 1)
         }
         
         try {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+            alarmManager.setWindow(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000*60, pendingIntent)
+        }
         call.resolve()
     }
 
@@ -81,20 +104,11 @@ class QatraPlugin : Plugin() {
         val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { 
             putExtra("quote", quote); putExtra("duration", duration)
         }
-        context.startService(serviceIntent)
-        call.resolve()
-    }
-
-    @PluginMethod
-    fun startPomodoro(call: PluginCall) {
-        val minutes = call.getInt("minutes") ?: 25
-        val audioUrl = call.getString("audioUrl") ?: ""
-        val serviceIntent = Intent(context, PomodoroService::class.java).apply {
-            putExtra("minutes", minutes)
-            putExtra("audioUrl", audioUrl)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(serviceIntent)
+        } else {
+            context.startService(serviceIntent)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(serviceIntent)
-        else context.startService(serviceIntent)
         call.resolve()
     }
 }

@@ -9,6 +9,7 @@ import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 
 class QatraAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -21,7 +22,8 @@ class QatraAlarmReceiver : BroadcastReceiver() {
                 putExtra("quote", quote)
                 putExtra("duration", duration)
             }
-            context.startService(serviceIntent)
+            // تشغيل الخدمة الأمامية لضمان عدم إيقافها من النظام
+            ContextCompat.startForegroundService(context, serviceIntent)
         }
         if (mode == "notification" || mode == "both") {
             showNotificationWithDropSound(context, quote)
@@ -32,7 +34,6 @@ class QatraAlarmReceiver : BroadcastReceiver() {
         val channelId = "qatra_drop_channel"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
-        // الطريقة الآمنة للوصول لملف الصوت بدون Import R
         val resId = context.resources.getIdentifier("drop_sound", "raw", context.packageName)
         val soundUri = Uri.parse("android.resource://" + context.packageName + "/" + resId)
 

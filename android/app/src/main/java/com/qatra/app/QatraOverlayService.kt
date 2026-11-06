@@ -2,6 +2,8 @@ package com.qatra.app
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.graphics.Color
@@ -20,6 +22,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.core.app.NotificationCompat
 
 class QatraOverlayService : Service() {
     private var windowManager: WindowManager? = null
@@ -31,6 +34,20 @@ class QatraOverlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val quote = intent?.getStringExtra("quote") ?: "الحمد لله"
         val duration = intent?.getIntExtra("duration", 10000) ?: 10000
+        
+        // تحويل الخدمة إلى Foreground Service لاختراق قيود أندرويد 12+
+        val channelId = "qatra_overlay_channel"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "Cinematic Drop", NotificationManager.IMPORTANCE_MIN)
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        }
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("قطرة")
+            .setContentText("يتم عرض القطرة السينمائية...")
+            .setSmallIcon(android.R.drawable.ic_popup_reminder)
+            .build()
+        startForeground(999, notification)
+
         playCinematicAnimation(quote, duration.toLong())
         return START_NOT_STICKY
     }
@@ -41,7 +58,7 @@ class QatraOverlayService : Service() {
         val screenHeight = resources.displayMetrics.heightPixels.toFloat()
         val bottomLandingY = screenHeight - 200f
 
-        overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#99030610")) }
+        overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#99030509")) }
         
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
@@ -53,8 +70,7 @@ class QatraOverlayService : Service() {
 
         val ripple = View(this).apply {
             background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#8000d2ff")) }
-            alpha = 0f
-            translationY = bottomLandingY - (screenHeight / 2f) + 100f
+            alpha = 0f; translationY = bottomLandingY - (screenHeight / 2f) + 100f
         }
         val rippleParams = FrameLayout.LayoutParams(100, 40).apply { gravity = Gravity.CENTER }
 
@@ -96,14 +112,9 @@ class QatraOverlayService : Service() {
 
         handler.postDelayed({
             dropView.visibility = View.GONE
-            
-            // الطريقة الآمنة للصوت
             try {
                 val resId = resources.getIdentifier("drop_sound", "raw", packageName)
-                if (resId != 0) {
-                    mediaPlayer = MediaPlayer.create(this, resId)
-                    mediaPlayer?.start()
-                }
+                if (resId != 0) { mediaPlayer = MediaPlayer.create(this, resId); mediaPlayer?.start() }
             } catch (e: Exception) {}
 
             ripple.alpha = 1f
@@ -121,14 +132,13 @@ class QatraOverlayService : Service() {
             val tGrowX = ObjectAnimator.ofFloat(quoteText, "scaleX", 0.2f, 1f).setDuration(2500)
             val tGrowY = ObjectAnimator.ofFloat(quoteText, "scaleY", 0.2f, 1f).setDuration(2500)
             val tFade = ObjectAnimator.ofFloat(quoteText, "alpha", 0f, 1f).setDuration(1500)
-            
             AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade); start() }
 
         }, 1000)
 
         handler.postDelayed({
             ObjectAnimator.ofFloat(overlayContainer, "alpha", 1f, 0f).setDuration(800).start()
-            handler.postDelayed({ stopSelf() }, 800)
+            handler.postDelayed({ stopForeground(true); stopSelf() }, 800)
         }, displayDuration)
     }
 
