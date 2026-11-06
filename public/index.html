@@ -3,384 +3,371 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#030509">
-  <title data-i18n="app_title">قطرة | QATRA</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#050811">
+  <title data-i18n="app_title">قطرة | Qatra</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    /* المتغيرات والألوان الاحترافية العميقة */
+    /* ألوان Premium داكنة جداً مع تدرجات نيون */
     :root {
-      --bg: #030509; 
-      --surface: rgba(16, 22, 35, 0.4); 
-      --surface-hover: rgba(25, 33, 50, 0.6);
-      --border: rgba(255, 255, 255, 0.05);
-      --border-glow: rgba(0, 240, 255, 0.15);
-      --text: #F4F7FC; 
-      --text-dim: #8B9BB4; 
-      --primary: #00F0FF; 
-      --secondary: #9D00FF;
+      --bg: #050811; 
+      --surface: #0a101d; 
+      --surface-glass: rgba(10, 16, 29, 0.6);
+      --border: rgba(255, 255, 255, 0.04);
+      --text: #ffffff; 
+      --muted: #6b7c99; 
+      --cyan: #00F0FF; 
+      --purple: #9D00FF;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
     
     body, html {
-      margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+      margin: 0; padding: 0; width: 100%; height: 100%;
       background-color: var(--bg); color: var(--text); font-family: "Cairo", sans-serif;
+      overflow: hidden; /* يمنع تحرك الشاشة كاملة */
     }
 
-    /* الخلفية المحيطية (Ambient Glowing Orbs) */
-    .ambient-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg); }
-    .orb-1 { position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw; background: var(--secondary); filter: blur(130px); opacity: 0.12; animation: float 15s ease-in-out infinite alternate; }
-    .orb-2 { position: absolute; bottom: 10%; left: -20%; width: 70vw; height: 70vw; background: var(--primary); filter: blur(150px); opacity: 0.1; animation: float 12s ease-in-out infinite alternate-reverse; }
-    @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 40px) scale(1.1); } }
+    /* خلفية محيطية هادئة */
+    .ambient-bg {
+      position: absolute; inset: 0; z-index: -1;
+      background: radial-gradient(circle at top left, rgba(0, 240, 255, 0.05), transparent 40%),
+                  radial-gradient(circle at bottom right, rgba(157, 0, 255, 0.05), transparent 40%);
+    }
 
-    .app-container { width: 100%; height: 100%; display: flex; flex-direction: column; max-width: 500px; margin: auto; position: relative; }
-    
-    /* شاشة الإقلاع (Minimal Splash) */
-    #splash { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-    .splash-logo { width: 60px; height: 60px; fill: none; stroke: url(#grad); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; animation: draw 2s ease forwards, pulse 3s infinite alternate; }
-    @keyframes pulse { 0% { filter: drop-shadow(0 0 10px rgba(0,240,255,0.2)); } 100% { filter: drop-shadow(0 0 25px rgba(0,240,255,0.6)); } }
+    .app-wrapper {
+      display: flex; flex-direction: column; width: 100%; height: 100%; max-width: 500px; margin: auto; position: relative;
+    }
+
+    /* شاشة الإقلاع */
+    #splash {
+      position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      transition: opacity 0.5s ease-out;
+    }
+    .splash-drop {
+      width: 70px; height: 70px; border-radius: 0 50% 50% 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      transform: rotate(45deg); box-shadow: 0 0 40px rgba(0, 240, 255, 0.4);
+    }
+    .splash-text { margin-top: 30px; font-size: 24px; font-weight: 900; letter-spacing: 4px; color: #fff; }
 
     /* الهيدر العلوي */
-    .header { display: flex; justify-content: space-between; align-items: center; padding: 30px 24px 15px; }
-    .header-title { font-size: 20px; font-weight: 900; letter-spacing: 1px; background: linear-gradient(to left, #fff, #a0aec0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .btn-icon { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 8px; border-radius: 50%; transition: 0.3s; display: grid; place-items: center;}
-    .btn-icon:active { background: var(--surface); color: var(--text); }
-    .btn-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
+    header { display: flex; justify-content: space-between; align-items: center; padding: 25px 20px 10px; z-index: 10; }
+    .header-btn { background: none; border: none; color: var(--text); padding: 8px; cursor: pointer; display: grid; place-items: center; }
+    .header-btn svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 2; }
+    .logo-container { display: flex; flex-direction: column; align-items: center; margin-top: -5px; }
+    .logo-drop { width: 24px; height: 24px; fill: url(#neon-grad); margin-bottom: 4px; }
+    .logo-text { font-size: 22px; font-weight: 900; line-height: 1; }
 
-    /* منطقة التمرير المخفية */
-    .content { flex: 1; overflow-y: auto; padding: 10px 24px 120px; scroll-behavior: smooth; }
-    .content::-webkit-scrollbar { display: none; }
+    /* منطقة المحتوى القابلة للتمرير */
+    .main-content { flex: 1; overflow-y: auto; padding: 15px 20px 110px; scroll-behavior: smooth; }
+    .main-content::-webkit-scrollbar { display: none; }
 
-    /* تصميم Bento Grid الحديث */
-    .bento-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    .bento-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 32px;
-      padding: 24px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      display: flex; flex-direction: column; justify-content: center; position: relative;
-      overflow: hidden; transition: transform 0.2s, background 0.3s; cursor: pointer;
+    /* تصميم البطاقات الأنيق */
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 28px;
+      padding: 22px; margin-bottom: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
     }
-    .bento-card:active { transform: scale(0.97); background: var(--surface-hover); border-color: var(--border-glow); }
-    .bento-span-2 { grid-column: span 2; }
-    
-    .card-icon-wrap { width: 44px; height: 44px; border-radius: 18px; display: grid; place-items: center; margin-bottom: 16px; }
-    .card-icon-wrap svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
-    .card-title { font-size: 13px; color: var(--text-dim); font-weight: 600; margin-bottom: 4px; }
-    .card-value { font-size: 18px; font-weight: 800; color: var(--text); }
+    .glass-effect .card { background: var(--surface-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
 
-    /* حلقة البومودورو النحيفة والعميقة */
-    .focus-ring-container { display: flex; justify-content: center; align-items: center; padding: 20px 0 40px; }
-    .focus-ring {
-      width: 260px; height: 260px; border-radius: 50%; position: relative;
+    /* مؤقت الجلسة (تصميم نيون حديث) */
+    .timer-container { display: flex; justify-content: center; align-items: center; padding: 20px 0 30px; }
+    .timer-ring {
+      width: 250px; height: 250px; border-radius: 50%; position: relative;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
-      box-shadow: inset 0 0 50px rgba(157, 0, 255, 0.1), 0 0 60px rgba(0, 240, 255, 0.05);
-      border: 1px solid rgba(255,255,255,0.03);
+      background: var(--surface); box-shadow: 0 15px 40px rgba(0,0,0,0.4); border: 1px solid var(--border);
     }
-    .focus-ring::before {
-      content: ''; position: absolute; inset: -2px; border-radius: 50%; z-index: -1;
-      background: linear-gradient(135deg, var(--primary), transparent, var(--secondary));
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0.7;
+    /* التوهج الخارجي للمؤقت */
+    .timer-ring::before {
+      content: ''; position: absolute; inset: -3px; border-radius: 50%; z-index: -1;
+      background: linear-gradient(135deg, var(--cyan), transparent, var(--purple));
+      opacity: 0.8;
     }
-    .time-display { font-size: 64px; font-weight: 300; font-family: -apple-system, BlinkMacSystemFont, sans-serif; letter-spacing: -2px; margin-bottom: 5px; }
-    .focus-play { width: 60px; height: 60px; border-radius: 50%; background: var(--text); color: var(--bg); border: none; display: grid; place-items: center; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 25px rgba(255,255,255,0.15); margin-top: 15px; }
-    .focus-play:active { transform: scale(0.9); }
-    .focus-play svg { width: 24px; height: 24px; fill: currentColor; margin-left: 3px;}
+    .time-text { font-size: 60px; font-weight: 800; font-family: sans-serif; letter-spacing: -1px; margin-top: -10px; }
+    .timer-label { font-size: 14px; color: var(--muted); font-weight: 700; margin-top: -5px; }
+    .play-btn {
+      position: absolute; bottom: -20px; width: 60px; height: 60px; border-radius: 50%; border: none;
+      background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #fff;
+      display: grid; place-items: center; cursor: pointer; box-shadow: 0 10px 25px rgba(157, 0, 255, 0.4);
+    }
+    .play-btn svg { width: 26px; height: 26px; fill: currentColor; margin-left: 3px;}
 
-    /* شريط التنقل العائم (Floating Capsule Nav) - آخر تقنية */
-    .floating-nav-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; padding: 0 20px;}
+    /* البطاقات التفاعلية (Action Cards) */
+    .action-row { display: flex; align-items: center; gap: 16px; cursor: pointer; }
+    .action-icon { width: 46px; height: 46px; border-radius: 16px; display: grid; place-items: center; flex-shrink: 0; }
+    .action-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
+    .action-info { flex: 1; }
+    .action-title { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
+    .action-sub { font-size: 13px; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;}
+    
+    /* النوافذ (Views) */
+    .view { display: none; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .view.active { display: block; }
+    @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* الكبسولة العائمة السفلية (Floating Capsule Nav) */
     .floating-nav {
-      background: rgba(10, 14, 25, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-      border: 1px solid var(--border); border-radius: 40px; display: flex; padding: 10px 20px; gap: 15px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+      background: rgba(8, 12, 22, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 40px;
+      display: flex; gap: 5px; padding: 8px 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); z-index: 100;
     }
     .nav-item {
-      background: none; border: none; color: var(--text-dim); padding: 12px 18px; cursor: pointer;
-      border-radius: 25px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
-      display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; color: var(--muted); padding: 12px 18px;
+      border-radius: 30px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.3s;
     }
-    .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-    .nav-item.active { color: var(--text); background: rgba(255,255,255,0.05); }
-    .nav-item.active::after {
-      content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
-      width: 6px; height: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 10px var(--primary);
-    }
+    .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+    .nav-item span { font-size: 13px; font-weight: 800; display: none; }
+    .nav-item.active { background: rgba(255,255,255,0.08); color: #fff; }
+    .nav-item.active span { display: block; } /* تمدد الزر النشط وإظهار النص */
+    .nav-item.active svg { stroke: var(--cyan); }
 
-    /* Views */
-    .view { display: none; animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-    .view.active { display: block; }
-    @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* عناصر الـ UI (مفاتيح وحقول إدخال عصرية) */
-    .modern-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    .modern-row:last-child { border-bottom: none; }
+    /* إعدادات وعناصر تحكم */
+    .control-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .control-row:last-child { border-bottom: none; }
     
-    .toggle { width: 44px; height: 24px; position: relative; }
+    .toggle { width: 48px; height: 26px; position: relative; }
     .toggle input { opacity: 0; width: 0; height: 0; }
     .toggle-track { position: absolute; inset: 0; border-radius: 30px; background: rgba(255,255,255,0.1); transition: 0.3s; }
-    .toggle-track::before { content: ""; position: absolute; width: 20px; height: 20px; right: 2px; top: 2px; border-radius: 50%; background: var(--text-dim); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .toggle input:checked + .toggle-track { background: var(--primary); }
-    .toggle input:checked + .toggle-track::before { transform: translateX(-20px); background: #000; }
+    .toggle-track::before { content: ""; position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; border-radius: 50%; background: #fff; transition: 0.3s; }
+    .toggle input:checked + .toggle-track { background: var(--cyan); }
+    .toggle input:checked + .toggle-track::before { transform: translateX(-22px); }
 
-    select, input[type="time"] { 
-      background: rgba(0,0,0,0.2); color: var(--text); border: 1px solid var(--border); 
-      border-radius: 14px; padding: 12px 16px; font-family: inherit; font-size: 14px; 
-      outline: none; width: 100%; transition: 0.3s; appearance: none;
-    }
-    select:focus, input[type="time"]:focus { border-color: var(--primary); background: rgba(0, 240, 255, 0.05); }
+    select, input[type="time"] { width: 100%; padding: 16px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 14px; margin-top: 8px; outline: none; }
+    .btn-primary { width: 100%; padding: 18px; border: none; border-radius: 18px; background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #fff; font-size: 16px; font-weight: 800; margin-top: 15px; cursor: pointer; box-shadow: 0 10px 25px rgba(0, 240, 255, 0.2); }
 
-    .btn-solid { width: 100%; padding: 16px; border: none; border-radius: 18px; background: var(--text); color: #000; font-size: 15px; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 15px;}
-    .btn-solid:active { transform: scale(0.96); }
-    .btn-outline { width: 100%; padding: 16px; border: 1px solid var(--border); border-radius: 18px; background: transparent; color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 15px;}
-    .btn-outline:active { background: rgba(255,255,255,0.05); }
-    .btn-glow { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; color: #fff; box-shadow: 0 10px 30px rgba(169,0,255,0.3); }
-
-    /* القوائم المنسدلة (Bottom Sheets) */
-    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(5px); }
+    /* قوائم منسدلة من الأسفل (Bottom Sheets) */
+    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(5px); }
     .sheet-overlay.show { display: flex; animation: fadeIn 0.3s; }
-    .sheet-content { background: #070b14; border-top: 1px solid var(--border); border-radius: 32px 32px 0 0; padding: 30px 24px; animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 85vh; overflow-y: auto; }
+    .sheet-content { background: var(--surface); border-top: 1px solid var(--border); border-radius: 32px 32px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; max-height: 85vh; overflow-y: auto; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .sheet-handle { width: 40px; height: 5px; background: var(--border); border-radius: 5px; margin: 0 auto 20px; }
+    .sheet-handle { width: 50px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 5px; margin: 0 auto 25px; }
 
-    /* الأقسام والاقتباسات */
-    .cat-item { display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid var(--border); border-radius: 20px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
-    .cat-item:active { background: rgba(255,255,255,0.02); }
-    
-    .checkbox-row { display: flex; align-items: flex-start; gap: 15px; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    .checkbox-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--primary); margin-top: 2px; flex-shrink: 0; }
+    /* الاقتباسات داخل القسم */
+    .check-row { display: flex; align-items: flex-start; gap: 15px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .check-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--cyan); margin-top: 2px; }
   </style>
 </head>
-<body>
+<body class="glass-active">
+  <!-- التدرج اللوني العام -->
   <svg width="0" height="0" style="position:absolute;">
-    <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00F0FF"/><stop offset="100%" stop-color="#9D00FF"/></linearGradient></defs>
+    <defs><linearGradient id="neon-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00F0FF"/><stop offset="100%" stop-color="#9D00FF"/></linearGradient></defs>
   </svg>
 
-  <div class="ambient-bg">
-    <div class="orb-1"></div><div class="orb-2"></div>
-  </div>
+  <div class="ambient-bg"></div>
 
+  <!-- شاشة الإقلاع المستقلة -->
   <div id="splash">
-    <svg class="splash-logo" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
-    <div style="font-size: 14px; font-weight: 700; margin-top: 20px; letter-spacing: 6px; color: var(--text-dim);">Q A T R A</div>
+    <div class="splash-drop"></div>
+    <div class="splash-text">Q A T R A</div>
   </div>
 
-  <div class="app-container">
-    <header class="header">
-      <div class="header-title" data-i18n="app_title">Qatra</div>
-      <button class="btn-icon" id="openSettingsSheet">
-        <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+  <div class="app-wrapper">
+    <header>
+      <button class="header-btn" onclick="document.getElementById('settingsSheet').classList.add('show')">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </button>
+      <div class="logo-container">
+        <svg class="logo-drop" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
+        <div class="logo-text" data-i18n="app_title">قطرة</div>
+      </div>
+      <button class="header-btn" onclick="document.getElementById('statsSheet').classList.add('show')">
+        <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
       </button>
     </header>
 
-    <div class="content">
-      <!-- 1. الرئيسية (Home) -->
+    <div class="main-content">
+      <!-- 1. الرئيسية -->
       <section class="view active" id="homeView">
-        <div class="focus-ring-container">
-          <div class="focus-ring" onclick="document.getElementById('pomodoroSheet').classList.add('show')">
-            <div class="timer-inner">
-              <div class="time-display" id="mainTimeDisplay">25:00</div>
-              <div class="timer-label" data-i18n="focus_session">Focus Session</div>
-              <button class="focus-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-            </div>
+        <div class="timer-container" onclick="document.getElementById('pomodoroSheet').classList.add('show')">
+          <div class="timer-ring">
+            <div class="time-text" id="mainTimeDisplay">25:00</div>
+            <div class="timer-label" data-i18n="focus_session">جلسة تركيز</div>
+            <button class="play-btn" id="timerPlayBtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
           </div>
         </div>
 
-        <div class="bento-grid">
-          <!-- البطاقة العريضة (اقتباس اليوم) -->
-          <div class="bento-item bento-span-2" id="triggerCinematic">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div class="card-icon-wrap" style="background:rgba(157,0,255,0.1); color:var(--secondary);"><svg viewBox="0 0 24 24"><path d="M10 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zm10 0h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zM10 11l-2 6M20 11l-2 6"/></svg></div>
-              <div style="color:var(--text-dim);">›</div>
-            </div>
-            <div class="card-title" data-i18n="quote_of_day">Daily Inspiration</div>
-            <div class="card-value" style="font-size:15px; font-weight:600; line-height:1.6;" id="dailyQuoteText">"الهدوء يمنحك القوة..."</div>
+        <div class="card action-row" onclick="document.querySelector('[data-view=\'dropView\']').click()">
+          <div class="action-icon" style="background: rgba(0, 240, 255, 0.1); color: var(--cyan);">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </div>
+          <div class="action-info">
+            <div class="action-title" data-i18n="upcoming">تذكيراتك القادمة</div>
+            <div class="action-sub" id="nextReminderText">لا يوجد مواعيد</div>
+          </div>
+          <div style="color:var(--muted); font-size:24px; font-weight:bold;">›</div>
+        </div>
 
-          <!-- بطاقة التذكيرات القادمة -->
-          <div class="bento-item" onclick="document.querySelector('[data-view=\'dropView\']').click()">
-            <div class="card-icon-wrap" style="background:rgba(0,240,255,0.1); color:var(--primary);"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-            <div class="card-title" data-i18n="upcoming">Upcoming</div>
-            <div class="card-value" style="font-size:14px;" id="nextReminderText">No schedule</div>
+        <div class="card action-row" id="triggerCinematic">
+          <div class="action-icon" style="background: rgba(157, 0, 255, 0.1); color: var(--purple);">
+            <svg viewBox="0 0 24 24"><path d="M10 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zm10 0h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zM10 11l-2 6M20 11l-2 6"/></svg>
           </div>
-
-          <!-- بطاقة الإحصائيات -->
-          <div class="bento-item" onclick="document.getElementById('statsSheet').classList.add('show')">
-            <div class="card-icon-wrap" style="background:rgba(255,255,255,0.05); color:var(--text);"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></div>
-            <div class="card-title" data-i18n="activity">Activity</div>
-            <div class="card-value" style="font-size:14px; color:var(--primary);">View Stats</div>
+          <div class="action-info">
+            <div class="action-title" data-i18n="quote_of_day">اقتباس اليوم</div>
+            <div class="action-sub" id="dailyQuoteText">...</div>
           </div>
+          <div style="color:var(--muted); font-size:24px; font-weight:bold;">›</div>
         </div>
       </section>
 
-      <!-- 2. تأمل (Meditate) -->
+      <!-- 2. تأمل -->
       <section class="view" id="meditationView">
-        <h2 style="font-weight:900; margin-bottom: 10px;" data-i18n="meditation">Meditate</h2>
-        <p style="color:var(--text-dim); font-size:14px; margin-top:0;">Background ambient sounds & Quran to help you relax.</p>
-        
-        <div class="bento-item bento-span-2" style="text-align:center; padding:50px 20px; margin-top:20px;">
-          <div class="card-icon-wrap" style="margin:0 auto 20px; width:60px; height:60px; background:rgba(0,240,255,0.1); color:var(--primary);"><svg viewBox="0 0 24 24" style="width:30px; height:30px;"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-3-5a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/></svg></div>
-          <div id="audioStatus" style="font-size:18px; font-weight:800; margin-bottom:30px;">Ready</div>
-          <button class="btn-solid btn-glow" id="playRandomAudioBtn">▶ Play Ambient</button>
+        <h2 style="color:var(--cyan); margin-top:0;" data-i18n="meditation">تأمل واسترخاء</h2>
+        <p style="color:var(--muted); font-size:14px;">استمع لأصوات طبيعية وقرآن كريم بهدوء.</p>
+        <div class="card" style="text-align:center; padding:50px 20px;">
+          <div id="audioStatus" style="font-size:18px; font-weight:800; margin-bottom:25px;">جاهز للاستماع</div>
+          <button class="btn-primary" id="playRandomAudioBtn">▶ تشغيل محتوى عشوائي</button>
         </div>
       </section>
 
-      <!-- 3. القطرة والمواعيد (Drop) -->
+      <!-- 3. القطرة والمواعيد -->
       <section class="view" id="dropView">
-        <h2 style="font-weight:900; margin-bottom: 20px;" data-i18n="qatra_settings">Cinematic Drop</h2>
+        <h2 style="color:var(--cyan); margin-top:0;" data-i18n="qatra_settings">تفعيل القطرة</h2>
         
-        <div class="bento-item bento-span-2" style="margin-bottom:16px;">
-          <h3 style="font-size:14px; color:var(--primary); margin-top:0;">1. Appearance</h3>
+        <div class="card">
+          <strong style="display:block; margin-bottom:15px; color:var(--cyan);">1. إعدادات الظهور</strong>
+          <label style="color:var(--muted); font-size:13px;" data-i18n="drop_mode">طريقة الظهور:</label>
+          <select id="notifModeSetting">
+            <option value="both" data-i18n="mode_both">القطرة السينمائية + إشعار النظام</option>
+            <option value="floating" data-i18n="mode_floating">القطرة السينمائية فقط</option>
+            <option value="notification" data-i18n="mode_notif">إشعار النظام فقط</option>
+          </select>
           
-          <div class="modern-row">
-            <span style="font-size:14px; font-weight:600;">Notification Mode</span>
-            <select id="notifModeSetting" style="width:auto; padding:8px 15px; border:none; background:rgba(255,255,255,0.05);">
-              <option value="both">Cinematic + Standard</option>
-              <option value="floating">Cinematic Only</option>
-              <option value="notification">Standard Only</option>
-            </select>
-          </div>
-          <div class="modern-row">
-            <span style="font-size:14px; font-weight:600;">Display Duration</span>
-            <select id="dropDurationSetting" style="width:auto; padding:8px 15px; border:none; background:rgba(255,255,255,0.05);">
-              <option value="5000">5 Sec</option>
-              <option value="10000" selected>10 Sec</option>
-              <option value="15000">15 Sec</option>
-            </select>
-          </div>
+          <label style="color:var(--muted); font-size:13px; display:block; margin-top:15px;" data-i18n="drop_duration">مدة البقاء:</label>
+          <select id="dropDurationSetting">
+            <option value="5000">5 ثوانٍ</option>
+            <option value="10000" selected>10 ثوانٍ</option>
+            <option value="15000">15 ثانية</option>
+          </select>
         </div>
 
-        <div class="bento-item bento-span-2">
-          <h3 style="font-size:14px; color:var(--primary); margin-top:0;">2. Triggers & Schedules</h3>
-          
-          <div class="modern-row" style="flex-direction:column; align-items:flex-start; gap:10px;">
-            <span style="font-size:14px; font-weight:600;">Auto Repeat (Interval)</span>
-            <select id="intervalSelect">
-              <option value="0">No Repeat</option>
-              <option value="30">Every 30 Mins</option>
-              <option value="60">Every 1 Hour</option>
-              <option value="180">Every 3 Hours</option>
-            </select>
-          </div>
-          
-          <div class="modern-row" style="flex-direction:column; align-items:flex-start; gap:10px; border-top: 1px solid rgba(255,255,255,0.05); margin-top:10px; padding-top:20px;">
-            <span style="font-size:14px; font-weight:600;">Add Specific Time</span>
+        <div class="card">
+          <strong style="display:block; margin-bottom:15px; color:var(--cyan);">2. الجدولة والمواعيد</strong>
+          <label style="color:var(--muted); font-size:13px;" data-i18n="drop_interval">تكرار تلقائي (حسب المدد):</label>
+          <select id="intervalSelect">
+            <option value="0" data-i18n="no_repeat">بدون تكرار</option>
+            <option value="30">كل نصف ساعة</option>
+            <option value="60">كل 1 ساعة</option>
+            <option value="180">كل 3 ساعات</option>
+          </select>
+
+          <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
+            <label style="color:var(--muted); font-size:13px;" data-i18n="custom_time">إضافة موعد مخصص بالدقيقة:</label>
             <input type="time" id="customTime">
-            <button class="btn-outline" id="saveScheduleBtn" style="padding:12px;">Add Schedule</button>
+            <button class="btn-primary" id="saveScheduleBtn" style="margin-top:10px;" data-i18n="save_time">حفظ الموعد</button>
           </div>
-          <div id="savedSchedulesList" style="margin-top:20px;"></div>
+          <div id="savedSchedulesList" style="margin-top:15px;"></div>
         </div>
+
+        <button class="btn-primary" id="previewFloatingBtn" style="background:transparent; border:2px solid var(--cyan); color:var(--cyan); box-shadow:none;" data-i18n="preview_drop">معاينة القطرة الآن 🎬</button>
       </section>
 
-      <!-- 4. الاقتباسات (Quotes) -->
+      <!-- 4. الاقتباسات والأقسام -->
       <section class="view" id="libraryView">
-        <h2 style="font-weight:900; margin-bottom: 20px;" data-i18n="quotes">Quotes Library</h2>
+        <h2 style="color:var(--cyan); margin-top:0;" data-i18n="quotes">المكتبة</h2>
         <div id="categoriesContainer"></div>
       </section>
     </div>
 
-    <!-- كبسولة التنقل العائمة (Floating Nav) -->
+    <!-- الكبسولة العائمة السفلية (Modern Floating Capsule Nav) -->
     <div class="floating-nav-container">
       <nav class="floating-nav">
-        <button class="nav-btn active" data-view="homeView">
+        <button class="nav-item active" data-view="homeView">
           <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span data-i18n="home">الرئيسية</span>
         </button>
-        <button class="nav-btn" data-view="meditationView">
+        <button class="nav-item" data-view="meditationView">
           <svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-3-5a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/></svg>
+          <span data-i18n="meditation">تأمل</span>
         </button>
-        <button class="nav-btn" data-view="dropView">
+        <button class="nav-item" data-view="dropView">
           <svg viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
+          <span data-i18n="qatra_settings">قطرة</span>
         </button>
-        <button class="nav-btn" data-view="libraryView">
-          <!-- أيقونة علامات الاقتباس (Quotes) -->
+        <button class="nav-item" data-view="libraryView">
           <svg viewBox="0 0 24 24"><path d="M10 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zm10 0h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zM10 11l-2 6M20 11l-2 6"/></svg>
+          <span data-i18n="quotes">مكتبة</span>
         </button>
       </nav>
     </div>
   </div>
 
-  <!-- ================= النوافذ السفلية (Bottom Sheets) ================= -->
+  <!-- النوافذ المنبثقة السفلية (Bottom Sheets) -->
 
-  <!-- 1. إعدادات التطبيق -->
+  <!-- 1. الإعدادات العامة -->
   <div class="sheet-overlay" id="settingsSheet">
     <div class="sheet-content">
       <div class="sheet-handle"></div>
-      <h3 style="margin-top:0; font-weight:800;">Preferences</h3>
-      
-      <div class="modern-row">
-        <span style="font-weight:600;">Glass Effect 💎</span>
+      <h2 style="margin-top:0;">الإعدادات</h2>
+      <div class="control-row">
+        <span style="font-weight:700;" data-i18n="glass_mode">تأثير الزجاج 💎</span>
         <label class="toggle"><input type="checkbox" id="glassToggle"><span class="toggle-track"></span></label>
       </div>
-      <div class="modern-row">
-        <span style="font-weight:600;">Dark Mode 🌙</span>
+      <div class="control-row">
+        <span style="font-weight:700;" data-i18n="dark_mode">الوضع الداكن 🌙</span>
         <label class="toggle"><input type="checkbox" id="darkToggle"><span class="toggle-track"></span></label>
       </div>
-      <div class="modern-row" style="flex-direction:column; align-items:flex-start; gap:10px;">
-        <span style="font-weight:600;">Language</span>
+      <div style="margin-top:15px;">
+        <label style="color:var(--muted); font-size:14px;" data-i18n="language">لغة التطبيق:</label>
         <select id="langSelect">
-          <option value="en">English</option>
           <option value="ar">العربية (Arabic)</option>
+          <option value="en">English</option>
         </select>
       </div>
-      <button class="btn-solid" onclick="document.getElementById('settingsSheet').classList.remove('show')">Done</button>
+      <button class="btn-primary" onclick="document.getElementById('settingsSheet').classList.remove('show')" style="margin-top:20px;">تم</button>
     </div>
   </div>
 
-  <!-- 2. إعداد البومودورو -->
+  <!-- 2. البومودورو -->
   <div class="sheet-overlay" id="pomodoroSheet">
     <div class="sheet-content">
       <div class="sheet-handle"></div>
-      <h3 style="margin-top:0; font-weight:800;">Focus Session</h3>
-      <div class="modern-row" style="flex-direction:column; align-items:flex-start; gap:10px;">
-        <span style="font-weight:600; color:var(--text-dim);">Duration</span>
-        <select id="pomoTime">
-          <option value="15">15 Minutes</option>
-          <option value="25" selected>25 Minutes (Pomodoro)</option>
-          <option value="50">50 Minutes (Deep Work)</option>
-        </select>
-      </div>
-      <div class="modern-row" style="flex-direction:column; align-items:flex-start; gap:10px;">
-        <span style="font-weight:600; color:var(--text-dim);">Background Ambience</span>
-        <select id="pomoAudio">
-          <option value="none">Silent</option>
-          <option value="https://actions.google.com/sounds/v1/water/rain_on_roof.ogg" selected>Rain Drops</option>
-          <option value="https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg">Ocean Waves</option>
-          <option value="https://server8.mp3quran.net/afs/001.mp3">Quran (Al-Fatihah)</option>
-        </select>
-      </div>
-      <button class="btn-solid btn-glow" id="startPomodoroBtn">Start Session</button>
-      <button class="btn-outline" onclick="document.getElementById('pomodoroSheet').classList.remove('show')">Cancel</button>
+      <h2 style="margin-top:0; color:var(--cyan);">إعداد جلسة التركيز</h2>
+      <label style="color:var(--muted); font-size:14px;">مدة الجلسة:</label>
+      <select id="pomoTime">
+        <option value="15">15 دقيقة</option>
+        <option value="25" selected>25 دقيقة (بومودورو)</option>
+        <option value="50">50 دقيقة</option>
+      </select>
+      <label style="color:var(--muted); font-size:14px; display:block; margin-top:15px;">خلفية صوتية للاسترخاء:</label>
+      <select id="pomoAudio">
+        <option value="none">بدون صوت (صمت)</option>
+        <option value="https://actions.google.com/sounds/v1/water/rain_on_roof.ogg" selected>صوت المطر</option>
+        <option value="https://server8.mp3quran.net/afs/001.mp3">تلاوة قرآنية هادئة</option>
+      </select>
+      <button class="btn-primary" id="startPomodoroBtn">بدء الجلسة</button>
     </div>
   </div>
 
-  <!-- 3. محتوى قسم الاقتباسات -->
-  <div class="sheet-overlay" id="categorySheet">
-    <div class="sheet-content" style="height:85vh; display:flex; flex-direction:column;">
-      <div class="sheet-handle"></div>
-      <h3 style="margin-top:0; font-weight:800; color:var(--cyan);" id="catSheetTitle">Category</h3>
-      <div style="flex:1; overflow-y:auto; padding-right:5px;" id="catSheetContent"></div>
-      <button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')">Close</button>
-    </div>
-  </div>
-
-  <!-- 4. الإحصائيات -->
+  <!-- 3. الإحصائيات والمبيان -->
   <div class="sheet-overlay" id="statsSheet">
     <div class="sheet-content">
       <div class="sheet-handle"></div>
-      <h3 style="margin-top:0; font-weight:800;">Activity Stats 📈</h3>
-      
-      <!-- مبيان خطي عصري -->
-      <div style="width:100%; height:140px; background:rgba(255,255,255,0.02); border-radius:16px; margin: 20px 0; border-bottom: 2px solid var(--border); border-left: 2px solid var(--border); overflow: hidden;">
+      <h2 style="margin-top:0;" data-i18n="stats">إحصائيات التقدم 📈</h2>
+      <!-- مبيان خطي احترافي -->
+      <div style="width:100%; height:140px; background:rgba(0,0,0,0.3); border-radius:16px; margin: 20px 0; position:relative; overflow:hidden; border-bottom: 2px solid var(--border); border-left:2px solid var(--border);">
         <svg viewBox="0 0 100 50" preserveAspectRatio="none" style="width:100%; height:100%;">
           <polyline fill="none" stroke="#00F0FF" stroke-width="2" points="0,45 20,35 40,25 60,30 80,15 100,5" />
           <polygon fill="rgba(0,240,255,0.15)" points="0,50 0,45 20,35 40,25 60,30 80,15 100,5 100,50" />
         </svg>
       </div>
-
-      <div style="font-size:15px; font-weight:600; line-height:2.8;">
-        <div class="modern-row" style="padding:5px 0;"><span>Active Days</span> <span id="statDays" style="color:var(--text);">1</span></div>
-        <div class="modern-row" style="padding:5px 0;"><span>Drops Spawned</span> <span id="statDrops" style="color:var(--primary);">0</span></div>
+      <div style="font-size:16px; line-height:2.5; font-weight:700;">
+        <div class="control-row"><span data-i18n="stat_days">أيام الاستخدام:</span> <span id="statDays" style="color:var(--text);">1</span></div>
+        <div class="control-row"><span data-i18n="stat_notifs">الإشعارات المستلمة:</span> <span id="statNotifs" style="color:var(--text);">0</span></div>
+        <div class="control-row" style="border:none;"><span data-i18n="stat_drops">القطرات السينمائية:</span> <span id="statDrops" style="color:var(--cyan);">0</span></div>
       </div>
-      <button class="btn-solid" onclick="document.getElementById('statsSheet').classList.remove('show')">Done</button>
+      <button class="btn-primary" onclick="document.getElementById('statsSheet').classList.remove('show')">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- 4. محتوى قسم الاقتباسات -->
+  <div class="sheet-overlay" id="categorySheet">
+    <div class="sheet-content" style="height:85vh; display:flex; flex-direction:column;">
+      <div class="sheet-handle"></div>
+      <h2 style="margin-top:0; color:var(--cyan);" id="catSheetTitle">القسم</h2>
+      <div style="flex:1; overflow-y:auto;" id="catSheetContent"></div>
+      <button class="btn-primary" onclick="document.getElementById('categorySheet').classList.remove('show')">رجوع</button>
     </div>
   </div>
 
