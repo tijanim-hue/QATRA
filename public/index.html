@@ -127,11 +127,11 @@
       background: rgba(255,255,255,.04);
       border: 1px solid var(--border);
       border-radius: 14px;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.2s;
     }
 
     .icon-button:active {
-      transform: scale(0.95);
+      transform: scale(0.92);
     }
 
     .icon-button svg {
@@ -193,7 +193,7 @@
       margin: 15px 0;
     }
 
-    /* شكل القطرة الزجاجية 3D */
+    /* شكل القطرة الزجاجية 3D داخل التطبيق */
     .drop {
       position: relative;
       width: 120px;
@@ -204,7 +204,7 @@
       animation: morphDrop 4s ease-in-out infinite;
     }
 
-    /* شكل البيضة المتكسرة */
+    /* شكل البيضة المتكسرة داخل التطبيق */
     .egg {
       position: relative;
       width: 100px;
@@ -212,6 +212,7 @@
       border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
       background: linear-gradient(135deg, #fff7e6 0%, #ffd180 50%, #f57c00 100%);
       box-shadow: inset -10px -15px 25px rgba(150, 75, 0, 0.4), 0 15px 30px rgba(0,0,0,0.3);
+      animation: float 4s ease-in-out infinite;
     }
     .egg .crack {
       position: absolute;
@@ -227,6 +228,11 @@
       0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
       50% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
     }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
 
     .drop-ring {
       position: absolute;
@@ -235,6 +241,11 @@
       border: 1px solid rgba(119,205,255,.15);
       border-radius: 50%;
       animation: pulse 4s ease-out infinite;
+    }
+    .drop-ring.ring-2 {
+      width: 230px;
+      height: 230px;
+      animation-delay: 1.5s;
     }
 
     @keyframes pulse {
@@ -268,6 +279,11 @@
       font-size: 14px;
       background: linear-gradient(100deg, #8ce8e6, #76c9ff);
       box-shadow: 0 10px 28px rgba(83,192,255,.15);
+      transition: transform .2s, filter .2s;
+    }
+    .primary-button:active {
+      transform: scale(.97);
+      filter: brightness(.95);
     }
 
     .secondary-button {
@@ -296,6 +312,7 @@
       border-radius: 20px;
       background: var(--surface);
       margin-bottom: 10px;
+      transition: background 0.3s ease;
     }
 
     .reminder-info, .setting-info { flex: 1; min-width: 0; }
@@ -305,4 +322,266 @@
     .toggle { width: 45px; height: 26px; position: relative; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; }
     .toggle-track { position: absolute; inset: 0; border-radius: 30px; background: #354159; transition: .25s; }
-    .toggle-track::before { content: ""; position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; border-radius: 50%; background: #fff; transition: .25
+    .toggle-track::before { content: ""; position: absolute; width: 20px; height: 20px; right: 3px; top: 3px; border-radius: 50%; background: #fff; transition: .25s; }
+    .toggle input:checked + .toggle-track { background: #49b9d9; }
+    .toggle input:checked + .toggle-track::before { transform: translateX(-19px); }
+
+    .category-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .category-card { text-align: right; padding: 15px; min-height: 95px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); color: var(--text); transition: background 0.3s ease; }
+    .category-emoji { font-size: 22px; margin-bottom: 7px; }
+    .category-name { font-size: 13px; font-weight: 700; }
+    .category-count { color: var(--muted); font-size: 10px; margin-top: 3px; }
+
+    .bottom-nav {
+      position: fixed; z-index: 20; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 560px; display: grid; grid-template-columns: repeat(3, 1fr);
+      padding: 10px 18px calc(10px + env(safe-area-inset-bottom));
+      background: var(--surface); border-top: 1px solid var(--border); backdrop-filter: blur(20px);
+      transition: background 0.3s ease;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: transparent; color: #75839f; font-size: 10px; font-weight: 700; padding: 6px; }
+    .nav-item.active { color: var(--blue); }
+    .nav-item svg { width: 21px; height: 21px; }
+
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .page-title { font-size: 24px; font-weight: 800; margin: 8px 0 5px; }
+    .page-subtitle { color: var(--muted); font-size: 12px; line-height: 1.9; margin: 0 0 22px; }
+
+    .field { display: grid; gap: 7px; margin-bottom: 16px; }
+    .field label { color: #b8c6df; font-size: 12px; font-weight: 700; }
+    .field input, .field select { width: 100%; min-height: 48px; padding: 10px 13px; color: var(--text); background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; outline: none; }
+    
+    .days-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+    .day-chip { min-height: 39px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 12px; color: var(--muted); background: rgba(255,255,255,.03); font-size: 11px; font-weight: 700; }
+    .day-chip.selected { background: rgba(103,200,255,.15); color: var(--blue); border-color: rgba(103,200,255,.4); }
+
+    .modal-backdrop { position: fixed; z-index: 50; inset: 0; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(2,6,15,.75); backdrop-filter: blur(8px); }
+    .modal-backdrop.show { display: flex; }
+    .modal { width: 100%; max-width: 430px; max-height: 85vh; overflow-y: auto; padding: 22px; border: 1px solid var(--border); border-radius: 25px; background: var(--surface); transition: background 0.3s ease;}
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-header h3 { margin: 0; font-size: 17px; font-weight: 800; }
+    .modal-close { border: 0; color: var(--muted); background: transparent; font-size: 24px; }
+
+    .toast {
+      position: fixed; z-index: 100; bottom: 95px; left: 50%; transform: translate(-50%, 15px);
+      opacity: 0; pointer-events: none; padding: 12px 18px; color: #071323; background: #a4edee;
+      border-radius: 14px; font-size: 12px; font-weight: 800; transition: .25s;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  </style>
+</head>
+
+<body>
+  <!-- شاشة الإقلاع -->
+  <div id="splash-screen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#0B1021; z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:opacity 0.6s ease;">
+      <div style="width: 80px; height: 80px; border-radius: 50% 50% 50% 0; background: linear-gradient(135deg, #80E0FF, #2A75D3); transform: rotate(-45deg);"></div>
+      <h1 style="color:white; margin-top:30px; font-size: 28px; letter-spacing: 2px;">قــطــرة</h1>
+      <p style="color:#80E0FF; font-size:12px; margin-top:5px; opacity:0.8;">QATRA . MOMENTS OF AWARENESS</p>
+      <div style="width:180px; height:4px; background:#1a2b4c; border-radius:2px; margin-top:40px; overflow:hidden;">
+          <div id="splash-progress" style="width:0%; height:100%; background:#80E0FF; border-radius:2px; transition:width 2.5s ease-out;"></div>
+      </div>
+  </div>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 4C24 4 9 21 9 31C9 39 15.7 44 24 44C32.3 44 39 39 39 31C39 21 24 4 24 4Z" fill="url(#brandGradient)" stroke="#B7F4FF" stroke-width="1.2"/>
+            <defs>
+              <linearGradient id="brandGradient" x1="12" y1="7" x2="36" y2="42">
+                <stop stop-color="#C8F8FF"/><stop offset="1" stop-color="#817DFF"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">قطرة</div>
+          <div class="brand-sub">QATRA</div>
+        </div>
+      </div>
+
+      <!-- أزرار التحكم الجديدة في الأعلى -->
+      <div class="top-actions">
+        <button class="icon-button" id="themeToggle" aria-label="تبديل الوضع الداكن">🌙</button>
+        <button class="icon-button" id="glassToggle" aria-label="تأثير الزجاج">💎</button>
+        <button class="icon-button" id="openSettings" aria-label="الإعدادات">⚙️</button>
+      </div>
+    </header>
+
+    <section class="view active" id="homeView">
+      <div class="welcome">
+        <div class="eyebrow">لحظة لك أنت</div>
+        <h1>خذ نفسًا من الهدوء والأذكار.</h1>
+        <p>وسط ضجيج اليوم، امنح نفسك قطرة وعي أو نفحة إيمانية.</p>
+      </div>
+
+      <section class="hero">
+        <div class="hero-label">إشراقة اليوم</div>
+        <div class="drop-stage" id="dropStage" aria-hidden="true">
+          <div class="drop-ring"></div>
+          <div class="drop-ring ring-2"></div>
+          <div class="drop"></div>
+        </div>
+        <div class="quote" id="dailyQuote">لا يلزم أن تكون كل خطواتك كبيرة.</div>
+        <div class="quote-author" id="quoteCategory">قطرة أمل</div>
+        <button class="primary-button" id="showDrop"><span>✦</span> أرسل لي قطرة الآن</button>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <h2>تذكيراتك اليومية</h2>
+          <button class="text-button" id="manageSchedule">إدارة المواعيد</button>
+        </div>
+        <div class="reminder-card">
+          <div class="reminder-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+              <path d="M10 21h4"/>
+            </svg>
+          </div>
+          <div class="reminder-info">
+            <div class="reminder-title">التذكيرات</div>
+            <div class="reminder-sub" id="reminderSummary">لم تضف أي موعد بعد</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="remindersEnabled"><span class="toggle-track"></span></label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <h2>مساحات الوعي والأذكار</h2>
+          <button class="text-button" id="openLibrary">كل العبارات والأدعية</button>
+        </div>
+        <div class="category-grid" id="categoryGrid"></div>
+      </section>
+    </section>
+
+    <section class="view" id="scheduleView">
+      <h1 class="page-title">مواعيد قطرتك</h1>
+      <p class="page-subtitle">اختر اللحظات التي تريد أن تتوقف فيها وتستعيد هدوءك.</p>
+      <div class="schedule-list" id="scheduleList"></div>
+      <button class="primary-button" id="addSchedule" style="margin-top:16px">＋ إضافة موعد جديد</button>
+    </section>
+
+    <section class="view" id="libraryView">
+      <h1 class="page-title">مكتبة العبارات والأذكار</h1>
+      <p class="page-subtitle">كلمات وأدعية تفتح نافذة واسعة في يومك.</p>
+      <div class="category-grid" id="libraryGrid"></div>
+      <div id="quotesList" style="margin-top:18px"></div>
+    </section>
+
+    <section class="view" id="settingsView">
+      <h1 class="page-title">الإعدادات وتخصيص المحتوى</h1>
+      <p class="page-subtitle">اختر ما تفضل أن يظهر لك عند سقوط القطرة أو انكسار البيضة.</p>
+
+      <div class="settings-group">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-title">شكل العرض السينمائي</div>
+            <div class="setting-description">اختر بين قطرة الماء المائية أو البيضة المنكسرة</div>
+          </div>
+          <select id="visualStyleSetting" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:8px">
+            <option value="drop">قطرة الماء المائية 💧</option>
+            <option value="egg">البيضة المتكسرة 🥚</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-title">تخصيص نوع المحتوى</div>
+            <div class="setting-description">حدد ما سيأتيك في الإشعارات السينمائية</div>
+          </div>
+          <select id="contentTypeSetting" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:8px">
+            <option value="all">عشوائي (الكل منوع)</option>
+            <option value="quotes">العبارات التحفيزية فقط</option>
+            <option value="dhikr">الأذكار والأدعية فقط</option>
+            <option value="specific_category">تصنيف محدد...</option>
+          </select>
+        </div>
+
+        <div class="setting-row" id="specificCategoryGroup" style="display:none;">
+          <div class="setting-info">
+            <div class="setting-title">اختر التصنيف المفضل</div>
+          </div>
+          <select id="specificCategorySetting" style="background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:8px;max-width:140px;"></select>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-title">الإشعارات العادية</div></div>
+          <label class="toggle"><input type="checkbox" id="notificationSetting"><span class="toggle-track"></span></label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-title">العرض السينمائي (العائم)</div></div>
+          <label class="toggle"><input type="checkbox" id="floatingSetting"><span class="toggle-track"></span></label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-title">الوضع الداكن</div></div>
+          <label class="toggle"><input type="checkbox" id="darkModeSetting"><span class="toggle-track"></span></label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info"><div class="setting-title">تأثير الزجاج (Glassmorphism)</div></div>
+          <label class="toggle"><input type="checkbox" id="glassmorphismSetting"><span class="toggle-track"></span></label>
+        </div>
+      </div>
+
+      <section class="section">
+        <button class="secondary-button" id="previewFloating">معاينة التأثير السينمائي الخارجي</button>
+      </section>
+      <section class="section">
+        <button class="secondary-button" id="resetApp" style="color:var(--danger)">إعادة ضبط التطبيق</button>
+      </section>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="homeView">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 21v-7h6v7"/></svg>الرئيسية
+    </button>
+    <button class="nav-item" data-view="scheduleView">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>المواعيد
+    </button>
+    <button class="nav-item" data-view="libraryView">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 1 4 16.5Z"/><path d="M4 16.5A2.5 2.5 0 0 1 6.5 14H20"/></svg>المكتبة
+    </button>
+  </nav>
+
+  <div class="modal-backdrop" id="scheduleModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">إضافة موعد</h3>
+        <button class="modal-close" id="closeModal">×</button>
+      </div>
+      <form id="scheduleForm">
+        <input type="hidden" id="scheduleId">
+        <div class="field">
+          <label for="scheduleTime">وقت التذكير</label>
+          <input type="time" id="scheduleTime" value="09:00" required>
+        </div>
+        <div class="field">
+          <label>أيام التذكير</label>
+          <div class="days-grid" id="daysGrid"></div>
+        </div>
+        <div class="field">
+          <label for="scheduleMode">طريقة الظهور</label>
+          <select id="scheduleMode">
+            <option value="both">إشعار + قطرة سينمائية</option>
+            <option value="notification">إشعار فقط</option>
+            <option value="floating">قطرة سينمائية فقط</option>
+          </select>
+        </div>
+        <button class="primary-button" type="submit">حفظ الموعد</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
