@@ -1,6 +1,6 @@
 "use strict";
 
-const STORE_KEY = "qatra_premium_v10";
+const STORE_KEY = "qatra_premium_v11"; // مفتاح جديد لضمان تحديث الإعدادات
 const QUOTES_DB = {
   dhikr: { titleAr: "أذكار وأدعية", titleEn: "Dhikr & Dua", icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', items: ["سبحان الله وبحمده، سبحان الله العظيم.", "لا إله إلا أنت سبحانك إني كنت من الظالمين."] },
   motivation: { titleAr: "تحفيز وإيجابية", titleEn: "Motivation", icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>', items: ["الهدوء ليس ضعفاً، بل هو قوة التحكم في الذات.", "لا يلزم أن تكون كل خطواتك كبيرة؛ المهم أن تواصل السير."] },
@@ -8,9 +8,9 @@ const QUOTES_DB = {
 };
 
 let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
-  lang: 'ar', dark: true, glass: false, mode: 'both', duration: 10000, interval: '0',
+  lang: 'ar', dark: true, glass: true, mode: 'both', duration: 10000, interval: '0',
   selectedQuotes: [...QUOTES_DB.dhikr.items, ...QUOTES_DB.motivation.items],
-  schedules: [], stats: { drops: 0, days: 1 }
+  schedules: [], stats: { drops: 0, notifs: 0, days: 1 }
 };
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
 
@@ -25,20 +25,26 @@ function applyState() {
   document.body.classList.toggle('light-mode', !state.dark);
   document.body.classList.toggle('glass-active', state.glass);
   
-  document.getElementById('darkToggle').checked = state.dark;
-  document.getElementById('glassToggle').checked = state.glass;
-  document.getElementById('langSelect').value = state.lang;
-  document.getElementById('notifModeSetting').value = state.mode;
-  document.getElementById('dropDurationSetting').value = state.duration;
-  document.getElementById('intervalSelect').value = state.interval;
+  // حماية التحديثات باستخدام دالة تأكد من وجود العنصر
+  const safeSetChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+  const safeSetValue = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  const safeSetText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+
+  safeSetChecked('darkToggle', state.dark);
+  safeSetChecked('glassToggle', state.glass);
+  safeSetValue('langSelect', state.lang);
+  safeSetValue('notifModeSetting', state.mode);
+  safeSetValue('dropDurationSetting', state.duration);
+  safeSetValue('intervalSelect', state.interval);
 
   document.documentElement.dir = (state.lang === 'ar') ? 'rtl' : 'ltr';
   document.querySelectorAll('[data-i18n]').forEach(el => {
     if(dict[state.lang] && dict[state.lang][el.getAttribute('data-i18n')]) el.textContent = dict[state.lang][el.getAttribute('data-i18n')];
   });
   
-  document.getElementById('statDrops').innerText = state.stats.drops;
-  document.getElementById('statDays').innerText = state.stats.days;
+  safeSetText('statDrops', state.stats.drops);
+  safeSetText('statNotifs', state.stats.notifs);
+  safeSetText('statDays', state.stats.days);
   renderCategories();
 }
 
@@ -59,7 +65,9 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 
 // --- الأقسام والاقتباسات ---
 function renderCategories() {
-  document.getElementById('categoriesContainer').innerHTML = Object.keys(QUOTES_DB).map(key => {
+  const container = document.getElementById('categoriesContainer');
+  if(!container) return;
+  container.innerHTML = Object.keys(QUOTES_DB).map(key => {
     const cat = QUOTES_DB[key];
     const title = state.lang === 'ar' ? cat.titleAr : cat.titleEn;
     return `<div class="cat-item" onclick="openCategory('${key}')">
@@ -100,19 +108,18 @@ async function fireCinematic() {
   if (QatraNative) {
     state.stats.drops++; applyState();
     await QatraNative.showDrop({ quote: quote, duration: state.duration });
-  } else {
-    alert("التأثير السينمائي سيعمل في تطبيق الأندرويد فقط.");
   }
 }
 document.getElementById('triggerCinematic').onclick = fireCinematic;
-document.getElementById('previewFloatingBtn').onclick = fireCinematic;
 
 document.getElementById('notifModeSetting').onchange = e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); };
 document.getElementById('dropDurationSetting').onchange = e => { state.duration = parseInt(e.target.value); applyState(); syncNativeAlarms(); };
 document.getElementById('intervalSelect').onchange = e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); renderSchedules(); };
 
 function renderSchedules() {
-  document.getElementById('savedSchedulesList').innerHTML = state.schedules.map((s, i) => 
+  const list = document.getElementById('savedSchedulesList');
+  if(!list) return;
+  list.innerHTML = state.schedules.map((s, i) => 
     `<div class="modern-row" style="background:rgba(0,0,0,0.2); padding:15px; border-radius:16px; margin-bottom:10px;">
       <strong style="font-size:18px;">${s.time}</strong>
       <button onclick="deleteSchedule(${i})" style="background:none;border:none;color:#ff4d4d;font-weight:bold;cursor:pointer;">X</button>
@@ -120,10 +127,11 @@ function renderSchedules() {
   ).join('');
   
   const nextTxt = document.getElementById('nextReminderText');
-  if(state.interval !== '0') nextTxt.innerText = state.lang==='ar'?`تكرار (كل ${state.interval} دقيقة)`:`Repeat (${state.interval}m)`;
-  else if(state.schedules.length > 0) nextTxt.innerText = state.lang==='ar'?`لديك ${state.schedules.length} مواعيد`:`${state.schedules.length} Schedules`;
-  else nextTxt.innerText = state.lang==='ar'?"لا يوجد مواعيد":"No schedule";
+  if(state.interval !== '0') nextTxt.innerText = state.lang === 'ar' ? `تكرار (كل ${state.interval} دقيقة)` : `Repeat (${state.interval}m)`;
+  else if(state.schedules.length > 0) nextTxt.innerText = state.lang === 'ar' ? `لديك ${state.schedules.length} مواعيد` : `${state.schedules.length} Schedules`;
+  else nextTxt.innerText = state.lang === 'ar' ? "لا يوجد مواعيد" : "No schedule";
 }
+
 document.getElementById('saveScheduleBtn').onclick = () => {
   const t = document.getElementById('customTime').value;
   if(t) { state.schedules.push({id: Math.floor(Math.random()*10000), time: t}); applyState(); renderSchedules(); syncNativeAlarms(); }
@@ -132,18 +140,17 @@ window.deleteSchedule = (i) => { state.schedules.splice(i,1); applyState(); rend
 
 function syncNativeAlarms() {
   if(!QatraNative) return;
-  // إرسال المواعيد لتعمل في الثانية 00 بدقة (المحرك جاهز من قبل)
-  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote() });
-  state.schedules.forEach(s => QatraNative.schedule({id: s.id, time: s.time, mode: state.mode, duration: state.duration, quote: getRandomQuote()}));
+  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote() }).catch(e=>console.log(e));
+  state.schedules.forEach(s => QatraNative.schedule({id: s.id, time: s.time, mode: state.mode, duration: state.duration, quote: getRandomQuote()}).catch(e=>console.log(e)));
 }
 
-// --- البومودورو و التأمل (أصوات في الخلفية) ---
+// --- البومودورو و التأمل ---
 document.getElementById('startPomodoroBtn').onclick = () => {
   const mins = parseInt(document.getElementById('pomoTime').value);
   const audio = document.getElementById('pomoAudio').value;
   document.getElementById('pomodoroSheet').classList.remove('show');
   if (QatraNative) {
-    QatraNative.startPomodoro({ minutes: mins, audioUrl: audio }); // يعمل في الخلفية كقارئ موسيقى
+    QatraNative.startPomodoro({ minutes: mins, audioUrl: audio }); 
     document.getElementById('mainTimeDisplay').textContent = `${mins}:00`;
   }
 };
@@ -151,24 +158,33 @@ document.getElementById('startPomodoroBtn').onclick = () => {
 const randomAudios = ["https://actions.google.com/sounds/v1/water/rain_on_roof.ogg", "https://server8.mp3quran.net/afs/001.mp3"];
 let randPlayer = new Audio(); let isRandPlaying = false;
 document.getElementById('playRandomAudioBtn').onclick = () => {
-  if (isRandPlaying) { randPlayer.pause(); isRandPlaying = false; document.getElementById('playRandomAudioBtn').textContent = state.lang==='ar'?"▶ تشغيل محتوى عشوائي":"▶ Play Ambient"; document.getElementById('audioStatus').textContent = state.lang==='ar'?"متوقف":"Ready"; }
+  if (isRandPlaying) { randPlayer.pause(); isRandPlaying = false; document.getElementById('playRandomAudioBtn').textContent = state.lang==='ar'?"▶ تشغيل محتوى عشوائي":"▶ Play Ambient"; document.getElementById('audioStatus').textContent = state.lang==='ar'?"متوقف":"Stopped"; }
   else {
     randPlayer.src = randomAudios[Math.floor(Math.random() * randomAudios.length)];
-    randPlayer.play(); isRandPlaying = true; document.getElementById('playRandomAudioBtn').textContent = "⏸"; document.getElementById('audioStatus').textContent = state.lang==='ar'?"جارٍ الاسترخاء...":"Playing...";
+    randPlayer.play(); isRandPlaying = true; document.getElementById('playRandomAudioBtn').textContent = "⏸"; document.getElementById('audioStatus').textContent = state.lang==='ar'?"جارٍ الاسترخاء...":"Relaxing...";
   }
 };
 
-// --- البداية ---
+// --- الإقلاع الآمن ---
 window.onload = () => {
-  applyState(); renderSchedules();
-  document.getElementById('dailyQuoteText').textContent = `"${getRandomQuote()}"`;
+  applyState(); 
+  renderSchedules();
+  const qt = document.getElementById('dailyQuoteText');
+  if(qt) qt.textContent = `"${getRandomQuote()}"`;
   
+  // 1. إخفاء شاشة الإقلاع بشكل مستقل لتفادي أي تجميد
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(()=> splash.remove(), 600);
+    }
+  }, 1500);
+
+  // 2. طلب الأذونات بدون أن تؤثر على إخفاء شاشة الإقلاع
   if (QatraNative) {
-    QatraNative.askPermissions().then(() => {
-      document.getElementById('splash').style.opacity = '0';
-      setTimeout(()=> document.getElementById('splash').remove(), 800);
-    });
-  } else {
-    setTimeout(() => { document.getElementById('splash').style.opacity = '0'; setTimeout(()=> document.getElementById('splash').remove(), 800); }, 2000);
+    setTimeout(() => {
+      QatraNative.askPermissions().catch(e => console.log("Permissions prompt dismissed/failed", e));
+    }, 1800);
   }
 };
