@@ -51,9 +51,7 @@ class QatraPlugin : Plugin() {
         
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
-            putExtra("mode", mode)
-            putExtra("duration", duration)
-            putExtra("quote", quote)
+            putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote)
         }
         val pendingIntent = PendingIntent.getBroadcast(context, 99999, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         

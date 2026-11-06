@@ -22,7 +22,6 @@ class QatraAlarmReceiver : BroadcastReceiver() {
                 putExtra("quote", quote)
                 putExtra("duration", duration)
             }
-            // تشغيل الخدمة الأمامية لضمان عدم إيقافها من النظام
             ContextCompat.startForegroundService(context, serviceIntent)
         }
         if (mode == "notification" || mode == "both") {

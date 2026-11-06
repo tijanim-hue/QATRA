@@ -35,7 +35,6 @@ class QatraOverlayService : Service() {
         val quote = intent?.getStringExtra("quote") ?: "الحمد لله"
         val duration = intent?.getIntExtra("duration", 10000) ?: 10000
         
-        // تحويل الخدمة إلى Foreground Service لاختراق قيود أندرويد 12+
         val channelId = "qatra_overlay_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "Cinematic Drop", NotificationManager.IMPORTANCE_MIN)
@@ -86,13 +85,9 @@ class QatraOverlayService : Service() {
         val dropParams = FrameLayout.LayoutParams(dropSize, dropSize).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL }
 
         val quoteText = TextView(this).apply {
-            text = quote
-            setTextColor(Color.WHITE)
-            textSize = 28f
-            gravity = Gravity.CENTER
-            setShadowLayer(25f, 0f, 0f, Color.parseColor("#00d2ff"))
-            setTypeface(null, Typeface.BOLD)
-            alpha = 0f
+            text = quote; setTextColor(Color.WHITE); textSize = 28f
+            gravity = Gravity.CENTER; setShadowLayer(25f, 0f, 0f, Color.parseColor("#00d2ff"))
+            setTypeface(null, Typeface.BOLD); alpha = 0f
         }
         val textParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
             gravity = Gravity.CENTER; setMargins(40, 0, 40, 0)
