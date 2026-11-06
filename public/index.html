@@ -72,7 +72,7 @@
     .progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; position: relative; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 4px; width: 0%; transition: width 0.5s; }
 
-    /* الكبسولة العائمة (بدون قسم إعداد القطرة) */
+    /* الكبسولة العائمة */
     .floating-nav-container { position: fixed; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; padding: 0 20px;}
     .floating-nav { background: rgba(10, 14, 25, 0.85); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 40px; display: flex; padding: 10px 20px; gap: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
     .nav-item { background: none; border: none; color: var(--text-dim); padding: 12px 18px; cursor: pointer; border-radius: 25px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
@@ -121,10 +121,8 @@
       <section class="view active" id="homeView">
         <div class="drop-center-container">
           <div class="drop-center">
-            <!-- أيقونة القطرة الفخمة -->
             <svg class="main-drop-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
-            <div style="font-size: 16px; font-weight: 800; color: var(--text);">لحظة وعي</div>
-            <!-- زر إعدادات القطرة -->
+            <div style="font-size: 16px; font-weight: 800; color: var(--text);" data-i18n="focus_session">لحظة وعي</div>
             <button class="drop-setup-btn" onclick="document.getElementById('dropSettingsSheet').classList.add('show')">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             </button>
@@ -162,7 +160,7 @@
         </div>
       </section>
 
-      <!-- 3. الحديقة (الجوائز) بدل القطرة في البار السفلي -->
+      <!-- 3. الحديقة (الجوائز) -->
       <section class="view" id="gardenView">
         <h2 style="font-weight:900; margin-bottom: 10px;" data-i18n="garden">حديقتك وإنجازاتك</h2>
         <p style="color:var(--text-dim); font-size:14px; margin-top:0;">اقرأ القطرات لتنمو أشجارك.</p>
@@ -185,12 +183,9 @@
     <!-- الكبسولة العائمة (Floating Nav) -->
     <div class="floating-nav-container">
       <nav class="floating-nav">
-        <!-- أيقونة علامات الاقتباس -->
         <button class="nav-item" data-view="libraryView"><svg viewBox="0 0 24 24"><path d="M10 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zm10 0h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zM10 11l-2 6M20 11l-2 6"/></svg></button>
         <button class="nav-item" data-view="meditationView"><svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-3-5a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/></svg></button>
-        <!-- الرئيسية -->
         <button class="nav-item active" data-view="homeView"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
-        <!-- الجوائز (ورقة شجر) -->
         <button class="nav-item" data-view="gardenView"><svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 1 8.3C19.2 15.66 15.14 20 11 20z"/><path d="M11 20v-5c0-1.42 1.13-2.61 2.5-2.84"/></svg></button>
       </nav>
     </div>
@@ -198,7 +193,7 @@
 
   <!-- ================= Bottom Sheets ================= -->
 
-  <!-- نافذة إعدادات القطرة المائية -->
+  <!-- إعدادات القطرة -->
   <div class="sheet-overlay" id="dropSettingsSheet">
     <div class="sheet-content">
       <div class="sheet-handle"></div>
@@ -232,12 +227,11 @@
       <div class="modern-row" style="flex-direction:column; align-items:flex-start; gap:10px; padding-top:20px;">
         <span style="font-weight:600; color:var(--text-dim);">إضافة موعد مخصص</span>
         <input type="time" id="customTime">
-        <button class="btn-outline" id="saveScheduleBtn" style="padding:12px;">حفظ الموعد</button>
+        <button class="btn-solid btn-glow" id="saveScheduleBtn" style="padding:12px; margin-top:10px;">حفظ الموعد</button>
       </div>
       <div id="savedSchedulesList" style="margin-top:20px;"></div>
       
-      <button class="btn-solid btn-glow" id="previewFloatingBtn">معاينة القطرة الآن 🎬</button>
-      <button class="btn-solid" onclick="document.getElementById('dropSettingsSheet').classList.remove('show')" style="background:transparent; color:var(--text);">إغلاق</button>
+      <button class="btn-solid" onclick="document.getElementById('dropSettingsSheet').classList.remove('show')" style="background:transparent; border:1px solid var(--border); color:var(--text);">إغلاق</button>
     </div>
   </div>
 
@@ -256,7 +250,7 @@
   <div class="sheet-overlay" id="categorySheet">
     <div class="sheet-content" style="height:85vh; display:flex; flex-direction:column;">
       <div class="sheet-handle"></div>
-      <h3 style="margin-top:0; font-weight:800; color:var(--cyan);" id="catSheetTitle">القسم</h3>
+      <h3 style="margin-top:0; color:var(--cyan);" id="catSheetTitle">القسم</h3>
       <div style="flex:1; overflow-y:auto; padding-right:5px;" id="catSheetContent"></div>
       <button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')">إغلاق</button>
     </div>
