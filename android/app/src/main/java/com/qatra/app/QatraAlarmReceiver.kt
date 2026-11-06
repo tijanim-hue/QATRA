@@ -18,15 +18,21 @@ class QatraAlarmReceiver : BroadcastReceiver() {
         val duration = intent.getIntExtra("duration", 10000)
 
         if (mode == "floating" || mode == "both") {
-            val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { putExtra("quote", quote); putExtra("duration", duration) }
+            val serviceIntent = Intent(context, QatraOverlayService::class.java).apply {
+                putExtra("quote", quote)
+                putExtra("duration", duration)
+            }
             ContextCompat.startForegroundService(context, serviceIntent)
         }
-        if (mode == "notification" || mode == "both") showNotificationWithDropSound(context, quote)
+        if (mode == "notification" || mode == "both") {
+            showNotificationWithDropSound(context, quote)
+        }
     }
 
     private fun showNotificationWithDropSound(context: Context, quote: String) {
         val channelId = "qatra_drop_channel"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
         val resId = context.resources.getIdentifier("drop_sound", "raw", context.packageName)
         val soundUri = Uri.parse("android.resource://" + context.packageName + "/" + resId)
 
@@ -38,7 +44,10 @@ class QatraAlarmReceiver : BroadcastReceiver() {
         }
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_popup_reminder)
-            .setContentTitle("قطرة (QATRA)").setContentText(quote).setSound(soundUri).setAutoCancel(true)
+            .setContentTitle("قطرة (QATRA)")
+            .setContentText(quote)
+            .setSound(soundUri)
+            .setAutoCancel(true)
         notificationManager.notify((System.currentTimeMillis() % 10000).toInt(), builder.build())
     }
 }
