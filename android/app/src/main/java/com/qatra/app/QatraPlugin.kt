@@ -28,13 +28,12 @@ class QatraPlugin : Plugin() {
         }
         call.resolve()
     }
+
     @PluginMethod
     fun showDrop(call: PluginCall) {
         val quote = call.getString("quote") ?: "سبحان الله"
-        val duration = call.getInt("duration") ?: 10000
-        val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { 
+        val serviceIntent = Intent(context, QatraOverlayService::class.java).apply {
             putExtra("quote", quote)
-            putExtra("duration", duration)
         }
         context.startService(serviceIntent)
         call.resolve()
