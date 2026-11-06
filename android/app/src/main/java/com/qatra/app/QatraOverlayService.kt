@@ -20,6 +20,8 @@ import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
@@ -47,7 +49,7 @@ class QatraOverlayService : Service() {
                 getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
             }
             startForeground(1992, NotificationCompat.Builder(this, channelId)
-                .setContentTitle("قطرة").setContentText("عرض سينمائي...").setSmallIcon(android.R.drawable.ic_popup_reminder).build())
+                .setContentTitle("قطرة").setContentText("تأمل اللحظة...").setSmallIcon(android.R.drawable.ic_popup_reminder).build())
         } catch (e: Exception) { e.printStackTrace() }
     }
 
@@ -61,7 +63,6 @@ class QatraOverlayService : Service() {
         }
 
         playCinematicAnimation(quote, style)
-        playSound()
         return START_NOT_STICKY
     }
 
@@ -69,8 +70,9 @@ class QatraOverlayService : Service() {
         if (overlayContainer != null) return
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
+        // خلفية مظللة
         overlayContainer = FrameLayout(this).apply {
-            setBackgroundColor(Color.parseColor("#B3000000")) // تظليل سينمائي أنيق
+            setBackgroundColor(Color.parseColor("#D9080E1C")) // لون داكن شفاف أنيق
         }
 
         val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -90,18 +92,28 @@ class QatraOverlayService : Service() {
             PixelFormat.TRANSLUCENT
         )
 
-        // عنصر الشكل (قطرة أو بيضة)
-        val shapeSize = if (style == "egg") 280 else 260
+        // 1. حاويات دوائر الماء (Ripples)
+        val ripple1 = View(this).apply {
+            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#4080E0FF")) }
+            alpha = 0f
+        }
+        val ripple2 = View(this).apply {
+            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#20ffffff")) }
+            alpha = 0f
+        }
+
+        // 2. شكل القطرة أو البيضة
+        val shapeSize = if (style == "egg") 180 else 160
         val visualView = View(this).apply {
             val gradient = GradientDrawable()
             if (style == "egg") {
                 gradient.shape = GradientDrawable.RECTANGLE
-                gradient.cornerRadius = 140f
+                gradient.cornerRadius = 90f // شكل بيضاوي
                 gradient.colors = intArrayOf(Color.parseColor("#fff7e6"), Color.parseColor("#ffd180"), Color.parseColor("#f57c00"))
             } else {
                 gradient.shape = GradientDrawable.RECTANGLE
                 val r = shapeSize / 2f
-                gradient.cornerRadii = floatArrayOf(0f, 0f, r, r, r, r, r, r)
+                gradient.cornerRadii = floatArrayOf(0f, 0f, r, r, r, r, r, r) // زاوية حادة
                 gradient.colors = intArrayOf(Color.parseColor("#ffffff"), Color.parseColor("#80E0FF"), Color.parseColor("#2A75D3"))
                 rotation = -45f
             }
@@ -109,63 +121,87 @@ class QatraOverlayService : Service() {
             elevation = 40f
         }
 
-        val visualParams = FrameLayout.LayoutParams(shapeSize, shapeSize).apply {
-            gravity = Gravity.CENTER
-        }
-
-        // صندوق النص الإيجابي / الدعاء
+        // 3. النص (الذكر أو المقولة)
         val quoteText = TextView(this).apply {
             text = quote
             setTextColor(Color.WHITE)
-            textSize = 21f
+            textSize = 22f
             gravity = Gravity.CENTER
-            setPadding(50, 50, 50, 50)
-            alpha = 0f
+            setPadding(60, 60, 60, 60)
+            alpha = 0f // مخفي في البداية
             val bg = GradientDrawable()
-            bg.setColor(Color.parseColor("#E60B1021"))
-            bg.cornerRadius = 40f
-            bg.setStroke(3, Color.parseColor("#4A90E2"))
+            bg.setColor(Color.parseColor("#111A2D"))
+            bg.cornerRadius = 50f
+            bg.setStroke(3, Color.parseColor("#67C8FF"))
             background = bg
         }
 
-        val textParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
+        val centerParams = FrameLayout.LayoutParams(shapeSize, shapeSize).apply { gravity = Gravity.CENTER }
+        val textParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
             gravity = Gravity.CENTER
             setMargins(50, 0, 50, 0)
         }
 
-        overlayContainer?.addView(visualView, visualParams)
+        overlayContainer?.addView(ripple1, centerParams)
+        overlayContainer?.addView(ripple2, centerParams)
+        overlayContainer?.addView(visualView, centerParams)
         overlayContainer?.addView(quoteText, textParams)
+        
         windowManager?.addView(overlayContainer, params)
 
-        // حركة السقوط السينمائي (من أعلى الشاشة إلى المنتصف مع تأثير الارتداد والانفجار الخفيف)
-        visualView.translationY = -800f
-        val fallAnim = ObjectAnimator.ofFloat(visualView, "translationY", -800f, 0f).apply {
-            duration = 1200
-        }
-        val scaleXAnim = ObjectAnimator.ofFloat(visualView, "scaleX", 0.4f, 1.1f, 1f)
-        val scaleYAnim = ObjectAnimator.ofFloat(visualView, "scaleY", 0.4f, 1.1f, 1f)
-        
-        val animatorSet = AnimatorSet().apply {
-            playTogether(fallAnim, scaleXAnim, scaleYAnim)
+        // ============================================
+        // برمجة الحركات السينمائية (Animations)
+        // ============================================
+
+        val handler = Handler(Looper.getMainLooper())
+
+        // 1. حركة السقوط من أعلى الشاشة
+        visualView.translationY = -1500f
+        ObjectAnimator.ofFloat(visualView, "translationY", -1500f, 0f).apply {
+            duration = 700
+            interpolator = AccelerateInterpolator()
             start()
         }
 
-        // بعد استقرار الشكل، تختفي القطرة/البيضة تدريجياً ويصعد النص للوسط
-        Handler(Looper.getMainLooper()).postDelayed({
-            val fadeOutVisual = ObjectAnimator.ofFloat(visualView, "alpha", 1f, 0f).setDuration(600)
-            val fadeInText = ObjectAnimator.ofFloat(quoteText, "alpha", 0f, 1f).setDuration(800)
+        // 2. الاصطدام ودوائر الماء والصوت (بعد السقوط مباشرة)
+        handler.postDelayed({
+            playSound()
             
-            val textAnimSet = AnimatorSet().apply {
-                playTogether(fadeOutVisual, fadeInText)
-                start()
-            }
-        }, 1400)
+            // اهتزاز واصطدام
+            val squashX = ObjectAnimator.ofFloat(visualView, "scaleX", 1f, 1.25f, 1f).setDuration(250)
+            val squashY = ObjectAnimator.ofFloat(visualView, "scaleY", 1f, 0.75f, 1f).setDuration(250)
+            AnimatorSet().apply { playTogether(squashX, squashY); start() }
 
-        // إغلاق تلقائي بعد قراءة العبارة
-        Handler(Looper.getMainLooper()).postDelayed({ stopSelf() }, 10000)
+            // انتشار الدوائر المائية
+            ripple1.alpha = 1f; ripple2.alpha = 1f
+            val r1ScaleX = ObjectAnimator.ofFloat(ripple1, "scaleX", 1f, 4.5f).setDuration(900)
+            val r1ScaleY = ObjectAnimator.ofFloat(ripple1, "scaleY", 1f, 4.5f).setDuration(900)
+            val r1Alpha = ObjectAnimator.ofFloat(ripple1, "alpha", 1f, 0f).setDuration(900)
+
+            val r2ScaleX = ObjectAnimator.ofFloat(ripple2, "scaleX", 1f, 6.5f).setDuration(1300)
+            val r2ScaleY = ObjectAnimator.ofFloat(ripple2, "scaleY", 1f, 6.5f).setDuration(1300)
+            val r2Alpha = ObjectAnimator.ofFloat(ripple2, "alpha", 1f, 0f).setDuration(1300)
+
+            AnimatorSet().apply { playTogether(r1ScaleX, r1ScaleY, r1Alpha, r2ScaleX, r2ScaleY, r2Alpha); start() }
+
+        }, 700)
+
+        // 3. تلاشي القطرة وصعود النص ببطء (دون لمس المستخدم)
+        handler.postDelayed({
+            val fadeOutVisual = ObjectAnimator.ofFloat(visualView, "alpha", 1f, 0f).setDuration(500)
+            
+            quoteText.translationY = 200f
+            val fadeInText = ObjectAnimator.ofFloat(quoteText, "alpha", 0f, 1f).setDuration(800)
+            val riseText = ObjectAnimator.ofFloat(quoteText, "translationY", 200f, 0f).apply {
+                duration = 1000
+                interpolator = OvershootInterpolator(1.2f)
+            }
+            
+            AnimatorSet().apply { playTogether(fadeOutVisual, fadeInText, riseText); start() }
+        }, 1200)
+
+        // 4. إغلاق الخدمة تلقائياً بعد 10 ثوانٍ لمنح المستخدم فرصة للقراءة
+        handler.postDelayed({ stopSelf() }, 10000)
     }
 
     private fun playSound() {
