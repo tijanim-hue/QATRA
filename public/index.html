@@ -3,336 +3,335 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#030509">
+  <meta name="theme-color" content="#02050a">
   <title data-i18n="app_title">قطرة | QATRA</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* المتغيرات الأساسية القابلة للتغيير عند السحب */
     :root {
-      --bg: #030509; 
-      --surface: rgba(20, 25, 35, 0.4); 
-      --border: rgba(255, 255, 255, 0.06);
-      --text: #ffffff; 
-      --text-dim: #7b8ba4; 
-      --primary: #00F0FF; 
-      --secondary: #9D00FF;
+      --bg: #02050a; --surface: rgba(10, 15, 25, 0.5); --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff; --muted: #7b8ba4; --cyan: #00e5ff; --blue: #0066ff; --purple: #a900ff;
     }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none;}
-    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: var(--bg); color: var(--text); font-family: "Cairo", sans-serif; transition: background 0.3s; }
-
-    /* تأثير الزجاج الحقيقي */
-    body.glass-active { --surface: rgba(15, 20, 30, 0.3); --border: rgba(255, 255, 255, 0.12); }
-    body.glass-active .glass-card { backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-    body.light-mode { --bg: #f0f4f8; --surface: rgba(255,255,255,0.7); --text: #050a15; --border: rgba(0,0,0,0.1); --text-dim: #5a6b8c; }
+    
+    /* تأثير الزجاج الحقيقي المتقدم */
+    body.glass-active {
+      --surface: rgba(15, 22, 40, 0.35);
+      --border: rgba(255, 255, 255, 0.15);
+    }
+    body.glass-active .glass-panel {
+      backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    
+    body.light-mode { --bg: #eef2f6; --surface: rgba(255, 255, 255, 0.7); --text: #050a15; --border: rgba(0,0,0,0.1); --muted: #5a6b8c; }
     body.light-mode.glass-active { --surface: rgba(255,255,255,0.4); }
 
-    /* الخلفية والتموجات (تتأثر بألوان المتغيرات) */
-    .ambient-bg { position: fixed; inset: 0; z-index: -1; background: var(--bg); overflow: hidden;}
-    .orb-1 { position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw; background: var(--secondary); filter: blur(120px); opacity: 0.15; transition: background 1s; animation: float 15s infinite alternate;}
-    .orb-2 { position: absolute; bottom: 10%; left: -20%; width: 70vw; height: 70vw; background: var(--primary); filter: blur(140px); opacity: 0.15; transition: background 1s; animation: float 12s infinite alternate-reverse;}
-    @keyframes float { 0% {transform: translate(0,0);} 100% {transform: translate(30px,40px);} }
-
-    /* مؤشر السحب للتحديث */
-    .ptr-container { position: absolute; top: 0; left: 0; width: 100%; height: 70px; display: flex; justify-content: center; align-items: center; z-index: 50; transform: translateY(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .ptr-icon { width: 30px; height: 30px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--primary); transition: border-top-color 1s; }
-    .ptr-icon.spin { animation: spin 1s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    /* شاشة ثابتة لا تتحرك */
+    body, html {
+      margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+      background-color: var(--bg); color: var(--text); font-family: "Cairo", sans-serif;
+      background-image: 
+        radial-gradient(circle at 15% 30%, rgba(0, 229, 255, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 85% 70%, rgba(169, 0, 255, 0.1) 0%, transparent 40%);
+      transition: background 0.3s ease;
+    }
 
     .app-container { width: 100%; height: 100%; display: flex; flex-direction: column; max-width: 500px; margin: auto; position: relative; }
     
-    /* الإقلاع */
-    #splash { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s; }
-    .splash-drop { width: 70px; height: 70px; border-radius: 0 50% 50% 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); transform: rotate(45deg); animation: pulse 2s infinite alternate; }
-    @keyframes pulse { 0% { filter: drop-shadow(0 0 10px rgba(0,240,255,0.2)); } 100% { filter: drop-shadow(0 0 30px rgba(0,240,255,0.6)); } }
+    /* شاشة الإقلاع */
+    #splash { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease; }
+    .splash-drop { width: 80px; height: 80px; border-radius: 0 50% 50% 50%; background: linear-gradient(135deg, var(--cyan), var(--blue)); transform: rotate(45deg); animation: pulseDrop 2s infinite; }
+    @keyframes pulseDrop { 0%, 100% { transform: rotate(45deg) scale(1); } 50% { transform: rotate(45deg) scale(1.1); box-shadow: 0 0 30px rgba(0,229,255,0.5); } }
 
-    /* الهيدر */
-    .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 25px 24px 10px; z-index: 10; }
-    .header-btn { background: none; border: none; color: var(--text-dim); padding: 0; cursor: pointer; display: grid; place-items: center;}
-    .header-btn svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 2; }
-    .brand { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: -5px; }
-    .brand-icon { width: 34px; height: 34px; margin-bottom: 2px; }
-    .brand-name { font-size: 24px; font-weight: 900; line-height: 1; letter-spacing: 0.5px;}
-
-    /* التمرير الداخلي */
-    .main-content { flex: 1; overflow-y: auto; padding: 10px 24px 120px; scroll-behavior: smooth; position: relative; }
-    .main-content::-webkit-scrollbar { display: none; }
-
-    .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; padding: 24px; margin-bottom: 16px; transition: all 0.3s; }
-
-    /* القطرة المركزية المبهرة */
-    .hero-container { display: flex; justify-content: center; align-items: center; padding: 10px 0 40px; position: relative;}
-    .hero-ring {
-      width: 250px; height: 250px; border-radius: 50%; position: relative;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      box-shadow: inset 0 0 60px rgba(157, 0, 255, 0.1), 0 0 50px rgba(0, 240, 255, 0.05);
-      border: 1px solid rgba(255,255,255,0.03); transition: box-shadow 1s;
-    }
-    .hero-ring::before {
-      content: ''; position: absolute; inset: -2px; border-radius: 50%; z-index: -1;
-      background: linear-gradient(135deg, var(--primary), transparent, var(--secondary));
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0.8; transition: background 1s;
-    }
-    .hero-icon { width: 75px; height: 75px; fill: url(#neon-grad); filter: drop-shadow(0 10px 20px rgba(0,240,255,0.3)); margin-bottom: 15px;}
+    /* Topbar */
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; padding: 25px 20px 10px; z-index: 10; }
+    .hamburger { background: none; border: none; color: var(--text); padding: 0; cursor: pointer;}
+    .hamburger svg { width: 30px; height: 30px; stroke: currentColor; fill: none; stroke-width: 2; }
     
-    /* زر الإعدادات العائم أسفل القطرة */
-    .hero-action-btn {
-      position: absolute; bottom: -20px; width: 60px; height: 60px; border-radius: 50%; border: none;
-      background: var(--text); color: var(--bg); display: grid; place-items: center; cursor: pointer;
-      box-shadow: 0 10px 25px rgba(255,255,255,0.15); transition: transform 0.2s;
+    .brand { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: -5px; }
+    .brand-icon { width: 36px; height: 36px; margin-bottom: 5px; }
+    .brand-name { font-size: 26px; font-weight: 800; line-height: 1; }
+    .brand-sub { font-size: 11px; color: var(--muted); letter-spacing: 4px; margin-top: 2px;}
+
+    /* القائمة الجانبية */
+    .sidebar { position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: rgba(5, 10, 20, 0.85); backdrop-filter: blur(25px); border-left: 1px solid var(--border); z-index: 1000; transition: right 0.4s ease; padding: 30px 20px; display: flex; flex-direction: column; }
+    .sidebar.open { right: 0; }
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .sidebar-overlay.show { opacity: 1; pointer-events: all; }
+
+    /* منطقة المحتوى القابلة للتمرير */
+    .content-area { flex: 1; overflow-y: auto; padding: 10px 20px 100px; scroll-behavior: smooth; }
+    .content-area::-webkit-scrollbar { display: none; }
+
+    .glass-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 15px; }
+
+    /* دائرة جلسة التركيز الاحترافية (النيون) */
+    .timer-wrapper {
+      position: relative; width: 260px; height: 260px; margin: 10px auto 30px; border-radius: 50%; padding: 4px;
+      background: conic-gradient(from 180deg, var(--cyan), var(--purple), var(--cyan));
+      box-shadow: 0 0 40px rgba(169, 0, 255, 0.2); cursor: pointer;
     }
-    .hero-action-btn:active { transform: scale(0.9); }
-    .hero-action-btn svg { width: 24px; height: 24px; fill: currentColor; }
+    .timer-inner {
+      background: var(--bg); width: 100%; height: 100%; border-radius: 50%;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;
+    }
+    .time-display { font-size: 58px; font-weight: 800; letter-spacing: 1px; margin-top: -10px; }
+    .timer-label { font-size: 15px; color: var(--muted); font-weight: 700; text-align: center; }
+    
+    .play-btn {
+      position: absolute; bottom: 25px; width: 54px; height: 54px; border-radius: 50%; border: none;
+      background: #c7e3ff; color: #02050a; display: grid; place-items: center; pointer-events: none;
+    }
 
-    /* بطاقات الأكشن (Bento) */
-    .action-card { display: flex; align-items: center; gap: 16px; cursor: pointer; position: relative; overflow: hidden; }
-    .card-icon-wrap { width: 46px; height: 46px; border-radius: 16px; display: grid; place-items: center; background: rgba(0,240,255,0.1); color: var(--primary); transition: background 1s, color 1s;}
-    .card-icon-wrap svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
-    .card-info { flex: 1; }
-    .card-title { font-size: 15px; font-weight: 800; margin-bottom: 2px; }
-    .card-sub { font-size: 13px; color: var(--text-dim); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;}
+    /* البار السفلي الاحترافي - الرئيسية بالمنتصف */
+    .bottom-nav {
+      position: absolute; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; align-items: flex-end;
+      padding: 10px 10px calc(15px + env(safe-area-inset-bottom));
+      background: rgba(2, 5, 10, 0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--border); border-radius: 35px 35px 0 0; z-index: 100;
+    }
+    .nav-item { border: none; background: transparent; color: var(--muted); font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; cursor: pointer; }
+    .nav-icon { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .nav-item.active { color: #fff; }
+    .nav-item.active .nav-icon { stroke: #fff; }
+    
+    .nav-home-btn {
+      width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #0044ff, #a900ff);
+      display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; border: none;
+      box-shadow: 0 5px 20px rgba(169,0,255,0.4); transform: translateY(-15px); cursor: pointer; font-family: inherit; font-size: 10px; font-weight: 700;
+    }
+    .nav-home-btn .nav-icon { stroke: #fff; width: 28px; height: 28px; margin-bottom:2px;}
 
-    /* الحديقة (الجوائز) */
-    .garden-stage { text-align: center; padding: 40px 20px; }
-    .tree-emoji { font-size: 85px; filter: drop-shadow(0 10px 20px rgba(0, 240, 255, 0.2)); margin-bottom: 15px; display: inline-block; animation: float 4s ease-in-out infinite alternate; transition: filter 1s;}
-    .progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin: 20px 0 10px; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 0.8s ease, background 1s; }
-
-    /* الكبسولة العائمة (Bottom Nav) الاحترافية */
-    .floating-nav-container { position: absolute; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 100; padding: 0 20px;}
-    .floating-nav { background: rgba(8, 12, 22, 0.9); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 40px; display: flex; justify-content: space-between; padding: 10px 15px; width: 100%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .nav-item { background: transparent; border: none; color: var(--text-dim); padding: 10px; border-radius: 25px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; flex: 1; }
-    .nav-item svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; transition: 0.3s;}
-    .nav-item.active { color: var(--text); background: rgba(255,255,255,0.06); }
-    .nav-item.active svg { stroke: var(--primary); }
-
-    .view { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .view { display: none; animation: fadeIn 0.3s ease; }
     .view.active { display: block; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* الإعدادات والأزرار */
-    .control-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    select, input[type="time"] { background: rgba(0,0,0,0.3); color: var(--text); border: 1px solid var(--border); border-radius: 14px; padding: 14px; font-family: inherit; font-size: 14px; width: 100%; outline: none; margin-top: 8px; transition: border-color 0.3s;}
-    select:focus, input[type="time"]:focus { border-color: var(--primary); }
-    .btn-solid { width: 100%; padding: 16px; border: none; border-radius: 16px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 15px; transition: background 1s;}
+    /* الأقسام والاقتباسات */
+    .category-card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 18px; padding: 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; cursor: pointer; }
+    
+    .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 16px; background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; margin-top:10px;}
+    select, input[type="time"] { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border); border-radius: 12px; outline:none; margin-top:5px; font-family:inherit;}
+    
+    /* النوافذ المنبثقة (Modals) */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; flex-direction: column; padding: 20px; backdrop-filter: blur(10px); }
+    .modal-overlay.show { display: flex; }
+    .close-modal { align-self: flex-start; background: none; border: none; color: #fff; font-size: 35px; cursor: pointer; margin-bottom: 15px; }
 
-    /* قوائم منسدلة (Bottom Sheets) */
-    .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(5px); }
-    .sheet-overlay.show { display: flex; animation: fadeIn 0.3s; }
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    .sheet-content { background: var(--surface); border-top: 1px solid var(--border); border-radius: 32px 32px 0 0; padding: 25px; animation: slideUpSheet 0.3s ease-out; max-height: 85vh; overflow-y: auto; }
-    @keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .sheet-handle { width: 45px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 5px; margin: 0 auto 20px; }
+    /* مبيان الإحصائيات الخطي */
+    .chart-container { width: 100%; height: 130px; background: rgba(0,0,0,0.2); border-radius: 12px; margin: 15px 0; position: relative; border-bottom: 2px solid var(--border); border-left: 2px solid var(--border); overflow: hidden; }
   </style>
 </head>
 <body>
-  <!-- التدرج الديناميكي -->
   <svg width="0" height="0" style="position:absolute;">
-    <defs><linearGradient id="neon-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" id="grad-start" stop-color="var(--primary)"/><stop offset="100%" id="grad-end" stop-color="var(--secondary)"/></linearGradient></defs>
+    <defs><linearGradient id="drop-grad" x1="12" y1="2" x2="12" y2="21"><stop offset="0%" stop-color="#00e5ff"/><stop offset="100%" stop-color="#0066ff"/></linearGradient></defs>
   </svg>
-
-  <div class="ambient-bg"><div class="orb-1"></div><div class="orb-2"></div></div>
 
   <div id="splash">
     <div class="splash-drop"></div>
-    <h1 style="color:white; margin-top:30px; font-size:32px; font-weight:900;">Qatra</h1>
+    <h1 style="color:white; margin-top:30px; font-size:32px;">قطرة</h1>
+    <p style="color:#00e5ff; letter-spacing:4px;">Q A T R A</p>
   </div>
 
-  <!-- القائمة الجانبية (Hamburger) -->
-  <div class="sheet-overlay" id="hamburgerSheet" style="justify-content: flex-start; background: rgba(0,0,0,0.85);">
-    <div style="background: rgba(10,15,25,0.95); width: 80%; height: 100%; padding: 30px 24px; border-left: 1px solid var(--border); position: absolute; right: 0; animation: slideLeft 0.3s;">
-      <button style="background:none; border:none; color:#fff; font-size:35px; text-align:left; margin-bottom:20px; cursor:pointer;" onclick="document.getElementById('hamburgerSheet').classList.remove('show')">×</button>
-      
-      <div class="glass-card" style="padding:15px; margin-bottom:15px;">
-        <div class="control-row" style="border:none; padding:0;">
-          <span style="font-weight:700;" data-i18n="glass_mode">تأثير الزجاج 💎</span>
-          <input type="checkbox" id="glassToggle" style="width:20px;height:20px;accent-color:var(--primary);">
-        </div>
-      </div>
-      <div class="glass-card" style="padding:15px; margin-bottom:15px;">
-        <div class="control-row" style="border:none; padding:0;">
-          <span style="font-weight:700;" data-i18n="dark_mode">الوضع الداكن 🌙</span>
-          <input type="checkbox" id="darkToggle" style="width:20px;height:20px;accent-color:var(--primary);">
-        </div>
-      </div>
-      <div style="margin-bottom:20px;">
-        <label style="color:var(--muted); font-size:13px;" data-i18n="language">اللغة:</label>
-        <select id="langSelect"><option value="ar">العربية</option><option value="en">English</option><option value="fr">Français</option></select>
-      </div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <button id="closeSidebar" style="background:none; border:none; color:white; font-size:30px; text-align:left; margin-bottom:20px; cursor:pointer;">×</button>
+    <div class="glass-panel" style="padding:15px; display:flex; justify-content:space-between;">
+      <span data-i18n="glass_mode">تأثير الزجاج 💎</span>
+      <input type="checkbox" id="glassToggle" style="width:20px;height:20px;accent-color:var(--cyan);">
     </div>
+    <div class="glass-panel" style="padding:15px; display:flex; justify-content:space-between;">
+      <span data-i18n="dark_mode">الوضع الداكن 🌙</span>
+      <input type="checkbox" id="darkToggle" style="width:20px;height:20px;accent-color:var(--cyan);">
+    </div>
+    <div style="margin-bottom:15px;">
+      <label style="color:var(--muted); font-size:12px;" data-i18n="language">لغة التطبيق:</label>
+      <select id="langSelect">
+        <option value="ar">العربية</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+    <button class="btn-primary" style="background:transparent; border:1px solid var(--cyan); color:var(--cyan);" data-i18n="share">📤 مشاركة التطبيق</button>
+  </aside>
+
+  <!-- نافذة البومودورو -->
+  <div class="modal-overlay" id="pomodoroModal">
+    <button class="close-modal" onclick="document.getElementById('pomodoroModal').classList.remove('show')">×</button>
+    <h2 style="color:var(--cyan); margin-top:0;">إعداد جلسة التركيز</h2>
+    <div class="glass-panel">
+      <label style="color:var(--muted); font-size:13px;">مدة الجلسة (دقائق):</label>
+      <select id="pomoTime">
+        <option value="15">15 دقيقة</option>
+        <option value="25" selected>25 دقيقة (بومودورو)</option>
+        <option value="50">50 دقيقة (جلسة عميقة)</option>
+      </select>
+    </div>
+    <div class="glass-panel">
+      <label style="color:var(--muted); font-size:13px;">الصوتيات في الخلفية:</label>
+      <select id="pomoAudio">
+        <option value="none">بدون صوت (صمت)</option>
+        <option value="https://actions.google.com/sounds/v1/water/rain_on_roof.ogg" selected>صوت المطر العذب</option>
+        <option value="https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg">أمواج البحر</option>
+        <option value="https://server8.mp3quran.net/afs/001.mp3">تلاوة قرآنية هادئة</option>
+      </select>
+    </div>
+    <button class="btn-primary" id="startPomodoroBtn">بدء الجلسة في الخلفية</button>
   </div>
-  @keyframes slideLeft { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+  <!-- نافذة محتوى قسم الاقتباسات -->
+  <div class="modal-overlay" id="quotesCategoryModal">
+    <button class="close-modal" onclick="document.getElementById('quotesCategoryModal').classList.remove('show')">×</button>
+    <h2 style="color:var(--cyan); margin-top:0;" id="catModalTitle">القسم</h2>
+    <div style="flex:1; overflow-y:auto;" id="catModalContent"></div>
+  </div>
 
   <div class="app-container">
-    <header class="header">
-      <button class="header-btn" onclick="document.getElementById('statsSheet').classList.add('show')"><svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></button>
+    <header class="topbar">
+      <!-- أزرار وهمية للحفاظ على توسيط الشعار -->
+      <div style="width:30px;"></div>
       <div class="brand">
-        <svg class="brand-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" fill="url(#neon-grad)"/></svg>
+        <svg class="brand-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" fill="url(#drop-grad)"/></svg>
         <div class="brand-name" data-i18n="app_title">قطرة</div>
+        <div class="brand-sub">Q A T R A</div>
       </div>
-      <button class="header-btn" onclick="document.getElementById('hamburgerSheet').classList.add('show')"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+      <button class="hamburger" id="openSidebar"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
     </header>
 
-    <div class="main-content" id="scrollContent">
-      <div class="ptr-container" id="ptrContainer"><div class="ptr-icon" id="ptrIcon"></div></div>
-
-      <!-- 1. الرئيسية (القطرة المركزية) -->
+    <div class="content-area">
+      <!-- 1. الرئيسية -->
       <section class="view active" id="homeView">
-        <div class="hero-container">
-          <div class="hero-ring">
-            <svg class="hero-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
-            <div style="font-size: 16px; font-weight: 800;" data-i18n="focus_session">لحظة وعي</div>
-            
-            <button class="hero-action-btn" onclick="document.getElementById('dropSettingsSheet').classList.add('show')">
-              <!-- أيقونة بدء وإعداد القطرة -->
-              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </button>
+        <div class="timer-wrapper" onclick="document.getElementById('pomodoroModal').classList.add('show')">
+          <div class="timer-inner">
+            <div class="time-display" id="mainTimeDisplay">25:00</div>
+            <div class="timer-label" data-i18n="focus_session">جلسة تركيز<br>وهدوء</div>
+            <button class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
           </div>
         </div>
 
-        <div class="glass-card action-row" id="triggerCinematic">
-          <div class="action-icon" style="color:var(--purple); background:rgba(157,0,255,0.1);"><svg viewBox="0 0 24 24"><path d="M10 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zm10 0h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zM10 11l-2 6M20 11l-2 6"/></svg></div>
-          <div class="action-info">
-            <div class="action-title" data-i18n="quote_of_day">اقتباس اليوم</div>
-            <div class="action-sub" id="dailyQuoteText">...</div>
+        <div class="glass-panel" style="display:flex; align-items:center; gap:15px; cursor:pointer;" onclick="document.querySelector('[data-view=\'settingsView\']').click()">
+          <div style="width:40px;height:40px;background:rgba(0,229,255,0.1);color:var(--cyan);display:grid;place-items:center;border-radius:12px;">
+            <svg width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </div>
-          <div style="color:var(--text-dim); font-size:24px;">›</div>
+          <div style="flex:1;">
+            <div style="font-weight:800; font-size:15px;" data-i18n="upcoming_reminders">تذكيراتك القادمة</div>
+            <div style="font-size:12px; color:var(--muted);" id="nextReminderText">لم تحدد مواعيد</div>
+          </div>
+          <div style="color:var(--muted); font-size:22px;">›</div>
         </div>
-        
-        <div class="glass-card action-row" onclick="document.getElementById('dropSettingsSheet').classList.add('show')">
-          <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-          <div class="action-info">
-            <div class="action-title" data-i18n="upcoming">مواعيدك</div>
-            <div class="action-sub" id="nextReminderText">لا توجد مواعيد</div>
+
+        <div class="glass-panel" style="display:flex; align-items:center; gap:15px; cursor:pointer;" id="triggerCinematic">
+          <div style="width:40px;height:40px;background:rgba(169,0,255,0.1);color:var(--purple);display:grid;place-items:center;border-radius:12px;">
+            <svg width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><path d="M10 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zm10 0h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zM10 11l-2 6M20 11l-2 6"/></svg>
           </div>
-          <div style="color:var(--text-dim); font-size:24px;">›</div>
+          <div style="flex:1;">
+            <div style="font-weight:800; font-size:15px;" data-i18n="quote_of_day">اقتباس اليوم</div>
+            <div style="font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="dailyQuoteText">...</div>
+          </div>
+          <div style="color:var(--muted); font-size:22px;">›</div>
         </div>
       </section>
 
-      <!-- 2. تأمل وجلسة تركيز -->
+      <!-- 2. تأمل -->
       <section class="view" id="meditationView">
-        <h2 style="color:var(--primary); margin-top:0;" data-i18n="meditation">تأمل وتركيز</h2>
+        <h2 style="color:var(--cyan); margin-top:0;" data-i18n="meditation">تأمل واسترخاء</h2>
+        <div class="glass-panel" style="text-align:center; padding:40px 20px;">
+          <div id="audioStatus" style="font-size:16px; margin-bottom:20px; font-weight:bold;">محتوى عشوائي للاسترخاء</div>
+          <button class="btn-primary" id="playRandomAudioBtn">▶ تشغيل الآن</button>
+        </div>
+      </section>
+
+      <!-- 3. تفعيل القطرة (الإعدادات) -->
+      <section class="view" id="settingsView">
+        <h2 style="color:var(--cyan); margin-top:0;" data-i18n="qatra_settings">تفعيل القطرة</h2>
         
-        <div class="glass-card" style="text-align:center; padding:40px 20px;">
-          <div class="action-icon" style="margin:0 auto 20px; width:60px; height:60px;"><svg viewBox="0 0 24 24" style="width:30px; height:30px;"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-3-5a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/></svg></div>
-          <div id="audioStatus" style="font-size:18px; font-weight:800; margin-bottom:10px;">جلسة هدوء مفتوحة</div>
-          <div style="color:var(--text-dim); font-size:13px; margin-bottom:25px;">قرآن وأصوات طبيعة</div>
-          <button class="btn-solid" id="playRandomAudioBtn">▶ تشغيل الآن</button>
-        </div>
+        <div class="glass-panel">
+          <label style="color:var(--muted); font-size:13px;">طريقة الظهور:</label>
+          <select id="notifModeSetting">
+            <option value="both">إشعار نصي + قطرة مائية سينمائية</option>
+            <option value="floating">القطرة المائية فقط</option>
+            <option value="notification">إشعار نصي فقط</option>
+          </select>
+          
+          <label style="color:var(--muted); font-size:13px; display:block; margin-top:15px;">مدة اختفاء القطرة المائية:</label>
+          <select id="dropDurationSetting">
+            <option value="5000">5 ثوانٍ</option>
+            <option value="10000" selected>10 ثوانٍ</option>
+            <option value="15000">15 ثانية</option>
+          </select>
 
-        <div class="glass-card" style="margin-top:20px;">
-          <h3 style="margin-top:0; font-size:16px;">مؤقت البومودورو (يعمل بالخلفية)</h3>
-          <select id="pomoTime"><option value="15">15 دقيقة</option><option value="25" selected>25 دقيقة</option><option value="50">50 دقيقة</option></select>
-          <select id="pomoAudio"><option value="none">بدون صوت</option><option value="https://actions.google.com/sounds/v1/water/rain_on_roof.ogg" selected>صوت المطر</option><option value="https://server8.mp3quran.net/afs/001.mp3">قرآن</option></select>
-          <button class="btn-solid" id="startPomodoroBtn" style="background:rgba(0,240,255,0.1); color:var(--primary);">بدء الجلسة</button>
+          <label style="color:var(--muted); font-size:13px; display:block; margin-top:15px;">التكرار التلقائي للمدد:</label>
+          <select id="intervalSelect">
+            <option value="0">بدون تكرار</option>
+            <option value="30">كل 30 دقيقة</option>
+            <option value="60">كل 1 ساعة</option>
+            <option value="180">كل 3 ساعات</option>
+          </select>
+
+          <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:15px;">
+            <label style="color:var(--muted); font-size:13px;">تحديد موعد مخصص بالدقيقة:</label>
+            <input type="time" id="customTime">
+            <button class="btn-primary" id="saveScheduleBtn" style="margin-top:10px;">حفظ الموعد</button>
+          </div>
+          <div id="savedSchedulesList" style="margin-top:15px;"></div>
         </div>
+        <button class="btn-primary" id="previewFloatingBtn" style="background:var(--cyan); color:#000;">معاينة القطرة السينمائية الآن 🎬</button>
       </section>
 
-      <!-- 3. الحديقة والجوائز -->
-      <section class="view" id="gardenView">
-        <h2 style="color:var(--primary); margin-top:0;" data-i18n="garden">حديقتك</h2>
-        <div class="glass-card garden-stage">
-          <div class="tree-emoji" id="treeEmoji">🌱</div>
-          <div style="font-size:24px; font-weight:900; color:var(--primary); margin-bottom:5px;" id="treeLevelName">بذرة النوايا</div>
-          <div style="font-size:14px; color:var(--text-dim); margin-bottom:25px;" id="treeDesc">استمر في استلام القطرات لتنمو!</div>
-          <div class="progress-bar"><div class="progress-fill" id="treeProgress"></div></div>
-          <div style="font-size:13px; color:var(--text-dim); margin-top:10px; font-weight:bold;" id="treeStats">المستوى: 1</div>
-        </div>
-      </section>
-
-      <!-- 4. المكتبة (أقسام) -->
+      <!-- 4. الاقتباسات (أقسام) -->
       <section class="view" id="libraryView">
-        <h2 style="color:var(--primary); margin-top:0;" data-i18n="quotes">المكتبة الشاملة</h2>
+        <h2 style="color:var(--cyan); margin-top:0;" data-i18n="quotes">اقتباسات</h2>
         <div id="categoriesContainer"></div>
       </section>
+
+      <!-- 5. الإحصائيات -->
+      <section class="view" id="statsView">
+        <h2 style="color:var(--cyan); margin-top:0;" data-i18n="stats">إحصائيات التقدم 📈</h2>
+        <div class="glass-panel">
+          <div class="chart-container">
+            <svg viewBox="0 0 100 50" preserveAspectRatio="none" style="width:100%; height:100%;">
+              <polyline fill="none" stroke="#00e5ff" stroke-width="2" points="0,45 20,35 40,25 60,30 80,15 100,5" />
+              <polygon fill="rgba(0,229,255,0.15)" points="0,50 0,45 20,35 40,25 60,30 80,15 100,5 100,50" />
+            </svg>
+          </div>
+          <div style="font-size:15px; line-height:2.5;">
+            <div>⏳ أيام الاستخدام: <span id="statDays">1</span></div>
+            <div>🔔 الإشعارات: <span id="statNotifs">0</span></div>
+            <div>💧 القطرات: <span id="statDrops">0</span></div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- الكبسولة العائمة (Bottom Nav) بتصميم أيقونات دقيق -->
-    <div class="floating-nav-container">
-      <nav class="floating-nav">
-        <button class="nav-item" data-view="libraryView">
-          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-        </button>
-        <button class="nav-item" data-view="gardenView">
-          <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 1 8.3C19.2 15.66 15.14 20 11 20z"/><path d="M11 20v-5c0-1.42 1.13-2.61 2.5-2.84"/></svg>
-        </button>
-        <button class="nav-item active" data-view="homeView">
-          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        </button>
-        <button class="nav-item" data-view="meditationView">
-          <svg viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-2a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-3-5a3 3 0 1 0 6 0 3 3 0 0 0-6 0z"/></svg>
-        </button>
-      </nav>
-    </div>
-  </div>
-
-  <!-- ================= Bottom Sheets ================= -->
-
-  <!-- إعدادات القطرة -->
-  <div class="sheet-overlay" id="dropSettingsSheet">
-    <div class="sheet-content">
-      <div class="sheet-handle"></div>
-      <h3 style="margin-top:0; font-weight:800;" data-i18n="qatra_settings">برمجة القطرة</h3>
+    <!-- البار السفلي الاحترافي - الرئيسية في الوسط -->
+    <nav class="bottom-nav">
+      <!-- زر الاقتباسات (أيقونة علامتي تنصيص) -->
+      <button class="nav-item" data-view="libraryView">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M10 11h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zm10 0h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6zM10 11l-2 6M20 11l-2 6"/></svg>
+        <span data-i18n="quotes">اقتباسات</span>
+      </button>
+      <!-- زر تأمل (أيقونة لوتس) -->
+      <button class="nav-item" data-view="meditationView">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16v-4m0-4h.01"/></svg>
+        <span data-i18n="meditation">تأمل</span>
+      </button>
       
-      <label style="color:var(--text-dim); font-size:13px; margin-top:10px; display:block;">طريقة الظهور:</label>
-      <select id="notifModeSetting">
-        <option value="both">قطرة مائية + إشعار النظام</option>
-        <option value="floating">القطرة المائية فقط</option>
-        <option value="notification">إشعار النظام فقط</option>
-      </select>
-      
-      <label style="color:var(--text-dim); font-size:13px; margin-top:15px; display:block;">مدة اختفاء القطرة:</label>
-      <select id="dropDurationSetting">
-        <option value="5000">5 ثوانٍ</option><option value="10000" selected>10 ثوانٍ</option><option value="15000">15 ثانية</option>
-      </select>
+      <!-- زر الرئيسية الدائري المميز في المنتصف -->
+      <button class="nav-item nav-home-btn active" data-view="homeView">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span data-i18n="home">الرئيسية</span>
+      </button>
 
-      <label style="color:var(--text-dim); font-size:13px; margin-top:15px; display:block;">التكرار التلقائي (بالمدد):</label>
-      <select id="intervalSelect">
-        <option value="0">بدون تكرار</option><option value="30">كل نصف ساعة</option><option value="60">كل 1 ساعة</option><option value="180">كل 3 ساعات</option><option value="720">كل 12 ساعة</option><option value="1440">كل 24 ساعة</option>
-      </select>
-
-      <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
-        <label style="color:var(--text-dim); font-size:13px; display:block;">إضافة موعد مخصص بالساعة والدقيقة:</label>
-        <input type="time" id="customTime">
-        <button class="btn-solid" id="saveScheduleBtn" style="margin-top:15px; background:rgba(255,255,255,0.1); color:#fff;">حفظ الموعد</button>
-      </div>
-      <div id="savedSchedulesList" style="margin-top:20px;"></div>
-      
-      <button class="btn-solid" id="previewFloatingBtn">معاينة القطرة الآن 🎬</button>
-      <button class="btn-solid" onclick="document.getElementById('dropSettingsSheet').classList.remove('show')" style="background:transparent; border:1px solid var(--border); color:var(--text);">إغلاق</button>
-    </div>
+      <!-- زر إعدادات القطرة -->
+      <button class="nav-item" data-view="settingsView">
+        <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span data-i18n="qatra_settings">القطرة</span>
+      </button>
+      <!-- زر الإحصائيات -->
+      <button class="nav-item" data-view="statsView">
+        <svg class="nav-icon" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        <span data-i18n="stats">إحصائيات</span>
+      </button>
+    </nav>
   </div>
-
-  <!-- محتوى القسم -->
-  <div class="sheet-overlay" id="categorySheet">
-    <div class="sheet-content" style="height:85vh; display:flex; flex-direction:column;">
-      <div class="sheet-handle"></div>
-      <h3 style="margin-top:0; color:var(--cyan);" id="catSheetTitle">القسم</h3>
-      <div style="flex:1; overflow-y:auto; padding-right:5px;" id="catSheetContent"></div>
-      <button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')">رجوع</button>
-    </div>
-  </div>
-
-  <!-- الإحصائيات -->
-  <div class="sheet-overlay" id="statsSheet">
-    <div class="sheet-content">
-      <div class="sheet-handle"></div>
-      <h3 style="margin-top:0;">إحصائياتك 📈</h3>
-      <div style="width:100%; height:140px; background:rgba(0,0,0,0.3); border-radius:16px; margin: 20px 0; position:relative; overflow:hidden; border-bottom: 2px solid var(--border); border-left:2px solid var(--border);">
-        <svg viewBox="0 0 100 50" preserveAspectRatio="none" style="width:100%; height:100%;">
-          <polyline fill="none" stroke="var(--primary)" stroke-width="2" points="0,45 20,35 40,25 60,30 80,15 100,5" style="transition: stroke 1s;"/>
-          <polygon fill="var(--border-glow)" points="0,50 0,45 20,35 40,25 60,30 80,15 100,5 100,50" style="transition: fill 1s;"/>
-        </svg>
-      </div>
-      <div style="font-size:16px; line-height:2.8; font-weight:700;">
-        <div class="control-row"><span>أيام الاستخدام:</span> <span id="statDays">1</span></div>
-        <div class="control-row"><span>الإشعارات:</span> <span id="statNotifs">0</span></div>
-        <div class="control-row" style="border:none;"><span>القطرات:</span> <span id="statDrops" style="color:var(--cyan);">0</span></div>
-      </div>
-      <button class="btn-solid" onclick="document.getElementById('statsSheet').classList.remove('show')">إغلاق</button>
-    </div>
-  </div>
-
   <script src="app.js"></script>
 </body>
 </html>
