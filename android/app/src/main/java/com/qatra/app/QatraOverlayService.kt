@@ -20,7 +20,6 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
-import com.qatra.app.R // استيراد مسار R
 
 class QatraOverlayService : Service() {
     private var windowManager: WindowManager? = null
@@ -40,7 +39,7 @@ class QatraOverlayService : Service() {
         if (overlayContainer != null) return
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val screenHeight = resources.displayMetrics.heightPixels.toFloat()
-        val bottomLandingY = screenHeight - 200f // القاع تماماً
+        val bottomLandingY = screenHeight - 200f
 
         overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#99030610")) }
         
@@ -52,7 +51,6 @@ class QatraOverlayService : Service() {
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) params.blurBehindRadius = 40
 
-        // دوائر الماء (مخفية في القاع)
         val ripple = View(this).apply {
             background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#8000d2ff")) }
             alpha = 0f
@@ -60,7 +58,6 @@ class QatraOverlayService : Service() {
         }
         val rippleParams = FrameLayout.LayoutParams(100, 40).apply { gravity = Gravity.CENTER }
 
-        // القطرة العمودية
         val dropSize = 100
         val dropView = View(this).apply {
             background = GradientDrawable().apply {
@@ -72,7 +69,6 @@ class QatraOverlayService : Service() {
         }
         val dropParams = FrameLayout.LayoutParams(dropSize, dropSize).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL }
 
-        // النص بخط عربي أنيق بدون إطار
         val quoteText = TextView(this).apply {
             text = quote
             setTextColor(Color.WHITE)
@@ -93,20 +89,21 @@ class QatraOverlayService : Service() {
 
         val handler = Handler(Looper.getMainLooper())
         
-        // 1. السقوط للقاع
         dropView.translationY = -300f
         ObjectAnimator.ofFloat(dropView, "translationY", -300f, bottomLandingY).apply {
             duration = 1000; interpolator = AccelerateInterpolator(); start()
         }
 
-        // 2. الارتطام، تشغيل صوت القطرة المحمل، ودوائر الماء
         handler.postDelayed({
             dropView.visibility = View.GONE
             
-            // تشغيل صوت القطرة المائية الحقيقي
+            // الطريقة الآمنة للصوت
             try {
-                mediaPlayer = MediaPlayer.create(this, R.raw.drop_sound)
-                mediaPlayer?.start()
+                val resId = resources.getIdentifier("drop_sound", "raw", packageName)
+                if (resId != 0) {
+                    mediaPlayer = MediaPlayer.create(this, resId)
+                    mediaPlayer?.start()
+                }
             } catch (e: Exception) {}
 
             ripple.alpha = 1f
@@ -115,7 +112,6 @@ class QatraOverlayService : Service() {
             val rFade = ObjectAnimator.ofFloat(ripple, "alpha", 1f, 0f).setDuration(800)
             AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 
-            // 3. خروج النص من القاع وصعوده للمنتصف
             quoteText.translationY = bottomLandingY / 2f
             quoteText.scaleX = 0.2f
             quoteText.scaleY = 0.2f
@@ -130,7 +126,6 @@ class QatraOverlayService : Service() {
 
         }, 1000)
 
-        // 4. الاختفاء حسب المدة المحددة
         handler.postDelayed({
             ObjectAnimator.ofFloat(overlayContainer, "alpha", 1f, 0f).setDuration(800).start()
             handler.postDelayed({ stopSelf() }, 800)

@@ -9,7 +9,6 @@ import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.qatra.app.R // استيراد مسار R
 
 class QatraAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -32,7 +31,10 @@ class QatraAlarmReceiver : BroadcastReceiver() {
     private fun showNotificationWithDropSound(context: Context, quote: String) {
         val channelId = "qatra_drop_channel"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val soundUri = Uri.parse("android.resource://" + context.packageName + "/" + R.raw.drop_sound)
+        
+        // الطريقة الآمنة للوصول لملف الصوت بدون Import R
+        val resId = context.resources.getIdentifier("drop_sound", "raw", context.packageName)
+        val soundUri = Uri.parse("android.resource://" + context.packageName + "/" + resId)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "QATRA Drops", NotificationManager.IMPORTANCE_HIGH).apply {
@@ -41,7 +43,7 @@ class QatraAlarmReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_popup_reminder) // أيقونة الإشعار الافتراضية
+            .setSmallIcon(android.R.drawable.ic_popup_reminder)
             .setContentTitle("قطرة (QATRA)")
             .setContentText(quote)
             .setSound(soundUri)
