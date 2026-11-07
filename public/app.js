@@ -1,6 +1,6 @@
 "use strict";
 
-const STORE_KEY = "qatra_worldclass_v3";
+const STORE_KEY = "qatra_worldclass_v4";
 
 // === قاموس الترجمة الشامل ===
 const DICT = {
@@ -9,7 +9,9 @@ const DICT = {
     click_to_program: "اضغط لبرمجة قطرتك", quote_of_day: "اقتباس اليوم", scheduled_reminders: "مواعيدك المبرمجة",
     no_reminders: "لا توجد مواعيد", drop_settings: "إعداد قطرتك", source_category: "1. مصدر العبارات",
     all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات",
-    cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", display_method: "2. طريقة العرض وتفضيلاتك",
+    cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", my_library: "مكتبتي الخاصة", my_library_title: "مكتبتي الخاصة",
+    add_your_quotes: "أضف عباراتك الخاصة (حتى 50)", enter_quote: "أدخل عبارتك هنا...", add: "إضافة",
+    display_method: "2. طريقة العرض وتفضيلاتك",
     mode_both: "تنبيه النظام + قطرة مائية (معاً)", mode_floating: "القطرة المائية فقط", mode_notification: "تنبيه النظام فقط",
     dur_5: "مدة القطرة: 5 ثوانٍ", dur_10: "مدة القطرة: 10 ثوانٍ", dur_15: "مدة القطرة: 15 ثانية",
     schedule_repeat: "3. جدولة المواعيد (تكرار مستمر)", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة",
@@ -28,7 +30,9 @@ const DICT = {
     click_to_program: "Tap to config Drop", quote_of_day: "Daily Quote", scheduled_reminders: "Your Reminders",
     no_reminders: "No scheduled reminders", drop_settings: "Drop Settings", source_category: "1. Quotes Source",
     all_categories: "Random (All categories)", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development",
-    cat_quran: "Quranic Verses", cat_culture: "Culture & Wisdom", display_method: "2. Display Mode",
+    cat_quran: "Quranic Verses", cat_culture: "Culture & Wisdom", my_library: "My Library", my_library_title: "My Custom Library",
+    add_your_quotes: "Add your custom quotes (up to 50)", enter_quote: "Enter your quote here...", add: "Add",
+    display_method: "2. Display Mode",
     mode_both: "Notification + Drop (Both)", mode_floating: "Floating Drop Only", mode_notification: "Notification Only",
     dur_5: "Duration: 5 Secs", dur_10: "Duration: 10 Secs", dur_15: "Duration: 15 Secs",
     schedule_repeat: "3. Auto Repeat", stop_repeat: "Stop Auto Repeat", every_30: "Every 30 Mins",
@@ -43,11 +47,13 @@ const DICT = {
     quotes_ready: "Quotes"
   },
   fr: {
-    app_title: "Qatra | Goutte", pull_to_switch: "Tirez pour changer de thème", moment_zen: "Moment Zen",
+    app_title: "Qatra | Goutte", pull_to_switch: "Tirez pour changer", moment_zen: "Moment Zen",
     click_to_program: "Configurer la Goutte", quote_of_day: "Citation du Jour", scheduled_reminders: "Vos Rappels",
     no_reminders: "Aucun rappel", drop_settings: "Paramètres", source_category: "1. Source des citations",
     all_categories: "Aléatoire", cat_dhikr: "Dhikr & Invocations", cat_selfDev: "Développement Personnel",
-    cat_quran: "Versets Coraniques", cat_culture: "Culture & Sagesse", display_method: "2. Mode d'affichage",
+    cat_quran: "Versets Coraniques", cat_culture: "Culture & Sagesse", my_library: "Ma Bibliothèque", my_library_title: "Ma Bibliothèque",
+    add_your_quotes: "Ajoutez vos citations (jusqu'à 50)", enter_quote: "Entrez votre citation...", add: "Ajouter",
+    display_method: "2. Mode d'affichage",
     mode_both: "Notification + Goutte (Les deux)", mode_floating: "Goutte Uniquement", mode_notification: "Notification Uniquement",
     dur_5: "Durée: 5 Sec", dur_10: "Durée: 10 Sec", dur_15: "Durée: 15 Sec",
     schedule_repeat: "3. Répétition Auto", stop_repeat: "Arrêter la Répétition", every_30: "Toutes les 30 Min",
@@ -66,7 +72,9 @@ const DICT = {
     click_to_program: "Configurar Gota", quote_of_day: "Cita del Día", scheduled_reminders: "Tus Recordatorios",
     no_reminders: "Sin recordatorios", drop_settings: "Configuración", source_category: "1. Fuente de Citas",
     all_categories: "Aleatorio", cat_dhikr: "Dhikr y Súplicas", cat_selfDev: "Desarrollo Personal",
-    cat_quran: "Versículos Coránicos", cat_culture: "Cultura y Sabiduría", display_method: "2. Modo de visualización",
+    cat_quran: "Versículos Coránicos", cat_culture: "Cultura y Sabiduría", my_library: "Mi Biblioteca", my_library_title: "Mi Biblioteca",
+    add_your_quotes: "Añade tus citas (hasta 50)", enter_quote: "Introduce tu cita...", add: "Añadir",
+    display_method: "2. Modo de visualización",
     mode_both: "Notificación + Gota (Ambos)", mode_floating: "Solo Gota", mode_notification: "Solo Notificación",
     dur_5: "Duración: 5 Seg", dur_10: "Duración: 10 Seg", dur_15: "Duración: 15 Seg",
     schedule_repeat: "3. Repetición Automática", stop_repeat: "Detener Repetición", every_30: "Cada 30 Min",
@@ -85,7 +93,9 @@ const DICT = {
     click_to_program: "Tropfen konfigurieren", quote_of_day: "Zitat des Tages", scheduled_reminders: "Ihre Erinnerungen",
     no_reminders: "Keine Erinnerungen", drop_settings: "Einstellungen", source_category: "1. Zitatquelle",
     all_categories: "Zufällig", cat_dhikr: "Dhikr & Bittgebete", cat_selfDev: "Selbstentwicklung",
-    cat_quran: "Koranverse", cat_culture: "Kultur & Weisheit", display_method: "2. Anzeigemodus",
+    cat_quran: "Koranverse", cat_culture: "Kultur & Weisheit", my_library: "Meine Bibliothek", my_library_title: "Meine Bibliothek",
+    add_your_quotes: "Eigene Zitate (bis 50)", enter_quote: "Zitat eingeben...", add: "Hinzufügen",
+    display_method: "2. Anzeigemodus",
     mode_both: "Benachrichtigung + Tropfen", mode_floating: "Nur Tropfen", mode_notification: "Nur Benachrichtigung",
     dur_5: "Dauer: 5 Sek", dur_10: "Dauer: 10 Sek", dur_15: "Dauer: 15 Sek",
     schedule_repeat: "3. Auto-Wiederholung", stop_repeat: "Wiederholung stoppen", every_30: "Alle 30 Min",
@@ -112,7 +122,8 @@ const QUOTES_DB = {
 
 let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
   lang: 'ar', dark: true, glass: true, mode: 'both', duration: 10000, interval: '0',
-  quoteSource: 'all', schedules: [], stats: { drops: 0, notifs: 0, days: 1 }
+  quoteSource: 'all', customQuotes: ["مرحباً بك في قطرة. هذه عبارتك الأولى في مكتبتك."], 
+  schedules: [], stats: { drops: 0, notifs: 0, days: 1 }
 };
 
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
@@ -140,6 +151,10 @@ function applyState() {
     const key = el.getAttribute('data-i18n');
     if (DICT[state.lang][key]) el.textContent = DICT[state.lang][key];
   });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (DICT[state.lang][key]) el.placeholder = DICT[state.lang][key];
+  });
 
   const c = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
   const s = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
@@ -149,19 +164,57 @@ function applyState() {
   s('notifModeSetting', state.mode); 
   s('dropDurationSetting', state.duration); 
   s('intervalSelect', state.interval);
-  s('quoteCategorySetting', state.quoteSource);
+  
+  // تحديث شكل القائمة الراديو الاحترافية
+  document.querySelectorAll('.custom-radio-item').forEach(item => {
+    if(item.dataset.value === state.quoteSource) item.classList.add('active');
+    else item.classList.remove('active');
+  });
 
   const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
   setTxt('statDrops', state.stats.drops);
   setTxt('statNotifs', state.stats.notifs);
   setTxt('statDays', state.stats.days);
 
-  renderCategories(); renderGarden(); renderSchedules();
+  renderCategories(); renderGarden(); renderSchedules(); renderMyLibrary();
 }
 
-// تغيير اللغة
+// تغيير اللغة والمصدر
 safeOn('langSelect', 'change', e => { state.lang = e.target.value; applyState(); syncNativeAlarms(); });
-safeOn('quoteCategorySetting', 'change', e => { state.quoteSource = e.target.value; applyState(); syncNativeAlarms(); });
+window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); syncNativeAlarms(); };
+
+// --- مكتبتي الخاصة (إضافة وحذف العبارات المخصصة) ---
+function renderMyLibrary() {
+  const list = document.getElementById('myLibraryList');
+  const countTxt = document.getElementById('myLibraryCount');
+  if(!list || !countTxt) return;
+  
+  countTxt.innerText = `العبارات المضافة: ${state.customQuotes.length} / 50`;
+  list.innerHTML = state.customQuotes.map((q, i) => `
+    <div class="my-quote-item">
+      <div style="flex:1; margin-inline-end:10px; font-weight:600; line-height:1.5;">${q}</div>
+      <button class="delete-btn" onclick="deleteCustomQuote(${i})">${getTranslation('delete')}</button>
+    </div>
+  `).join('');
+}
+
+safeOn('addQuoteBtn', 'click', () => {
+  const input = document.getElementById('newQuoteInput');
+  const txt = input.value.trim();
+  if (txt !== "" && state.customQuotes.length < 50) {
+    state.customQuotes.push(txt);
+    input.value = "";
+    applyState(); syncNativeAlarms();
+  } else if (state.customQuotes.length >= 50) {
+    alert("لقد وصلت للحد الأقصى (50 عبارة). احذف بعض العبارات لإضافة المزيد.");
+  }
+});
+
+window.deleteCustomQuote = (i) => {
+  state.customQuotes.splice(i, 1);
+  applyState(); syncNativeAlarms();
+};
+
 
 // --- الأيام والمواعيد ---
 const WEEK_DAYS = {
@@ -189,7 +242,6 @@ const GARDEN = [
   { max: 5, emoji: '🌱' }, { max: 20, emoji: '🌿' }, { max: 50, emoji: '🪴' },
   { max: 100, emoji: '🌳' }, { max: 200, emoji: '🌸' }, { max: 9999, emoji: '🌲' }
 ];
-// الترجمة المباشرة للحديقة للتسهيل
 const gardenNames = {ar: ['بذرة النوايا','برعم التغيير','نبتة الإصرار','شجرة المعرفة','شجرة مزدهرة','غابة الحكمة'], en: ['Seed of Intention','Sprout of Change','Plant of Persistence','Tree of Knowledge','Blooming Tree','Forest of Wisdom'], fr: ['Graine d\'Intention','Pousse de Changement','Plante de Persistance','Arbre de la Connaissance','Arbre en Fleurs','Forêt de la Sagesse'], es: ['Semilla de Intención','Brote de Cambio','Planta de Persistencia','Árbol del Conocimiento','Árbol Floreciente','Bosque de Sabiduría'], de: ['Samen der Absicht','Spross der Veränderung','Pflanze der Beharrlichkeit','Baum des Wissens','Blühender Baum','Wald der Weisheit']};
 const gardenDescs = {ar: ['كل قطرة تسقي بها روحك تنبت بذرة.','بداية جميلة، استمر!','جذورك تزداد قوة.','أصبحت تستظل بوعيك.','أثمرت جهودك نوراً.','أنت تزرع أرضاً من الوعي.'], en: ['Every drop grows a seed.','Great start, keep going!','Your roots are growing stronger.','Basking in your awareness.','Your efforts are bearing light.','You are planting a land of awareness.'], fr: ['Chaque goutte fait pousser une graine.','Bon début, continuez!','Vos racines se renforcent.','Vous vous prélassez dans la conscience.','Vos efforts portent de la lumière.','Vous plantez une terre de conscience.'], es: ['Cada gota hace crecer una semilla.','¡Buen comienzo, sigue así!','Tus raíces se están fortaleciendo.','Disfrutando de tu conciencia.','Tus esfuerzos dan luz.','Estás plantando una tierra de conciencia.'], de: ['Jeder Tropfen lässt einen Samen wachsen.','Toller Start, mach weiter!','Deine Wurzeln werden stärker.','Du sonnst dich in deinem Bewusstsein.','Deine Bemühungen bringen Licht.','Du pflanzt ein Land des Bewusstseins.']};
 
@@ -268,13 +320,15 @@ function getRandomQuote() {
   let pool = [];
   if (state.quoteSource === 'all') {
     Object.keys(QUOTES_DB).forEach(k => { pool = pool.concat(QUOTES_DB[k].items); });
+  } else if (state.quoteSource === 'myLibrary') {
+    pool = state.customQuotes.length > 0 ? state.customQuotes : ["أضف عبارات في مكتبتك الخاصة"];
   } else {
     pool = QUOTES_DB[state.quoteSource].items;
   }
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// دالة القطرة السينمائية (FullScreen)
+// دالة القطرة السينمائية
 window.fireCinematic = async () => {
   const quote = getRandomQuote();
   const qtEl = document.getElementById('dailyQuoteText');
@@ -282,7 +336,6 @@ window.fireCinematic = async () => {
 
   if (QatraNative) {
     state.stats.drops++; applyState();
-    // إرسال وضع الشاشة الكاملة (إن وجد) للمحرك
     await QatraNative.showDrop({ quote: quote, duration: state.duration, fullScreen: true }).catch(e=>{});
   }
 };
@@ -325,7 +378,10 @@ let randPlayer = new Audio(); let isRandPlaying = false;
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
 
-  if (QatraNative) { QatraNative.askPermissions().catch(e => console.log(e)); }
+  // 1. طلب الأذونات فوراً في البداية مع بدء التطبيق
+  if (QatraNative) { 
+      QatraNative.askPermissions().catch(e => console.log(e)); 
+  }
 
   safeOn('glassToggle', 'change', e => { state.glass = e.target.checked; applyState(); });
   safeOn('notifModeSetting', 'change', e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); });
