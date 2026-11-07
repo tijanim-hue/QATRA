@@ -81,6 +81,15 @@ safeOn('langSelect', 'change', e => { state.lang = e.target.value; applyState();
 safeOn('imageToggle', 'change', e => { state.showImage = e.target.checked; applyState(); syncNativeAlarms(); });
 safeOn('homeCardsToggle', 'change', e => { state.showHomeCards = e.target.checked; applyState(); });
 
+// --- استماع لتفاعل القلب من القطرة ---
+if (QatraNative) {
+  QatraNative.addListener('quoteLiked', (info) => {
+    state.stats.drops++;
+    if (state.stats[info.category] !== undefined) state.stats[info.category]++;
+    applyState();
+  });
+}
+
 // --- الرئيسية (تحديث البطاقات) ---
 function updateHomeCards() {
   const now = new Date();
@@ -198,6 +207,7 @@ window.fireCinematic = async () => {
   const qtEl = document.getElementById('dailyQuoteText'); if (qtEl) qtEl.textContent = `"${quote}"`;
   
   if (QatraNative) {
+    // القطرة في المعاينة تعتبر تفاعلاً
     state.stats.drops++; state.stats[catKey]++; applyState();
     await QatraNative.showDrop({ quote: quote, category: catKey, duration: state.duration, fullScreen: true, showImage: state.showImage }).catch(e=>{});
   }
@@ -218,6 +228,10 @@ window.playAudio = (type) => {
   const aMap = { 'rain': 'https://actions.google.com/sounds/v1/water/rain_on_roof.ogg', 'sea': 'https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg', 'quran1': 'https://server8.mp3quran.net/afs/001.mp3' };
   if(aMap[type]) { randPlayer.src = aMap[type]; randPlayer.play(); }
 };
+window.startSession = (mins) => {
+  alert(`بدأت جلسة ${mins} دقائق. يرجى الاسترخاء وإغلاق عينيك.`);
+  setTimeout(() => alert("انتهت الجلسة بنجاح."), mins * 60000);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   if (QatraNative) QatraNative.askPermissions().catch(e => console.log(e));
