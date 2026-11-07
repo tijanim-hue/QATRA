@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -24,8 +23,6 @@ import android.widget.TextView
 class QatraOverlayService : Service() {
     private var windowManager: WindowManager? = null
     private var overlayContainer: FrameLayout? = null
-    private var fallPlayer: MediaPlayer? = null
-    private var popPlayer: MediaPlayer? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -42,11 +39,14 @@ class QatraOverlayService : Service() {
         val screenHeight = resources.displayMetrics.heightPixels.toFloat()
         val bottomLandingY = screenHeight - 200f
 
+        // شاشة زجاجية داكنة لتغطية كامل الشاشة
         overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#E6030610")) }
         
+        // الأعلام التي تجبر الشاشة على الامتداد فوق شريط حالة الهاتف والعمل في الخلفية
         var layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
                           WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or 
                           WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                          WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                           WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                           
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -100,26 +100,15 @@ class QatraOverlayService : Service() {
 
         val handler = Handler(Looper.getMainLooper())
         
-        // تشغيل صوت السقوط
-        try {
-            val fallResId = resources.getIdentifier("drop_fall_sound", "raw", packageName)
-            if (fallResId != 0) { fallPlayer = MediaPlayer.create(this, fallResId); fallPlayer?.start() }
-        } catch (e: Exception) {}
-        
-        dropView.translationY = -300f
-        ObjectAnimator.ofFloat(dropView, "translationY", -300f, bottomLandingY).apply {
+        // إجبار الأندرويد على عرض نزول القطرة فوراً
+        dropView.translationY = -screenHeight
+        ObjectAnimator.ofFloat(dropView, "translationY", -screenHeight, bottomLandingY).apply {
             duration = 1000; interpolator = AccelerateInterpolator(); start()
         }
 
         handler.postDelayed({
             dropView.visibility = View.GONE
             
-            // تشغيل صوت الفرقعة عند وصول القطرة
-            try {
-                val popResId = resources.getIdentifier("drop_pop_sound", "raw", packageName)
-                if (popResId != 0) { popPlayer = MediaPlayer.create(this, popResId); popPlayer?.start() }
-            } catch (e: Exception) {}
-
             ripple.alpha = 1f
             val rScaleX = ObjectAnimator.ofFloat(ripple, "scaleX", 1f, 15f).setDuration(800)
             val rScaleY = ObjectAnimator.ofFloat(ripple, "scaleY", 1f, 15f).setDuration(800)
@@ -127,13 +116,15 @@ class QatraOverlayService : Service() {
             AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 
             quoteText.translationY = bottomLandingY / 2f
-            quoteText.scaleX = 0.2f; quoteText.scaleY = 0.2f
+            quoteText.scaleX = 0.2f
+            quoteText.scaleY = 0.2f
             
             val tRise = ObjectAnimator.ofFloat(quoteText, "translationY", bottomLandingY / 2f, 0f).setDuration(2500)
             tRise.interpolator = DecelerateInterpolator(1.2f)
             val tGrowX = ObjectAnimator.ofFloat(quoteText, "scaleX", 0.2f, 1f).setDuration(2500)
             val tGrowY = ObjectAnimator.ofFloat(quoteText, "scaleY", 0.2f, 1f).setDuration(2500)
             val tFade = ObjectAnimator.ofFloat(quoteText, "alpha", 0f, 1f).setDuration(1500)
+            
             AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade); start() }
 
         }, 1000)
@@ -146,8 +137,6 @@ class QatraOverlayService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        fallPlayer?.release()
-        popPlayer?.release()
         if (overlayContainer != null) { windowManager?.removeView(overlayContainer); overlayContainer = null }
     }
 }
