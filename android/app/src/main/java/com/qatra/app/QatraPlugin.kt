@@ -48,10 +48,11 @@ class QatraPlugin : Plugin() {
         val mode = call.getString("mode") ?: "both"
         val duration = call.getInt("duration") ?: 10000
         val quote = call.getString("quote") ?: "سبحان الله"
+        val category = call.getString("category") ?: "dhikr"
         
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
-            putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote)
+            putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote); putExtra("category", category)
         }
         val pendingIntent = PendingIntent.getBroadcast(context, 99999, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         
@@ -71,10 +72,11 @@ class QatraPlugin : Plugin() {
         val mode = call.getString("mode") ?: "both"
         val duration = call.getInt("duration") ?: 10000
         val quote = call.getString("quote") ?: "الحمد لله"
+        val category = call.getString("category") ?: "dhikr"
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
-            putExtra("id", id); putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote)
+            putExtra("id", id); putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote); putExtra("category", category)
         }
         val pendingIntent = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
@@ -108,11 +110,11 @@ class QatraPlugin : Plugin() {
     @PluginMethod
     fun showDrop(call: PluginCall) {
         val quote = call.getString("quote") ?: "سبحان الله"
+        val category = call.getString("category") ?: "dhikr"
         val duration = call.getInt("duration") ?: 10000
         val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { 
-            putExtra("quote", quote); putExtra("duration", duration)
+            putExtra("quote", quote); putExtra("duration", duration); putExtra("category", category)
         }
-        // الإصلاح: استخدام startService العادي المعفى من القيود
         context.startService(serviceIntent)
         call.resolve()
     }
