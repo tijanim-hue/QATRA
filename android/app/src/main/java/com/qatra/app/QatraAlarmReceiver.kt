@@ -35,7 +35,7 @@ class QatraAlarmReceiver : BroadcastReceiver() {
         val channelId = "qatra_drop_channel"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
-        val resId = context.resources.getIdentifier("drop_sound", "raw", context.packageName)
+        val resId = context.resources.getIdentifier("drop_pop_sound", "raw", context.packageName)
         val soundUri = Uri.parse("android.resource://" + context.packageName + "/" + resId)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

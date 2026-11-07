@@ -24,7 +24,8 @@ import android.widget.TextView
 class QatraOverlayService : Service() {
     private var windowManager: WindowManager? = null
     private var overlayContainer: FrameLayout? = null
-    private var mediaPlayer: MediaPlayer? = null
+    private var fallPlayer: MediaPlayer? = null
+    private var popPlayer: MediaPlayer? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -43,7 +44,6 @@ class QatraOverlayService : Service() {
 
         overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#E6030610")) }
         
-        // الأعلام المسؤولة عن ملء الشاشة بالكامل فوق شريط الحالة
         var layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
                           WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or 
                           WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
@@ -100,6 +100,12 @@ class QatraOverlayService : Service() {
 
         val handler = Handler(Looper.getMainLooper())
         
+        // تشغيل صوت السقوط
+        try {
+            val fallResId = resources.getIdentifier("drop_fall_sound", "raw", packageName)
+            if (fallResId != 0) { fallPlayer = MediaPlayer.create(this, fallResId); fallPlayer?.start() }
+        } catch (e: Exception) {}
+        
         dropView.translationY = -300f
         ObjectAnimator.ofFloat(dropView, "translationY", -300f, bottomLandingY).apply {
             duration = 1000; interpolator = AccelerateInterpolator(); start()
@@ -108,12 +114,10 @@ class QatraOverlayService : Service() {
         handler.postDelayed({
             dropView.visibility = View.GONE
             
+            // تشغيل صوت الفرقعة عند وصول القطرة
             try {
-                val resId = resources.getIdentifier("drop_sound", "raw", packageName)
-                if (resId != 0) {
-                    mediaPlayer = MediaPlayer.create(this, resId)
-                    mediaPlayer?.start()
-                }
+                val popResId = resources.getIdentifier("drop_pop_sound", "raw", packageName)
+                if (popResId != 0) { popPlayer = MediaPlayer.create(this, popResId); popPlayer?.start() }
             } catch (e: Exception) {}
 
             ripple.alpha = 1f
@@ -123,15 +127,13 @@ class QatraOverlayService : Service() {
             AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 
             quoteText.translationY = bottomLandingY / 2f
-            quoteText.scaleX = 0.2f
-            quoteText.scaleY = 0.2f
+            quoteText.scaleX = 0.2f; quoteText.scaleY = 0.2f
             
             val tRise = ObjectAnimator.ofFloat(quoteText, "translationY", bottomLandingY / 2f, 0f).setDuration(2500)
             tRise.interpolator = DecelerateInterpolator(1.2f)
             val tGrowX = ObjectAnimator.ofFloat(quoteText, "scaleX", 0.2f, 1f).setDuration(2500)
             val tGrowY = ObjectAnimator.ofFloat(quoteText, "scaleY", 0.2f, 1f).setDuration(2500)
             val tFade = ObjectAnimator.ofFloat(quoteText, "alpha", 0f, 1f).setDuration(1500)
-            
             AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade); start() }
 
         }, 1000)
@@ -144,7 +146,8 @@ class QatraOverlayService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer?.release()
+        fallPlayer?.release()
+        popPlayer?.release()
         if (overlayContainer != null) { windowManager?.removeView(overlayContainer); overlayContainer = null }
     }
 }
