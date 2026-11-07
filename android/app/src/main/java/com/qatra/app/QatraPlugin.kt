@@ -3,12 +3,15 @@ package com.qatra.app
 import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
@@ -18,28 +21,56 @@ import java.util.Calendar
 @CapacitorPlugin(name = "QatraNative")
 class QatraPlugin : Plugin() {
 
+    private val likeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "com.qatra.app.QUOTE_LIKED") {
+                val category = intent.getStringExtra("category") ?: "dhikr"
+                val ret = JSObject()
+                ret.put("category", category)
+                notifyListeners("quoteLiked", ret)
+            }
+        }
+    }
+
+    override fun load() {
+        super.load()
+        context.registerReceiver(likeReceiver, IntentFilter("com.qatra.app.QUOTE_LIKED"), Context.RECEIVER_EXPORTED)
+    }
+
     @PluginMethod
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
+        var needsOverlay = false
+        var needsNotification = false
+        var needsAlarm = false
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
+            needsOverlay = true
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
+                needsAlarm = true
                 val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             }
         }
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                needsNotification = true
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
             }
         }
-        call.resolve()
+        
+        val ret = JSObject()
+        ret.put("requestedOverlay", needsOverlay)
+        call.resolve(ret)
     }
 
     @PluginMethod

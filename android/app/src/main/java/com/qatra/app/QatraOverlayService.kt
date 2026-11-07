@@ -3,6 +3,7 @@ package com.qatra.app
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
@@ -27,6 +28,7 @@ class QatraOverlayService : Service() {
     private var overlayContainer: FrameLayout? = null
     private var fallPlayer: MediaPlayer? = null
     private var popPlayer: MediaPlayer? = null
+    private var isLiked = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -45,10 +47,9 @@ class QatraOverlayService : Service() {
         val screenHeight = resources.displayMetrics.heightPixels.toFloat()
         val bottomLandingY = screenHeight - 200f
 
-        // الشفافية التامة: إزالة أي لون خلفية لكي تظهر القطرة فوق شاشة الهاتف مباشرة
+        // الشفافية التامة
         overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.TRANSPARENT) }
         
-        // الأعلام التي تجبر الشاشة على الامتداد فوق شريط حالة الهاتف والعمل في الخلفية
         val layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
                           WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or 
                           WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
@@ -81,7 +82,7 @@ class QatraOverlayService : Service() {
         }
         val rippleParams = FrameLayout.LayoutParams(100, 40).apply { gravity = Gravity.CENTER }
 
-        // 2. الحاوية للعبارة (مع أو بدون صورة)
+        // 2. الحاوية للعبارة والزر
         val cardView = FrameLayout(this).apply {
             alpha = 0f
             if (showImage) {
@@ -131,20 +132,61 @@ class QatraOverlayService : Service() {
             FrameLayout.LayoutParams.WRAP_CONTENT
         ).apply { gravity = Gravity.CENTER; setMargins(0, 0, 0, 100) }
 
+        // 3. زر الإعجاب العائم (القلب)
+        val likeButton = TextView(this).apply {
+            text = "♡" // قلب فارغ
+            setTextColor(Color.WHITE)
+            textSize = 32f
+            gravity = Gravity.CENTER
+            alpha = 0f
+            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#80000000")) }
+            setPadding(20, 20, 20, 20)
+            elevation = 60f
+            
+            // عند الضغط على القلب
+            setOnClickListener {
+                if (!isLiked) {
+                    isLiked = true
+                    text = "♥" // قلب ممتلئ
+                    setTextColor(Color.parseColor("#EF4444")) // أحمر مشع
+                    setShadowLayer(20f, 0f, 0f, Color.parseColor("#EF4444"))
+                    
+                    // إرسال تفاعل (Broadcast) للتطبيق ليحسبه
+                    val intent = Intent("com.qatra.app.QUOTE_LIKED")
+                    intent.putExtra("category", category)
+                    sendBroadcast(intent)
+                    
+                    // حركة نبض للقلب
+                    val pScaleX = ObjectAnimator.ofFloat(this, "scaleX", 1f, 1.3f, 1f).setDuration(300)
+                    val pScaleY = ObjectAnimator.ofFloat(this, "scaleY", 1f, 1.3f, 1f).setDuration(300)
+                    AnimatorSet().apply { playTogether(pScaleX, pScaleY); start() }
+                }
+            }
+        }
+        
+        val likeParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
+            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            setMargins(0, 0, 0, 40) // يظهر تحت البطاقة
+        }
+
         overlayContainer?.addView(ripple, rippleParams)
         overlayContainer?.addView(dropView, dropParams)
         overlayContainer?.addView(cardView, cardParams)
+        overlayContainer?.addView(likeButton, likeParams) // إضافة زر القلب
+        
+        // تعديل مهم: السماح بالتفاعل مع الحاوية (Touch Events) لكي يعمل زر القلب
+        params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+        params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        
         windowManager?.addView(overlayContainer, params)
 
         val handler = Handler(Looper.getMainLooper())
         
-        // تشغيل صوت السقوط
         try {
             val fallResId = resources.getIdentifier("drop_fall_sound", "raw", packageName)
             if (fallResId != 0) { fallPlayer = MediaPlayer.create(this, fallResId); fallPlayer?.start() }
         } catch (e: Exception) {}
 
-        // الحركة 1: سقوط القطرة من أعلى الشاشة
         dropView.translationY = -screenHeight
         ObjectAnimator.ofFloat(dropView, "translationY", -screenHeight, bottomLandingY).apply {
             duration = 1000; interpolator = AccelerateInterpolator(); start()
@@ -153,7 +195,6 @@ class QatraOverlayService : Service() {
         handler.postDelayed({
             dropView.visibility = View.GONE
             
-            // تشغيل صوت الفرقعة
             try {
                 val popResId = resources.getIdentifier("drop_pop_sound", "raw", packageName)
                 if (popResId != 0) { popPlayer = MediaPlayer.create(this, popResId); popPlayer?.start() }
@@ -165,7 +206,6 @@ class QatraOverlayService : Service() {
             val rFade = ObjectAnimator.ofFloat(ripple, "alpha", 1f, 0f).setDuration(800)
             AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 
-            // الحركة 2: صعود العبارة إلى وسط الشاشة
             cardView.translationY = bottomLandingY / 2f
             cardView.scaleX = 0.5f; cardView.scaleY = 0.5f
             
@@ -175,13 +215,15 @@ class QatraOverlayService : Service() {
             val tGrowY = ObjectAnimator.ofFloat(cardView, "scaleY", 0.5f, 1f).setDuration(2500)
             val tFade = ObjectAnimator.ofFloat(cardView, "alpha", 0f, 1f).setDuration(1500)
             
-            // الحركة 3: وميض العبارة عند الاستقرار
             val pulseFade = ObjectAnimator.ofFloat(cardView, "alpha", 1f, 0.4f, 1f).apply {
                 duration = 1200
                 startDelay = 2500
             }
             
-            AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade, pulseFade); start() }
+            // ظهور زر القلب
+            val likeFade = ObjectAnimator.ofFloat(likeButton, "alpha", 0f, 1f).apply { duration = 1500; startDelay = 1000 }
+            
+            AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade, pulseFade, likeFade); start() }
 
         }, 1000)
 
