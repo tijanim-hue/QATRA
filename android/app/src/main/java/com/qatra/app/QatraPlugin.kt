@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
@@ -41,11 +42,13 @@ class QatraPlugin : Plugin() {
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
         var needsOverlay = false
-        var needsNotification = false
-        var needsAlarm = false
         
+        // طلب إذن الطفو فوق التطبيقات مع رسالة توجيهية
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             needsOverlay = true
+            activity.runOnUiThread {
+                Toast.makeText(context, "الرجاء السماح لـ 'قطرة' بالظهور فوق التطبيقات لتعمل القطرة المائية", Toast.LENGTH_LONG).show()
+            }
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
@@ -54,7 +57,6 @@ class QatraPlugin : Plugin() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
-                needsAlarm = true
                 val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
@@ -63,7 +65,6 @@ class QatraPlugin : Plugin() {
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                needsNotification = true
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
             }
         }
