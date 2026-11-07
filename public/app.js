@@ -1,6 +1,6 @@
 "use strict";
 
-const STORE_KEY = "qatra_worldclass_v5";
+const STORE_KEY = "qatra_worldclass_v6";
 
 // === قاموس الترجمة ===
 const DICT = {
@@ -10,7 +10,7 @@ const DICT = {
     display_method: "طريقة العرض وتفضيلاتك", mode_both: "تنبيه النظام + قطرة مائية (معاً)", mode_floating: "القطرة المائية فقط", 
     mode_notification: "تنبيه النظام فقط", dur_5: "مدة القطرة: 5 ثوانٍ", dur_10: "مدة القطرة: 10 ثوانٍ", dur_15: "مدة القطرة: 15 ثانية",
     smart_schedule: "البرمجة الذكية (توزيع تلقائي)", i_want: "أريد", drops_daily: "قطرات يومياً", from: "من", to: "إلى", apply_smart: "تطبيق البرمجة الذكية",
-    manual_schedule: "الجدولة اليدوية", custom_schedule: "تحديد ساعة وأيام مخصصة:", save_schedule: "حفظ الموعد", 
+    manual_schedule: "الجدولة اليدوية (تكرار مستمر)", custom_schedule: "تحديد ساعة وأيام مخصصة:", save_schedule: "حفظ الموعد", 
     personal_library: "المكتبة الشخصية", library_desc: "احتفظ بالمعاني التي تلامس قلبك، ونظمها في مجموعاتك.", 
     discover_quotes: "اكتشف العبارات", my_favorites: "مفضلاتي", my_groups: "مجموعاتي", my_custom_quotes: "عباراتي الخاصة", 
     create_group: "إنشاء مجموعة جديدة", add: "إضافة", your_garden: "حديقتك", level_of_awareness: "مستوى الوعي العام",
@@ -20,7 +20,7 @@ const DICT = {
     short_sessions: "جلسات قصيرة", app_settings: "إعدادات التطبيق", glass_mode: "الشفافية وتأثير الزجاج 💎", show_image: "إظهار صورة مع العبارة 🖼️",
     show_home_cards: "إظهار بطاقات الرئيسية 📱", language: "لغة التطبيق:", save_done: "تم وحفظ", back: "رجوع", copied: "تم النسخ بنجاح", 
     delete: "حذف", days: "أيام", quotes_ready: "عبارة جاهزة", rain: "🌧️ المطر", sea: "🌊 البحر", forest: "🌲 الغابة", birds: "🕊️ الطيور",
-    all_categories: "عشوائي", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مكتبتي الخاصة"
+    all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مجموعاتي الخاصة", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", every_3h: "كل 3 ساعات", every_12h: "كل 12 ساعة", every_24h: "كل 24 ساعة", no_reminders: "لا توجد مواعيد", source_category: "1. مصدر العبارات"
   },
   en: {
     app_title: "Qatra | Drop", pull_to_switch: "Pull to switch theme", moment_zen: "Moment of Zen", click_to_program: "Tap to config", 
@@ -37,9 +37,11 @@ const DICT = {
     quran_recitation: "Quran", short_sessions: "Short Sessions", app_settings: "App Settings", glass_mode: "Glass Effect 💎", 
     show_image: "Show image 🖼️", show_home_cards: "Show Home Cards 📱", language: "App Language:", save_done: "Done", back: "Back", 
     copied: "Copied!", delete: "Delete", days: "days", quotes_ready: "Quotes", rain: "🌧️ Rain", sea: "🌊 Sea", forest: "🌲 Forest", birds: "🕊️ Birds",
-    all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development", cat_quran: "Quranic Verses", cat_culture: "Culture", cat_poetry: "Poetry", my_library: "My Library"
+    all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development", cat_quran: "Quranic Verses", cat_culture: "Culture", cat_poetry: "Poetry", my_library: "My Groups", stop_repeat: "Stop Auto Repeat", every_30: "Every 30 Mins", every_1h: "Every 1 Hour", every_3h: "Every 3 Hours", every_12h: "Every 12 Hours", every_24h: "Every 24 Hours", no_reminders: "No scheduled reminders", source_category: "1. Quotes Source"
   }
 };
+// دعم جزئي للغات المتبقية بالانجليزية لتجنب تضخم الكود
+const langs = ['fr','es','de']; langs.forEach(l => DICT[l] = DICT['en']); 
 
 const generateArray = (base, count) => Array.from({length: count}, (_, i) => `${base} ${i+1}`);
 const QUOTES_DB = {
@@ -51,14 +53,13 @@ const QUOTES_DB = {
 };
 
 let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
-  lang: 'ar', dark: true, glass: true, mode: 'both', duration: 10000, showImage: false, showHomeCards: true,
+  lang: 'ar', dark: true, glass: true, mode: 'both', duration: 10000, interval: '0', showImage: false, showHomeCards: true,
   quoteSource: 'all', schedules: [], groups: { 'favorites': [], 'myQuotes': [] }, 
-  stats: { drops: 0, likes: 0, dhikr: 0, culture: 0, selfDev: 0, poetry: 0, days: 1, lastDate: new Date().toDateString() }
+  stats: { drops: 0, likes: 0, dhikr: 0, culture: 0, selfDev: 0, poetry: 0, days: 1 }
 };
 
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
 function getTranslation(key) { return (DICT[state.lang] && DICT[state.lang][key]) ? DICT[state.lang][key] : (DICT['en'][key] || key); }
-
 function safeOn(id, eventType, handler) { const el = document.getElementById(id); if (el) el.addEventListener(eventType, handler); }
 
 function applyState() {
@@ -66,7 +67,6 @@ function applyState() {
   document.body.classList.toggle('dark-mode', state.dark);
   document.body.classList.toggle('glass-active', state.glass);
   document.documentElement.dir = (state.lang === 'ar') ? 'rtl' : 'ltr';
-  document.documentElement.lang = state.lang;
   
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = getTranslation(el.getAttribute('data-i18n')); });
   
@@ -75,13 +75,23 @@ function applyState() {
 
   const c = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
   const s = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  
   c('glassToggle', state.glass); c('imageToggle', state.showImage); c('homeCardsToggle', state.showHomeCards);
-  s('langSelect', state.lang); s('notifModeSetting', state.mode); s('dropDurationSetting', state.duration);
+  s('langSelect', state.lang); s('notifModeSetting', state.mode); 
+  s('dropDurationSetting', state.duration); s('intervalSelect', state.interval);
   
   document.querySelectorAll('.custom-radio-item').forEach(item => {
     if(item.dataset.value === state.quoteSource) item.classList.add('active');
     else item.classList.remove('active');
   });
+
+  const optVals = ['0','30','60','180','720','1440'];
+  const optKeys = ['stop_repeat','every_30','every_1h','every_3h','every_12h','every_24h'];
+  const intSel = document.getElementById('intervalSelect');
+  if(intSel) {
+      intSel.innerHTML = optVals.map((v,i) => `<option value="${v}">${getTranslation(optKeys[i])}</option>`).join('');
+      intSel.value = state.interval;
+  }
 
   updateHomeCards(); renderGarden(); renderSchedules();
 }
@@ -91,23 +101,20 @@ safeOn('imageToggle', 'change', e => { state.showImage = e.target.checked; apply
 safeOn('homeCardsToggle', 'change', e => { state.showHomeCards = e.target.checked; applyState(); });
 window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); syncNativeAlarms(); };
 
-// --- استماع لتفاعل القلب من الأندرويد ---
+// --- استماع للقلب من القطرة في الأندرويد ---
 if (QatraNative) {
   QatraNative.addListener('quoteLiked', (info) => {
-    // زيادة تفاعل أثر اليوم والشجرة الخاصة بالقسم
     state.stats.likes++;
     if (state.stats[info.category] !== undefined) state.stats[info.category]++;
     else if (info.category === 'quran') state.stats.dhikr++;
-    else if (info.category === 'myLibrary') state.stats.selfDev++; // كمثال
-    
+    else if (info.category === 'myGroups') state.stats.selfDev++;
     applyState();
   });
 }
 
-// --- تحديث البطاقات الرئيسية ---
 function updateHomeCards() {
   const now = new Date();
-  let nextDrop = "لا توجد مواعيد";
+  let nextDrop = getTranslation('no_reminders');
   if (state.schedules.length > 0) {
     const next = state.schedules.map(s => {
       const [h,m] = s.time.split(':'); 
@@ -120,10 +127,9 @@ function updateHomeCards() {
   }
   const ndEl = document.getElementById('nextDropTimeText'); if(ndEl) ndEl.innerText = nextDrop;
   
-  let catText = state.quoteSource === 'all' ? getTranslation('all_categories') : (state.quoteSource === 'myLibrary' ? getTranslation('my_library') : getTranslation('cat_'+state.quoteSource));
+  let catText = state.quoteSource === 'all' ? getTranslation('all_categories') : (state.quoteSource === 'myGroups' ? getTranslation('my_library') : getTranslation('cat_'+state.quoteSource));
   const ncatEl = document.getElementById('nextDropCategoryText'); if(ncatEl) ncatEl.innerText = `الفئة: ${catText}`;
   
-  // أثر اليوم يُقاس بالتفاعل (الضغط على القلب)
   const tiEl = document.getElementById('todayImpactText'); if(tiEl) tiEl.innerText = `لقد تفاعلت مع ${state.stats.likes} قطرات اليوم`;
   const tipEl = document.getElementById('todayImpactProgress'); if(tipEl) tipEl.style.width = Math.min((state.stats.likes / 10)*100, 100) + '%';
   
@@ -136,11 +142,14 @@ function updateHomeCards() {
 }
 
 // --- الأيام والمواعيد والبرمجة الذكية ---
-const WEEK_DAYS = {ar: [{id:0,n:"أحد"},{id:1,n:"إثن"},{id:2,n:"ثلا"},{id:3,n:"أرب"},{id:4,n:"خمي"},{id:5,n:"جمع"},{id:6,n:"سبت"}]};
+const WEEK_DAYS = {
+  ar: [{id:0,n:"أحد"},{id:1,n:"إثن"},{id:2,n:"ثلا"},{id:3,n:"أرب"},{id:4,n:"خمي"},{id:5,n:"جمع"},{id:6,n:"سبت"}],
+  en: [{id:0,n:"Sun"},{id:1,n:"Mon"},{id:2,n:"Tue"},{id:3,n:"Wed"},{id:4,n:"Thu"},{id:5,n:"Fri"},{id:6,n:"Sat"}]
+};
 let currentSelectedDays = new Set([0,1,2,3,4,5,6]);
 function renderDaysGrid() {
   const dg = document.getElementById('daysGrid');
-  if(dg) dg.innerHTML = (WEEK_DAYS[state.lang] || WEEK_DAYS['ar']).map(d => `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.n}</div>`).join('');
+  if(dg) dg.innerHTML = (WEEK_DAYS[state.lang] || WEEK_DAYS['en']).map(d => `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.n}</div>`).join('');
 }
 window.toggleDay = (id) => { currentSelectedDays.has(id) ? currentSelectedDays.delete(id) : currentSelectedDays.add(id); renderDaysGrid(); };
 
@@ -164,9 +173,19 @@ safeOn('applySmartScheduleBtn', 'click', () => {
   }
 });
 
+safeOn('saveScheduleBtn', 'click', () => {
+  const tEl = document.getElementById('customTime');
+  if(!tEl) return;
+  const t = tEl.value;
+  if(t && currentSelectedDays.size > 0) {
+    state.schedules.push({id: Math.floor(Math.random()*10000), time: t, days: Array.from(currentSelectedDays)});
+    applyState(); renderSchedules(); syncNativeAlarms();
+  } else { alert(getTranslation('choose_time')); }
+});
+
 function renderSchedules() {
   const list = document.getElementById('savedSchedulesList');
-  if(list) list.innerHTML = state.schedules.map((s, i) => `<div class="modern-row" style="background:var(--bg); padding:18px; border-radius:18px; margin-bottom:12px; border:1px solid var(--border);"><strong style="font-size:18px;">${s.time}</strong> <button onclick="deleteSchedule(${i})" style="background:rgba(255,0,0,0.1); border:none; color:#ff4d4d; font-weight:bold; cursor:pointer; padding:8px 16px; border-radius:10px;">${getTranslation('delete')}</button></div>`).join('');
+  if(list) list.innerHTML = state.schedules.map((s, i) => `<div class="modern-row" style="background:var(--bg); padding:18px; border-radius:18px; margin-bottom:12px; border:1px solid var(--border); display:flex; justify-content:space-between;"><strong style="font-size:18px;">${s.time}</strong> <button onclick="deleteSchedule(${i})" style="background:rgba(255,0,0,0.1); border:none; color:#ff4d4d; font-weight:bold; cursor:pointer; padding:8px 16px; border-radius:10px;">${getTranslation('delete')}</button></div>`).join('');
   updateHomeCards();
 }
 window.deleteSchedule = (i) => { if(QatraNative && state.schedules[i]) QatraNative.cancel({id: state.schedules[i].id}); state.schedules.splice(i,1); applyState(); syncNativeAlarms(); };
@@ -186,7 +205,7 @@ function renderGarden() {
   tEl('totalDaysActiveText', `تفاعلت لمدة ${s.days} أيام`);
 }
 
-// --- المكتبة والمجموعات ---
+// --- المكتبة والمجموعات (أيقونات احترافية للقلب والنسخ) ---
 window.showCategoryList = () => { document.getElementById('categorySheet').classList.add('show'); renderCategories(); }
 window.showGroupsManager = () => { document.getElementById('groupsManagerArea').style.display = 'block'; renderGroupsList(); };
 
@@ -209,11 +228,16 @@ window.openQuotesList = (id) => {
   const content = document.getElementById('catSheetContent');
   if(content) {
       content.innerHTML = cat.items.slice(0, 50).map(q => {
+        // أيقونات القلب والنسخ الاحترافية
         return `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);">
           <div style="font-size:15px; font-weight:700;">${q}</div>
-          <div style="display:flex; gap:5px;">
-            <button onclick="copyQuote('${q.replace(/'/g, "\\'")}')" style="background:color-mix(in srgb, var(--primary) 10%, transparent); border:none; padding:10px; border-radius:12px; color:var(--primary); cursor:pointer;">📋</button>
-            <button onclick="addToFavorites('${q.replace(/'/g, "\\'")}')" style="background:color-mix(in srgb, var(--secondary) 10%, transparent); border:none; padding:10px; border-radius:12px; color:var(--secondary); cursor:pointer;">❤️</button>
+          <div style="display:flex; gap:8px;">
+            <button onclick="copyQuote('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:var(--primary); cursor:pointer;">
+              <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+            <button onclick="addToFavorites('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:var(--secondary); cursor:pointer;">
+              <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
           </div>
         </div>`;
       }).join('');
@@ -229,9 +253,7 @@ window.copyQuote = (txt) => {
 
 window.addToFavorites = (txt) => {
   if(!state.groups['favorites'].includes(txt)) {
-    state.groups['favorites'].push(txt);
-    applyState();
-    alert('تمت الإضافة للمفضلة');
+    state.groups['favorites'].push(txt); applyState(); alert('تمت الإضافة للمفضلة');
   }
 }
 
@@ -278,11 +300,10 @@ function getRandomQuote() {
     const keys = Object.keys(QUOTES_DB);
     categoryKey = keys[Math.floor(Math.random() * keys.length)];
     pool = QUOTES_DB[categoryKey].items;
-  } else if (state.quoteSource === 'myLibrary') {
-    // جمع كل العبارات من مكتبات المستخدم
+  } else if (state.quoteSource === 'myGroups') {
     Object.keys(state.groups).forEach(k => { pool = pool.concat(state.groups[k]); });
-    if(pool.length === 0) pool = ["أضف عبارات في مكتبتك الخاصة لتظهر هنا."];
-    categoryKey = "myLibrary";
+    if(pool.length === 0) pool = ["أضف عبارات في مجموعاتك لتظهر هنا."];
+    categoryKey = "myGroups";
   } else {
     pool = QUOTES_DB[state.quoteSource].items;
   }
@@ -301,15 +322,19 @@ window.fireCinematic = async () => {
 
 function syncNativeAlarms() {
   if(!QatraNative) return;
+  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote().quote, category: state.quoteSource, fullScreen: true, showImage: state.showImage }).catch(e=>{});
+  
   state.schedules.forEach(s => {
-    const { quote, categoryKey } = getRandomQuote();
-    QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: quote, category: categoryKey, fullScreen: true, showImage: state.showImage}).catch(e=>{});
+    const rQuote = getRandomQuote();
+    QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: rQuote.quote, category: rQuote.categoryKey, fullScreen: true, showImage: state.showImage}).catch(e=>{});
   });
 }
 
-// --- التأمل ومساحة سكينة ---
+// --- التأمل (المشغل العائم المتطور) ---
 let randPlayer = new Audio();
-window.playAudio = (type) => {
+let audioUpdateInterval;
+
+window.playAudio = (type, title) => {
   randPlayer.pause();
   const aMap = { 
     'rain': 'https://actions.google.com/sounds/v1/water/rain_on_roof.ogg', 
@@ -320,9 +345,38 @@ window.playAudio = (type) => {
     'quran2': 'https://server8.mp3quran.net/afs/018.mp3',
     'quran3': 'https://server8.mp3quran.net/afs/067.mp3'
   };
-  if(aMap[type]) { randPlayer.src = aMap[type]; randPlayer.play(); }
+  if(aMap[type]) { 
+      randPlayer.src = aMap[type]; 
+      randPlayer.play();
+      document.getElementById('audioTitleText').innerText = title || "جاري التشغيل";
+      document.getElementById('globalAudioPlayer').classList.add('show');
+      document.getElementById('audioPlayPauseBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+      
+      clearInterval(audioUpdateInterval);
+      audioUpdateInterval = setInterval(() => {
+          if (randPlayer.duration) {
+              const p = (randPlayer.currentTime / randPlayer.duration) * 100;
+              document.getElementById('audioProgressFill').style.width = `${p}%`;
+          }
+      }, 500);
+  }
 };
-window.stopAudio = () => { randPlayer.pause(); }
+
+window.togglePlayPause = () => {
+    if (randPlayer.paused) {
+        randPlayer.play();
+        document.getElementById('audioPlayPauseBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    } else {
+        randPlayer.pause();
+        document.getElementById('audioPlayPauseBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+    }
+}
+
+window.closeAudioPlayer = () => {
+    randPlayer.pause();
+    clearInterval(audioUpdateInterval);
+    document.getElementById('globalAudioPlayer').classList.remove('show');
+}
 
 window.startSession = (mins) => {
   alert(`بدأت جلسة ${mins} دقائق. يرجى الاسترخاء وإغلاق عينيك.`);
@@ -330,7 +384,7 @@ window.startSession = (mins) => {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // طلب الأذونات فور فتح التطبيق
+  
   if (QatraNative) QatraNative.askPermissions().catch(e => console.log(e));
   
   document.querySelectorAll('.nav-item, .nav-home-btn, .header-btn').forEach(btn => {
@@ -344,6 +398,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  let startY = 0;
+  const scrollContent = document.getElementById('scrollContent');
+  const ptrContainer = document.getElementById('ptrContainer');
+  const ptrIcon = document.getElementById('ptrIcon');
+
+  if(scrollContent && ptrContainer && ptrIcon) {
+    scrollContent.addEventListener('touchstart', e => { if(scrollContent.scrollTop === 0) startY = e.touches[0].clientY; }, {passive:true});
+    scrollContent.addEventListener('touchmove', e => {
+      if (startY > 0 && scrollContent.scrollTop === 0) {
+        let y = e.touches[0].clientY - startY;
+        if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform = `rotate(${y*4}deg)`; }
+      }
+    }, {passive:true});
+    scrollContent.addEventListener('touchend', e => {
+      if (startY > 0 && scrollContent.scrollTop === 0) {
+        let y = e.changedTouches[0].clientY - startY;
+        if (y > 70) {
+          ptrIcon.classList.add('spin');
+          state.dark = !state.dark;
+          applyState();
+          setTimeout(() => { ptrContainer.style.transform = `translateY(-100%)`; ptrIcon.classList.remove('spin'); }, 600);
+        } else {
+          ptrContainer.style.transform = `translateY(-100%)`;
+        }
+      }
+      startY = 0;
+    }, {passive:true});
+  }
+
   applyState(); renderDaysGrid();
+  const qtEl = document.getElementById('dailyQuoteText');
+  if(qtEl) qtEl.textContent = `"${getRandomQuote().quote}"`;
+
   setTimeout(() => { const splash = document.getElementById('splash'); if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 800); } }, 2500);
 });
