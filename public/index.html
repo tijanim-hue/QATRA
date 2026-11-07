@@ -23,7 +23,7 @@ body.dark-mode {
 --shadow: 0 10px 30px -10px rgba(0,0,0,0.4);
 }
 
-body.glass-active .glass-card, body.glass-active .floating-nav, body.glass-active .topbar {
+body.glass-active .glass-card, body.glass-active .floating-nav, body.glass-active .topbar, body.glass-active .audio-player {
 background: rgba(15, 20, 30, 0.35) !important;
 backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
 border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -187,6 +187,11 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 .custom-radio-circle::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); transform: scale(0); transition: 0.2s; }
 .custom-radio-item.active .custom-radio-circle::after { transform: scale(1); }
 
+/* أيام الأسبوع الاحترافية (تصحيح الشكل التقليدي) */
+.days-grid { display: flex; gap: 6px; margin-top: 15px; justify-content: space-between; flex-wrap: wrap;}
+.day-chip { flex: 1; padding: 10px 0; min-width:40px; text-align: center; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--text-dim); cursor: pointer; transition: 0.3s; }
+.day-chip.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border-color: transparent; box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 30%, transparent);}
+
 .btn-solid { width: 100%; padding: 18px; border: none; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-size: 16px; font-weight: 800; margin-top: 20px; cursor: pointer; box-shadow: 0 10px 25px color-mix(in srgb, var(--primary) 30%, transparent); transition: transform 0.2s;}
 .btn-solid:active { transform: scale(0.97); }
 .btn-danger { background: rgba(255,0,0,0.1); color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: none; }
@@ -198,14 +203,26 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .sheet-handle { width: 45px; height: 5px; background: var(--border); border-radius: 5px; margin: 0 auto 25px; }
 
-.days-grid { display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; }
-.day-chip { flex: 1; padding: 12px 0; text-align: center; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 700; color: var(--text-dim); cursor: pointer; transition: 0.3s; }
-.day-chip.active { background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); border-color: var(--primary); }
-
+/* التنبيه للنسخ */
 .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 2000; transition: 0.3s; opacity: 0; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* عناصر قائمة مكتبتي */
 .my-quote-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
 .delete-btn { background: rgba(255,0,0,0.1); color: #ff4d4d; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+/* المشغل الصوتي العائم (Floating Audio Player) */
+.audio-player { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(150px); width: 85%; max-width: 400px; background: var(--surface); border-radius: 24px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; z-index: 90; box-shadow: 0 15px 35px rgba(0,0,0,0.2); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; }
+.audio-player.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.audio-controls { display: flex; align-items: center; gap: 10px; }
+.audio-btn { background: none; border: none; color: var(--primary); cursor: pointer; display: grid; place-items: center; padding: 5px; }
+.audio-btn svg { width: 28px; height: 28px; fill: currentColor; }
+.audio-info { flex: 1; }
+.audio-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.audio-progress-bar { width: 100%; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.audio-progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.1s linear; }
+.audio-close { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 5px; }
+.audio-close svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
 </style>
 </head>
 <body class="glass-active dark-mode">
@@ -256,6 +273,29 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 </div>
 
+<div class="sheet-overlay" id="categorySheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:var(--primary);" id="catSheetTitle">القسم</h2>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="catSheetContent"></div>
+<button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')" data-i18n="back">رجوع</button>
+</div>
+</div>
+
+<!-- نافذة عرض العبارات داخل مجموعة مخصصة -->
+<div class="sheet-overlay" id="groupViewSheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:var(--primary);" id="groupViewTitle">اسم المجموعة</h2>
+<div style="display:flex; gap:10px; margin-bottom:15px;" id="addToGroupDiv">
+  <input type="text" id="newGroupQuoteInput" placeholder="أدخل عبارتك هنا..." style="margin:0; flex:1;">
+  <button class="btn-solid" onclick="addQuoteToCurrentGroup()" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
+</div>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="groupViewContent"></div>
+<button class="btn-solid" onclick="document.getElementById('groupViewSheet').classList.remove('show')" data-i18n="back">رجوع</button>
+</div>
+</div>
+
 <div class="app-container">
 <header class="header">
 <button class="header-btn" onclick="document.getElementById('statsSheet').classList.add('show')">
@@ -283,16 +323,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <div style="color:var(--text-dim); font-size:13px; margin-top:6px; font-weight:600;" data-i18n="click_to_program">اضغط لبرمجة قطرتك</div>
 </div>
 
-<div class="glass-card action-card" onclick="fireCinematic()">
-<div class="card-icon" style="color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, transparent);"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-<div class="card-info">
-<div class="card-title" data-i18n="quote_of_day">اقتباس اليوم (معاينة)</div>
-<div class="card-sub" id="dailyQuoteText">...</div>
-</div>
-<div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
-</div>
-
-<!-- البطاقات الثلاث الجديدة -->
+<!-- البطاقات الثلاث -->
 <div id="homeCardsContainer">
   <div class="glass-card action-card" onclick="document.querySelector('[data-view=\'dropConfigView\']').click()">
     <div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
@@ -319,6 +350,15 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
       <div class="card-sub" id="currentMomentText">...</div>
     </div>
   </div>
+</div>
+
+<div class="glass-card action-card" onclick="fireCinematic()" style="margin-top:20px;">
+<div class="card-icon" style="color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, transparent);"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+<div class="card-info">
+<div class="card-title" data-i18n="quote_of_day">معاينة القطرة الآن</div>
+<div class="card-sub" id="dailyQuoteText">...</div>
+</div>
+<div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
 </div>
 </section>
 
@@ -347,8 +387,9 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
     <div class="custom-radio-item" data-value="culture" onclick="setQuoteSource('culture')">
       <span data-i18n="cat_culture">ثقافة عامة وحكم</span><div class="custom-radio-circle"></div>
     </div>
-    <div class="custom-radio-item" data-value="myLibrary" onclick="setQuoteSource('myLibrary'); document.getElementById('myLibrarySheet').classList.add('show');">
-      <span data-i18n="my_library">مكتبتي الخاصة</span><div class="custom-radio-circle"></div>
+    <!-- المجموعات كخيار رئيسي -->
+    <div class="custom-radio-item" data-value="myGroups" onclick="setQuoteSource('myGroups'); showGroupsManager();">
+      <span data-i18n="my_groups">مجموعاتي الخاصة</span><div class="custom-radio-circle"></div>
     </div>
   </div>
 </div>
@@ -449,19 +490,19 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <div class="glass-card" style="padding:15px; margin-bottom:15px;">
   <h3 style="margin-top:0; font-size:16px; color:var(--primary);" data-i18n="nature_sounds">أصوات الطبيعة</h3>
   <div style="display:flex; flex-wrap:wrap; gap:10px;">
-    <button class="day-chip" onclick="playAudio('rain')" data-i18n="rain">🌧️ المطر</button>
-    <button class="day-chip" onclick="playAudio('sea')" data-i18n="sea">🌊 البحر</button>
-    <button class="day-chip" onclick="playAudio('forest')" data-i18n="forest">🌲 الغابة</button>
-    <button class="day-chip" onclick="playAudio('birds')" data-i18n="birds">🕊️ الطيور</button>
+    <button class="day-chip" onclick="playAudio('rain', 'المطر')" data-i18n="rain">🌧️ المطر</button>
+    <button class="day-chip" onclick="playAudio('sea', 'البحر')" data-i18n="sea">🌊 البحر</button>
+    <button class="day-chip" onclick="playAudio('forest', 'الغابة')" data-i18n="forest">🌲 الغابة</button>
+    <button class="day-chip" onclick="playAudio('birds', 'الطيور')" data-i18n="birds">🕊️ الطيور</button>
   </div>
 </div>
 
 <div class="glass-card" style="padding:15px; margin-bottom:15px;">
   <h3 style="margin-top:0; font-size:16px; color:var(--secondary);" data-i18n="quran_recitation">القرآن الكريم</h3>
   <div style="display:flex; flex-wrap:wrap; gap:10px;">
-    <button class="day-chip" onclick="playAudio('quran1')">سورة البقرة</button>
-    <button class="day-chip" onclick="playAudio('quran2')">سورة الكهف</button>
-    <button class="day-chip" onclick="playAudio('quran3')">سورة الملك</button>
+    <button class="day-chip" onclick="playAudio('quran1', 'سورة البقرة')">سورة البقرة</button>
+    <button class="day-chip" onclick="playAudio('quran2', 'سورة الكهف')">سورة الكهف</button>
+    <button class="day-chip" onclick="playAudio('quran3', 'سورة الملك')">سورة الملك</button>
   </div>
 </div>
 
@@ -473,8 +514,6 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
     <button class="day-chip" onclick="startSession(5)">5 دقائق استرخاء</button>
   </div>
 </div>
-
-<button class="btn-solid btn-danger" onclick="stopAudio()" style="margin-top:0;" data-i18n="stop_now">⏸ إيقاف الصوت/الجلسة</button>
 </section>
 
 <!-- ================= حديقتي المتعددة الأشجار (Garden View) ================= -->
@@ -511,12 +550,28 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </section>
 </div>
 
+<!-- ================= المشغل الصوتي العائم ================= -->
+<div class="audio-player" id="globalAudioPlayer">
+  <div class="audio-info">
+    <div class="audio-title" id="audioTitleText">جاري الاستماع...</div>
+    <div class="audio-progress-bar"><div class="audio-progress-fill" id="audioProgressFill"></div></div>
+  </div>
+  <div class="audio-controls">
+    <button class="audio-btn" id="audioPlayPauseBtn" onclick="togglePlayPause()">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="audio-close" onclick="closeAudioPlayer()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+</div>
+
 <!-- الكبسولة السفلية الفاخرة -->
 <nav class="floating-nav">
 <button class="nav-item" data-view="libraryView">
 <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
 </button>
-<!-- تم تغيير الأيقونة إلى قطرة ماء -->
+<!-- تم تغيير الأيقونة إلى قطرة ماء واسمها "قطرتي" -->
 <button class="nav-item" data-view="dropConfigView">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
 </button>
@@ -555,7 +610,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 </div>
 
-<!-- نافذة الإحصائيات والإعدادات -->
+<!-- الإحصائيات -->
 <div class="sheet-overlay" id="statsSheet">
 <div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
 <div class="sheet-handle"></div>
