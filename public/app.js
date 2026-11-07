@@ -49,7 +49,7 @@ const DICT = {
     quotes_ready: "Quotes"
   },
   fr: {
-    app_title: "Qatra | Goutte", pull_to_switch: "Tirez pour changer", moment_zen: "Moment Zen",
+    app_title: "Qatra | Goutte", pull_to_switch: "Tirez pour changer de thème", moment_zen: "Moment Zen",
     click_to_program: "Configurer la Goutte", quote_of_day: "Citation du Jour", scheduled_reminders: "Vos Rappels",
     no_reminders: "Aucun rappel", drop_settings: "Paramètres", source_category: "1. Source des citations",
     all_categories: "Aléatoire", cat_dhikr: "Dhikr & Invocations", cat_selfDev: "Développement Personnel",
@@ -396,6 +396,12 @@ let randPlayer = new Audio(); let isRandPlaying = false;
 // تهيئة التطبيق عند البداية
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
+
+  // تشغيل صوت سحري رائع عند الإقلاع
+  try {
+    const splashAudio = new Audio("https://actions.google.com/sounds/v1/magic/magic_chime.ogg");
+    splashAudio.play().catch(() => {});
+  } catch(e) {}
 
   if (QatraNative) { 
       QatraNative.askPermissions().catch(e => console.log(e)); 
