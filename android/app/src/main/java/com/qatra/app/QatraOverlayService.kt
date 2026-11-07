@@ -31,8 +31,6 @@ class QatraOverlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val quote = intent?.getStringExtra("quote") ?: "الحمد لله"
         val duration = intent?.getIntExtra("duration", 10000) ?: 10000
-        
-        // الإصلاح: تمت إزالة startForeground لمنع انهيار التطبيق
         playCinematicAnimation(quote, duration.toLong())
         return START_NOT_STICKY
     }
@@ -43,14 +41,25 @@ class QatraOverlayService : Service() {
         val screenHeight = resources.displayMetrics.heightPixels.toFloat()
         val bottomLandingY = screenHeight - 200f
 
-        overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#99030610")) }
+        overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#E6030610")) }
         
+        // الأعلام المسؤولة عن ملء الشاشة بالكامل فوق شريط الحالة
+        var layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+                          WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or 
+                          WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                          WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                          
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            layoutFlags = layoutFlags or WindowManager.LayoutParams.FLAG_BLUR_BEHIND
+        }
+
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+            layoutFlags,
             PixelFormat.TRANSLUCENT
         )
+        
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) params.blurBehindRadius = 40
 
         val ripple = View(this).apply {
@@ -129,7 +138,6 @@ class QatraOverlayService : Service() {
 
         handler.postDelayed({
             ObjectAnimator.ofFloat(overlayContainer, "alpha", 1f, 0f).setDuration(800).start()
-            // الإصلاح: تمت إزالة stopForeground
             handler.postDelayed({ stopSelf() }, 800)
         }, displayDuration)
     }
