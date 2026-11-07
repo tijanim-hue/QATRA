@@ -1,6 +1,6 @@
 "use strict";
 
-const STORE_KEY = "qatra_worldclass_v1";
+const STORE_KEY = "qatra_worldclass_v2";
 
 // توليد مكتبة ضخمة جداً (100 عنصر لكل قسم)
 const generateArray = (base, count) => Array.from({length: count}, (_, i) => `${base} ${i+1}`);
@@ -18,6 +18,12 @@ let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
 };
 
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
+
+// دالة الحماية: تمنع انهيار التطبيق إذا كان الزر غير موجود في الواجهة
+function safeOn(id, eventType, handler) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(eventType, handler);
+}
 
 function applyState() {
   localStorage.setItem(STORE_KEY, JSON.stringify(state));
@@ -39,58 +45,17 @@ function applyState() {
   renderCategories(); renderGarden();
 }
 
-// --- التنقل ---
-document.getElementById('darkToggle').onchange = e => { state.dark = e.target.checked; applyState(); };
-document.getElementById('glassToggle').onchange = e => { state.glass = e.target.checked; applyState(); };
-
-document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
-  btn.onclick = () => {
-    // تجاهل زر الإحصائيات لأنه يفتح نافذة ولا يغير الصفحة
-    if(btn.dataset.view === 'statsSheet') return;
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
-    document.getElementById(btn.dataset.view).classList.add('active');
-    btn.classList.add('active');
-  };
-});
-
-// --- السحب للتحديث (تبديل الوضع الداكن والمضيء) ---
-let startY = 0;
-const scrollContent = document.getElementById('scrollContent');
-const ptrContainer = document.getElementById('ptrContainer');
-const ptrIcon = document.getElementById('ptrIcon');
-
-scrollContent.addEventListener('touchstart', e => { if(scrollContent.scrollTop === 0) startY = e.touches[0].clientY; }, {passive:true});
-scrollContent.addEventListener('touchmove', e => {
-  if (startY > 0 && scrollContent.scrollTop === 0) {
-    let y = e.touches[0].clientY - startY;
-    if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform = `rotate(${y*4}deg)`; }
-  }
-}, {passive:true});
-scrollContent.addEventListener('touchend', e => {
-  if (startY > 0 && scrollContent.scrollTop === 0) {
-    let y = e.changedTouches[0].clientY - startY;
-    if (y > 70) {
-      ptrIcon.classList.add('spin');
-      // تبديل الوضع الداكن بدلاً من تغيير الألوان
-      state.dark = !state.dark;
-      applyState();
-      setTimeout(() => { ptrContainer.style.transform = `translateY(-100%)`; ptrIcon.classList.remove('spin'); }, 600);
-    } else {
-      ptrContainer.style.transform = `translateY(-100%)`;
-    }
-  }
-  startY = 0;
-}, {passive:true});
-
 // --- الأيام والمواعيد المخصصة ---
 const WEEK_DAYS = [{ id: 0, name: "أحد" }, { id: 1, name: "إثن" }, { id: 2, name: "ثلا" }, { id: 3, name: "أرب" }, { id: 4, name: "خمي" }, { id: 5, name: "جمع" }, { id: 6, name: "سبت" }];
 let currentSelectedDays = new Set([0,1,2,3,4,5,6]);
 
 function renderDaysGrid() {
-  document.getElementById('daysGrid').innerHTML = WEEK_DAYS.map(d => 
-    `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.name}</div>`
-  ).join('');
+  const dg = document.getElementById('daysGrid');
+  if(dg) {
+      dg.innerHTML = WEEK_DAYS.map(d => 
+        `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.name}</div>`
+      ).join('');
+  }
 }
 window.toggleDay = (id) => { currentSelectedDays.has(id) ? currentSelectedDays.delete(id) : currentSelectedDays.add(id); renderDaysGrid(); };
 
@@ -142,20 +107,25 @@ function renderCategories() {
 
 window.openCategory = (id) => {
   const cat = QUOTES_DB[id];
-  document.getElementById('catSheetTitle').innerText = cat.title;
-  // عرض 50 عنصر لتجنب تجميد الشاشة
-  document.getElementById('catSheetContent').innerHTML = cat.items.slice(0, 50).map(q => {
-    const checked = state.selectedQuotes.includes(q) ? "checked" : "";
-    return `<div style="display:flex; align-items:flex-start; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);">
-      <input type="checkbox" style="width:24px; height:24px; accent-color:var(--primary); margin-top:2px; flex-shrink:0;" value="${q}" ${checked} 
-        onchange="if(this.checked) state.selectedQuotes.push(this.value); else state.selectedQuotes = state.selectedQuotes.filter(x=>x!==this.value); applyState(); syncNativeAlarms();">
-      <div style="font-size:15px; font-weight:700;">${q}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('categorySheet').classList.add('show');
+  const title = document.getElementById('catSheetTitle');
+  if (title) title.innerText = cat.title;
+  
+  const content = document.getElementById('catSheetContent');
+  if(content) {
+      content.innerHTML = cat.items.slice(0, 50).map(q => {
+        const checked = state.selectedQuotes.includes(q) ? "checked" : "";
+        return `<div style="display:flex; align-items:flex-start; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);">
+          <input type="checkbox" style="width:24px; height:24px; accent-color:var(--primary); margin-top:2px; flex-shrink:0;" value="${q}" ${checked} 
+            onchange="if(this.checked) state.selectedQuotes.push(this.value); else state.selectedQuotes = state.selectedQuotes.filter(x=>x!==this.value); applyState(); syncNativeAlarms();">
+          <div style="font-size:15px; font-weight:700;">${q}</div>
+        </div>`;
+      }).join('');
+  }
+  const sheet = document.getElementById('categorySheet');
+  if(sheet) sheet.classList.add('show');
 };
 
-// --- القطرة والمواعيد (نفس المحرك الناجح) ---
+// --- القطرة والمواعيد ---
 function getRandomQuote() {
   const pool = state.selectedQuotes.length > 0 ? state.selectedQuotes : QUOTES_DB.dhikr.items;
   return pool[Math.floor(Math.random() * pool.length)];
@@ -171,11 +141,6 @@ window.fireCinematic = async () => {
     await QatraNative.showDrop({ quote: quote, duration: state.duration }).catch(e=>{});
   }
 };
-document.getElementById('previewFloatingBtn').onclick = fireCinematic;
-
-document.getElementById('notifModeSetting').onchange = e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); };
-document.getElementById('dropDurationSetting').onchange = e => { state.duration = parseInt(e.target.value); applyState(); syncNativeAlarms(); };
-document.getElementById('intervalSelect').onchange = e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); renderSchedules(); };
 
 function renderSchedules() {
   const list = document.getElementById('savedSchedulesList');
@@ -195,17 +160,6 @@ function renderSchedules() {
   }
 }
 
-document.getElementById('saveScheduleBtn').onclick = () => {
-  const tEl = document.getElementById('customTime');
-  if(!tEl) return;
-  const t = tEl.value;
-  if(t && currentSelectedDays.size > 0) { 
-    state.schedules.push({id: Math.floor(Math.random()*10000), time: t, days: Array.from(currentSelectedDays)}); 
-    applyState(); renderSchedules(); syncNativeAlarms();
-  } else {
-    alert("الرجاء اختيار الوقت ويوم واحد على الأقل.");
-  }
-};
 window.deleteSchedule = (i) => { 
   if(QatraNative && state.schedules[i]) QatraNative.cancel({id: state.schedules[i].id}).catch(e=>{});
   state.schedules.splice(i,1); applyState(); renderSchedules(); syncNativeAlarms(); 
@@ -220,40 +174,108 @@ function syncNativeAlarms() {
 // --- التأمل والاستماع ---
 const randomAudios = ["https://actions.google.com/sounds/v1/water/rain_on_roof.ogg", "https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg", "https://server8.mp3quran.net/afs/001.mp3"];
 let randPlayer = new Audio(); let isRandPlaying = false;
-document.getElementById('playAudioBtn').onclick = () => {
-  const btn = document.getElementById('playAudioBtn');
-  const status = document.getElementById('audioStatus');
-  if (isRandPlaying) { 
-    randPlayer.pause(); isRandPlaying = false; 
-    if(btn) btn.textContent = "▶ تشغيل الآن"; 
-    if(status) status.textContent = "استعد للهدوء"; 
-  } else {
-    randPlayer.src = randomAudios[Math.floor(Math.random() * randomAudios.length)];
-    randPlayer.play(); isRandPlaying = true; 
-    if(btn) btn.textContent = "⏸ إيقاف"; 
-    if(status) status.textContent = "جارٍ الاسترخاء...";
-  }
-};
 
-// --- الإقلاع الآمن جداً وطلب الأذونات ---
-window.onload = () => {
-  applyState(); renderSchedules(); renderDaysGrid();
-  const qtEl = document.getElementById('dailyQuoteText');
-  if(qtEl) qtEl.textContent = `"${getRandomQuote()}"`;
-  
-  // شاشة إقلاع آمنة لا تتوقف أبداً (مستقلة عن الأذونات)
-  setTimeout(() => {
-    const splash = document.getElementById('splash');
-    if (splash) { 
-      splash.style.opacity = '0'; 
-      setTimeout(() => splash.remove(), 800); 
+// =======================================================
+// المحرك الرئيسي: تشغيل التطبيق بأمان تام بعد تحميل الواجهة
+// =======================================================
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. ربط الأحداث بأمان (يمنع الكراش الذي تسبب بتوقف الشاشة)
+    safeOn('darkToggle', 'change', e => { state.dark = e.target.checked; applyState(); });
+    safeOn('glassToggle', 'change', e => { state.glass = e.target.checked; applyState(); });
+    safeOn('notifModeSetting', 'change', e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); });
+    safeOn('dropDurationSetting', 'change', e => { state.duration = parseInt(e.target.value); applyState(); syncNativeAlarms(); });
+    safeOn('intervalSelect', 'change', e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); renderSchedules(); });
+    
+    safeOn('saveScheduleBtn', 'click', () => {
+        const tEl = document.getElementById('customTime');
+        if(!tEl) return;
+        const t = tEl.value;
+        if(t && currentSelectedDays.size > 0) { 
+            state.schedules.push({id: Math.floor(Math.random()*10000), time: t, days: Array.from(currentSelectedDays)}); 
+            applyState(); renderSchedules(); syncNativeAlarms();
+        } else {
+            alert("الرجاء اختيار الوقت ويوم واحد على الأقل.");
+        }
+    });
+
+    safeOn('playAudioBtn', 'click', () => {
+        const btn = document.getElementById('playAudioBtn');
+        const status = document.getElementById('audioStatus');
+        if (isRandPlaying) { 
+            randPlayer.pause(); isRandPlaying = false; 
+            if(btn) btn.textContent = "▶ تشغيل الآن"; 
+            if(status) status.textContent = "استعد للهدوء"; 
+        } else {
+            randPlayer.src = randomAudios[Math.floor(Math.random() * randomAudios.length)];
+            randPlayer.play(); isRandPlaying = true; 
+            if(btn) btn.textContent = "⏸ إيقاف"; 
+            if(status) status.textContent = "جارٍ الاسترخاء...";
+        }
+    });
+
+    // ربط التنقل السفلي
+    document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(btn.dataset.view === 'statsSheet') return;
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
+        const viewEl = document.getElementById(btn.dataset.view);
+        if(viewEl) viewEl.classList.add('active');
+        btn.classList.add('active');
+      });
+    });
+
+    // ربط السحب للتحديث لتبديل الألوان بمرونة
+    let startY = 0;
+    const scrollContent = document.getElementById('scrollContent');
+    const ptrContainer = document.getElementById('ptrContainer');
+    const ptrIcon = document.getElementById('ptrIcon');
+
+    if(scrollContent && ptrContainer && ptrIcon) {
+        scrollContent.addEventListener('touchstart', e => { if(scrollContent.scrollTop === 0) startY = e.touches[0].clientY; }, {passive:true});
+        scrollContent.addEventListener('touchmove', e => {
+          if (startY > 0 && scrollContent.scrollTop === 0) {
+            let y = e.touches[0].clientY - startY;
+            if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform = `rotate(${y*4}deg)`; }
+          }
+        }, {passive:true});
+        scrollContent.addEventListener('touchend', e => {
+          if (startY > 0 && scrollContent.scrollTop === 0) {
+            let y = e.changedTouches[0].clientY - startY;
+            if (y > 70) {
+              ptrIcon.classList.add('spin');
+              state.dark = !state.dark;
+              applyState();
+              setTimeout(() => { ptrContainer.style.transform = `translateY(-100%)`; ptrIcon.classList.remove('spin'); }, 600);
+            } else {
+              ptrContainer.style.transform = `translateY(-100%)`;
+            }
+          }
+          startY = 0;
+        }, {passive:true});
     }
-  }, 2500); // إظهار الشاشة لـ 2.5 ثانية لعرض شريط التحميل واسمك بوضوح
 
-  // طلب الأذونات يعمل في الخلفية بهدوء
-  if (QatraNative) {
-    setTimeout(() => { 
-      QatraNative.askPermissions().catch(e => console.log(e)); 
-    }, 3500);
-  }
-};
+    // 2. تحديث الواجهة عند الإقلاع
+    applyState(); renderSchedules(); renderDaysGrid();
+    const qtEl = document.getElementById('dailyQuoteText');
+    if(qtEl) qtEl.textContent = `"${getRandomQuote()}"`;
+    
+    // =====================================================
+    // 3. الإخفاء الإجباري لشاشة الإقلاع (يضمن الدخول للتطبيق دائماً)
+    // =====================================================
+    setTimeout(() => {
+        const splash = document.getElementById('splash');
+        if (splash) { 
+            splash.style.opacity = '0'; 
+            setTimeout(() => splash.remove(), 800); 
+        }
+    }, 2500);
+
+    // 4. طلب الأذونات بهدوء في الخلفية لكي لا تتعارض مع الشاشة
+    if (QatraNative) {
+        setTimeout(() => { 
+            QatraNative.askPermissions().catch(e => console.log(e)); 
+        }, 3500);
+    }
+});
