@@ -94,69 +94,12 @@ transition: 0.3s;
 .hero-icon { width: 65px; height: 65px; fill: url(#grad); filter: drop-shadow(0 10px 15px color-mix(in srgb, var(--primary) 30%, transparent)); margin-bottom: 12px;}
 .hero-text { font-size: 18px; font-weight: 800; color: var(--text); }
 
-/* الحديقة */
-.garden-stage { text-align: center; padding: 20px; }
-.garden-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-.garden-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 15px; text-align: center; }
-.tree-emoji { font-size: 45px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); margin-bottom: 10px; display: inline-block; animation: floatObj 4s ease-in-out infinite alternate;}
-@keyframes floatObj { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-.progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 15px; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px;}
-
-/* ================= الكبسولة العائمة ================= */
-.floating-nav {
-position: absolute;
-bottom: 30px;
-left: 50%;
-transform: translateX(-50%);
-width: 90%;
-max-width: 420px;
-display: flex; 
-flex-direction: row; 
-justify-content: space-evenly; 
-align-items: center;
-padding: 10px 12px;
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 40px;
-z-index: 100;
-box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
-transition: background 0.5s;
-}
-.nav-item {
-background: transparent;
-border: none;
-color: var(--text-dim);
-padding: 10px;
-border-radius: 50%;
-display: flex; 
-flex-direction: column;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-flex: 1; 
-min-width: 50px;
-}
+/* الكبسولة العائمة */
+.floating-nav { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 420px; display: flex; flex-direction: row; justify-content: space-evenly; align-items: center; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 40px; z-index: 100; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); transition: background 0.5s; }
+.nav-item { background: transparent; border: none; color: var(--text-dim); padding: 10px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); flex: 1; min-width: 50px; }
 .nav-item svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; }
 .nav-item.active { color: var(--primary); }
-
-.nav-home-btn {
-flex: none;
-width: 60px;
-height: 60px;
-border-radius: 50%;
-background: linear-gradient(135deg, var(--primary), var(--secondary));
-display: flex; 
-align-items: center;
-justify-content: center;
-color: #fff;
-border: 4px solid var(--bg);
-box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 40%, transparent);
-transform: translateY(-20px);
-cursor: pointer;
-transition: 0.3s;
-}
+.nav-home-btn { flex: none; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: #fff; border: 4px solid var(--bg); box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 40%, transparent); transform: translateY(-20px); cursor: pointer; transition: 0.3s; }
 .nav-home-btn svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2.5;}
 .nav-home-btn:active { transform: translateY(-15px) scale(0.95); }
 
@@ -164,6 +107,19 @@ transition: 0.3s;
 .view { display: none; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .view.active { display: block; }
 @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.control-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.control-row:last-child { border-bottom: none; }
+.setting-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.setting-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.toggle { width: 50px; height: 28px; position: relative; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track { position: absolute; inset: 0; border-radius: 30px; background: var(--border); transition: 0.3s; }
+.toggle-track::before { content: ""; position: absolute; width: 22px; height: 22px; right: 3px; top: 3px; border-radius: 50%; background: var(--text); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+.toggle input:checked + .toggle-track { background: var(--primary); }
+.toggle input:checked + .toggle-track::before { transform: translateX(-22px); background: #fff;}
+select, input[type="text"], input[type="time"], input[type="number"], textarea { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none;}
+select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="number"]:focus, textarea:focus { border-color: var(--primary); }
 
 /* أزرار الاختيار الاحترافية */
 .custom-radio-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
@@ -183,6 +139,7 @@ transition: 0.3s;
 .btn-solid { width: 100%; padding: 18px; border: none; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-size: 16px; font-weight: 800; margin-top: 20px; cursor: pointer; box-shadow: 0 10px 25px color-mix(in srgb, var(--primary) 30%, transparent); transition: transform 0.2s;}
 .btn-solid:active { transform: scale(0.97); }
 .btn-danger { background: rgba(255,0,0,0.1); color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: none; }
+.btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); box-shadow: none; }
 
 .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(4px); }
 .sheet-overlay.show { display: flex; animation: fadeIn 0.3s; }
@@ -191,12 +148,22 @@ transition: 0.3s;
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .sheet-handle { width: 45px; height: 5px; background: var(--border); border-radius: 5px; margin: 0 auto 25px; }
 
-/* التنبيه للنسخ */
+/* عناصر قائمة المكتبة ودفتر الأثر */
+.my-quote-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 15px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+.journal-item { background: var(--bg); padding: 15px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 4px solid var(--primary); }
+.delete-btn { background: rgba(255,0,0,0.1); color: #ff4d4d; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
 .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 2000; transition: 0.3s; opacity: 0; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-.my-quote-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
-.delete-btn { background: rgba(255,0,0,0.1); color: #ff4d4d; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+/* الحديقة */
+.garden-stage { text-align: center; padding: 20px; }
+.garden-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+.garden-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 15px; text-align: center; }
+.tree-emoji { font-size: 45px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); margin-bottom: 10px; display: inline-block; animation: floatObj 4s ease-in-out infinite alternate;}
+@keyframes floatObj { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+.progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 15px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px;}
 
 /* المشغل الصوتي العائم */
 .audio-player { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(150px); width: 85%; max-width: 400px; background: var(--surface); border-radius: 24px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; z-index: 90; box-shadow: 0 15px 35px rgba(0,0,0,0.2); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; pointer-events:none; }
@@ -204,26 +171,12 @@ transition: 0.3s;
 .audio-controls { display: flex; align-items: center; gap: 10px; }
 .audio-btn { background: none; border: none; color: var(--primary); cursor: pointer; display: grid; place-items: center; padding: 5px; }
 .audio-btn svg { width: 28px; height: 28px; fill: currentColor; }
-.audio-info { flex: 1; }
-.audio-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.audio-info { flex: 1; min-width: 0; }
+.audio-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .audio-progress-bar { width: 100%; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
 .audio-progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.1s linear; }
 .audio-close { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 5px; }
 .audio-close svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
-
-/* إعدادات وتصميم الإحصائيات الجديد */
-.control-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-.control-row:last-child { border-bottom: none; }
-.setting-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-.setting-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.toggle { width: 50px; height: 28px; position: relative; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-track { position: absolute; inset: 0; border-radius: 30px; background: var(--border); transition: 0.3s; }
-.toggle-track::before { content: ""; position: absolute; width: 22px; height: 22px; right: 3px; top: 3px; border-radius: 50%; background: var(--text); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
-.toggle input:checked + .toggle-track { background: var(--primary); }
-.toggle input:checked + .toggle-track::before { transform: translateX(-22px); background: #fff;}
-select, input[type="text"], input[type="time"], input[type="number"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none;}
-select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="number"]:focus { border-color: var(--primary); }
 </style>
 </head>
 <body class="glass-active dark-mode">
@@ -242,69 +195,10 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 
 <div id="copyToast" class="toast" data-i18n="copied">تم النسخ بنجاح</div>
+<!-- عنصر مخفي لتوليد الصورة للمشاركة -->
+<canvas id="shareCanvas" style="display:none;"></canvas>
 
-<!-- الإعدادات (تصميم أيقونات حديثة) -->
-<div class="sheet-overlay" id="settingsSheet">
-<div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
-<div class="sheet-handle"></div>
-<h2 style="margin-top:0;" data-i18n="app_settings">إعدادات التطبيق</h2>
-<div class="control-row">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div class="setting-icon" style="background:color-mix(in srgb, var(--primary) 15%, transparent); color:var(--primary);"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-    <span style="font-weight:700; font-size:15px;" data-i18n="glass_mode">الشفافية والزجاج</span>
-  </div>
-  <label class="toggle"><input type="checkbox" id="glassToggle"><span class="toggle-track"></span></label>
-</div>
-<div class="control-row">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div class="setting-icon" style="background:color-mix(in srgb, #F59E0B 15%, transparent); color:#F59E0B;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-    <span style="font-weight:700; font-size:15px;" data-i18n="show_image">إظهار صورة العبارة</span>
-  </div>
-  <label class="toggle"><input type="checkbox" id="imageToggle"><span class="toggle-track"></span></label>
-</div>
-<div class="control-row">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div class="setting-icon" style="background:color-mix(in srgb, #10B981 15%, transparent); color:#10B981;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
-    <span style="font-weight:700; font-size:15px;" data-i18n="show_home_cards">بطاقات الرئيسية</span>
-  </div>
-  <label class="toggle"><input type="checkbox" id="homeCardsToggle"><span class="toggle-track"></span></label>
-</div>
-<div style="margin-top:20px;">
-  <label style="color:var(--text-dim); font-size:14px; font-weight:700;" data-i18n="language">لغة التطبيق:</label>
-  <select id="langSelect">
-    <option value="ar">العربية</option>
-    <option value="en">English</option>
-    <option value="fr">Français</option>
-    <option value="es">Español</option>
-    <option value="de">Deutsch</option>
-  </select>
-</div>
-<button class="btn-solid" onclick="document.getElementById('settingsSheet').classList.remove('show')" data-i18n="save_done">تم وحفظ</button>
-</div>
-</div>
-
-<div class="sheet-overlay" id="categorySheet">
-<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
-<div class="sheet-handle"></div>
-<h2 style="margin-top:0; color:var(--primary);" id="catSheetTitle">القسم</h2>
-<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="catSheetContent"></div>
-<button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')" data-i18n="back">رجوع</button>
-</div>
-</div>
-
-<div class="sheet-overlay" id="groupViewSheet">
-<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
-<div class="sheet-handle"></div>
-<h2 style="margin-top:0; color:var(--primary);" id="groupViewTitle">اسم المجموعة</h2>
-<div style="display:flex; gap:10px; margin-bottom:15px;" id="addToGroupDiv">
-  <input type="text" id="newGroupQuoteInput" placeholder="أدخل عبارتك هنا..." style="margin:0; flex:1;">
-  <button class="btn-solid" onclick="addQuoteToCurrentGroup()" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
-</div>
-<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="groupViewContent"></div>
-<button class="btn-solid" onclick="document.getElementById('groupViewSheet').classList.remove('show')" data-i18n="back">رجوع</button>
-</div>
-</div>
-
+<!-- ================= الصفحة الرئيسية ================= -->
 <div class="app-container">
 <header class="header">
 <button class="header-btn" onclick="document.getElementById('statsSheet').classList.add('show')">
@@ -354,7 +248,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
     <div class="card-icon" style="color:#F59E0B; background:color-mix(in srgb, #F59E0B 10%, transparent);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
     <div class="card-info">
       <div class="card-title" data-i18n="current_moment">لحظتك الحالية</div>
-      <div class="card-sub" id="currentMomentText">...</div>
+      <div class="card-sub" id="currentMomentText" style="white-space:normal;">...</div>
     </div>
   </div>
 </div>
@@ -379,6 +273,10 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
     <div class="custom-radio-item active" data-value="all" onclick="setQuoteSource('all')">
       <span data-i18n="all_categories">عشوائي (من كل الأقسام)</span><div class="custom-radio-circle"></div>
     </div>
+    <!-- القسم الجديد: سؤال وعي -->
+    <div class="custom-radio-item" data-value="awareness" onclick="setQuoteSource('awareness')">
+      <span data-i18n="cat_awareness">أسئلة وعي (جديد)</span><div class="custom-radio-circle"></div>
+    </div>
     <div class="custom-radio-item" data-value="dhikr" onclick="setQuoteSource('dhikr')">
       <span data-i18n="cat_dhikr">أذكار وأدعية</span><div class="custom-radio-circle"></div>
     </div>
@@ -395,7 +293,11 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
       <span data-i18n="cat_culture">ثقافة عامة وحكم</span><div class="custom-radio-circle"></div>
     </div>
     <div class="custom-radio-item" data-value="myGroups" onclick="setQuoteSource('myGroups'); showGroupsManager();">
-      <span data-i18n="my_library">مجموعاتي الخاصة</span><div class="custom-radio-circle"></div>
+      <span data-i18n="my_groups">مجموعاتي الخاصة</span><div class="custom-radio-circle"></div>
+    </div>
+    <!-- القسم الجديد: قطرات لأحبائي -->
+    <div class="custom-radio-item" data-value="family" onclick="setQuoteSource('family'); openFamilySheet();">
+      <span data-i18n="cat_family">قطرات لأحبائي (عائلتي)</span><div class="custom-radio-circle"></div>
     </div>
   </div>
 </div>
@@ -414,6 +316,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </select>
 </div>
 
+<!-- البرمجة الذكية -->
 <div class="glass-card">
 <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="smart_schedule">3. البرمجة الذكية (توزيع تلقائي)</strong>
 <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
@@ -430,6 +333,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <button class="btn-solid" id="applySmartScheduleBtn" data-i18n="apply_smart">تطبيق البرمجة الذكية</button>
 </div>
 
+<!-- الجدولة اليدوية -->
 <div class="glass-card">
 <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="manual_schedule">الجدولة اليدوية (تكرار مستمر)</strong>
 <select id="intervalSelect"></select>
@@ -447,6 +351,19 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <p style="color:var(--text-dim); font-size:14px; margin-top:0; margin-bottom:20px;" data-i18n="library_desc">احتفظ بالمعاني التي تلامس قلبك، ونظمها في مجموعاتك الخاصة.</p>
 
 <div class="glass-card" style="padding:0; overflow:hidden;">
+  <!-- القسم الجديد: دفتر الأثر -->
+  <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="openJournalSheet()">
+    <div class="card-icon" style="background:#8B5CF6; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+    <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_journal">دفتر الأثر (تأملاتي)</div></div>
+    <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
+  </div>
+  <!-- القسم الجديد: قطرات لأحبائي -->
+  <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="openFamilySheet()">
+    <div class="card-icon" style="background:#F43F5E; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="family_drops">قطرات لأحبائي</div></div>
+    <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
+  </div>
+
   <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="showCategoryList()">
     <div class="card-icon" style="background:var(--primary); color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
     <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="discover_quotes">اكتشف العبارات</div></div>
@@ -457,7 +374,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
     <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_favorites">مفضلاتي</div></div>
     <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
   </div>
-  <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="showGroupsManager()">
+  <div class="action-card" style="padding:15px 20px;" onclick="showGroupsManager()">
     <div class="card-icon" style="background:#F59E0B; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
     <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_groups">مجموعاتي</div></div>
     <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
@@ -577,13 +494,90 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </nav>
 </div>
 
+<!-- ================= النوافذ المنبثقة الجديدة ================= -->
+<div class="sheet-overlay" id="categorySheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:var(--primary);" id="catSheetTitle">القسم</h2>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="catSheetContent"></div>
+<button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')" data-i18n="back">رجوع</button>
+</div>
+</div>
+
+<div class="sheet-overlay" id="groupViewSheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:var(--primary);" id="groupViewTitle">اسم المجموعة</h2>
+<div style="display:flex; gap:10px; margin-bottom:15px;" id="addToGroupDiv">
+  <input type="text" id="newGroupQuoteInput" placeholder="أدخل عبارتك هنا..." style="margin:0; flex:1;">
+  <button class="btn-solid" onclick="addQuoteToCurrentGroup()" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
+</div>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="groupViewContent"></div>
+<button class="btn-solid" onclick="document.getElementById('groupViewSheet').classList.remove('show')" data-i18n="back">رجوع</button>
+</div>
+</div>
+
+<!-- 1. نافذة دفتر الأثر (Journal) -->
+<div class="sheet-overlay" id="journalSheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:#8B5CF6;" data-i18n="my_journal">دفتر الأثر</h2>
+<p style="color:var(--text-dim); font-size:14px; margin-top:0;">مساحتك الخاصة للتأمل والإجابة عن أسئلة الوعي. (تُحفظ محلياً فقط)</p>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="journalContent"></div>
+<button class="btn-solid" onclick="document.getElementById('journalSheet').classList.remove('show')" data-i18n="back">رجوع</button>
+</div>
+</div>
+
+<!-- نافذة الإجابة عن سؤال الوعي -->
+<div class="sheet-overlay" id="answerSheet">
+<div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:var(--primary);">سؤال اليوم 💡</h2>
+<div class="glass-card" style="background:color-mix(in srgb, var(--primary) 10%, transparent); padding:20px; text-align:center; font-size:18px; font-weight:800; color:var(--primary);" id="activeQuestionText">...</div>
+<textarea id="answerInput" placeholder="اكتب تأملك أو إجابتك هنا..." rows="4" style="resize:none;"></textarea>
+<div style="display:flex; gap:10px; margin-top:15px;">
+  <button class="btn-solid" style="margin-top:0; flex:2;" onclick="saveReflection()">حفظ الإجابة</button>
+  <button class="btn-solid btn-outline" style="margin-top:0; flex:1;" onclick="document.getElementById('answerSheet').classList.remove('show')">تأجيل</button>
+</div>
+</div>
+</div>
+
+<!-- 2. نافذة قطرات لأحبائي (Family Drops) -->
+<div class="sheet-overlay" id="familySheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:#F43F5E;" data-i18n="family_drops">قطرات لأحبائي</h2>
+<p style="color:var(--text-dim); font-size:14px; margin-top:0;">أرسل رسائل وقطرات إيجابية لعائلتك وأصدقائك.</p>
+<div style="display:flex; gap:10px; margin-bottom:15px;">
+  <input type="text" id="newFamilyName" placeholder="الاسم (مثال: ابني أحمد)" style="margin:0; flex:2;">
+  <select id="newFamilyRel" style="margin:0; flex:1; padding:0 10px;">
+    <option value="عائلة">عائلة</option><option value="صديق">صديق</option>
+  </select>
+  <button class="btn-solid" onclick="addFamilyMember()" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
+</div>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="familyContent"></div>
+<button class="btn-solid" onclick="document.getElementById('familySheet').classList.remove('show')" data-i18n="back">رجوع</button>
+</div>
+</div>
+
+<!-- 3. نافذة المشاركة الفنية (Share Drop) -->
+<div class="sheet-overlay" id="shareSheet">
+<div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:var(--primary);">أرسل قطرة 📤</h2>
+<div class="glass-card" style="padding:20px; text-align:center; font-size:16px; font-weight:700; margin-bottom:20px;" id="shareQuoteText">...</div>
+<button class="btn-solid" onclick="shareAsImage()" style="margin-top:0; margin-bottom:10px;">🖼️ مشاركة كصورة فنية</button>
+<button class="btn-solid btn-outline" onclick="shareAsText()" style="margin-top:0; margin-bottom:20px;">💬 مشاركة كنص عادي</button>
+<button class="btn-solid btn-danger" onclick="document.getElementById('shareSheet').classList.remove('show')" style="margin-top:0;">إلغاء</button>
+</div>
+</div>
+
 <!-- ================= نافذة الإحصائيات (تحديث المخطط الدائري) ================= -->
 <div class="sheet-overlay" id="statsSheet">
 <div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
 <div class="sheet-handle"></div>
 <h2 style="margin-top:0;" data-i18n="your_progress">نشاطك وتقدمك 📈</h2>
 <div style="display:flex; justify-content:space-around; align-items:center; padding: 20px 0; border-bottom:1px solid var(--border); margin-bottom:15px;">
-  <!-- الدائرة 1: القطرات -->
   <div style="position:relative; width:100px; height:100px;">
     <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
       <circle cx="18" cy="18" r="16" fill="none" stroke="var(--border)" stroke-width="3"></circle>
@@ -594,7 +588,6 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
       <span style="font-size:11px; color:var(--text-dim); font-weight:700;">قطرة</span>
     </div>
   </div>
-  <!-- الدائرة 2: الأيام -->
   <div style="position:relative; width:100px; height:100px;">
     <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
       <circle cx="18" cy="18" r="16" fill="none" stroke="var(--border)" stroke-width="3"></circle>
@@ -607,6 +600,46 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
   </div>
 </div>
 <button class="btn-solid" onclick="document.getElementById('statsSheet').classList.remove('show')" data-i18n="close">إغلاق</button>
+</div>
+</div>
+
+<!-- الإعدادات -->
+<div class="sheet-overlay" id="settingsSheet">
+<div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0;" data-i18n="app_settings">إعدادات التطبيق</h2>
+<div class="control-row">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="setting-icon" style="background:color-mix(in srgb, var(--primary) 15%, transparent); color:var(--primary);"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <span style="font-weight:700; font-size:15px;" data-i18n="glass_mode">الشفافية والزجاج</span>
+  </div>
+  <label class="toggle"><input type="checkbox" id="glassToggle"><span class="toggle-track"></span></label>
+</div>
+<div class="control-row">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="setting-icon" style="background:color-mix(in srgb, #F59E0B 15%, transparent); color:#F59E0B;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+    <span style="font-weight:700; font-size:15px;" data-i18n="show_image">إظهار صورة العبارة</span>
+  </div>
+  <label class="toggle"><input type="checkbox" id="imageToggle"><span class="toggle-track"></span></label>
+</div>
+<div class="control-row">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="setting-icon" style="background:color-mix(in srgb, #10B981 15%, transparent); color:#10B981;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+    <span style="font-weight:700; font-size:15px;" data-i18n="show_home_cards">بطاقات الرئيسية</span>
+  </div>
+  <label class="toggle"><input type="checkbox" id="homeCardsToggle"><span class="toggle-track"></span></label>
+</div>
+<div style="margin-top:20px;">
+  <label style="color:var(--text-dim); font-size:14px; font-weight:700;" data-i18n="language">لغة التطبيق:</label>
+  <select id="langSelect">
+    <option value="ar">العربية</option>
+    <option value="en">English</option>
+    <option value="fr">Français</option>
+    <option value="es">Español</option>
+    <option value="de">Deutsch</option>
+  </select>
+</div>
+<button class="btn-solid" onclick="document.getElementById('settingsSheet').classList.remove('show')" data-i18n="save_done">تم وحفظ</button>
 </div>
 </div>
 
