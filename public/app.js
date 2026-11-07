@@ -40,7 +40,7 @@ const DICT = {
     all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development", cat_quran: "Quranic Verses", cat_culture: "Culture", cat_poetry: "Poetry", my_library: "My Groups", stop_repeat: "Stop Auto Repeat", every_30: "Every 30 Mins", every_1h: "Every 1 Hour", every_3h: "Every 3 Hours", every_12h: "Every 12 Hours", every_24h: "Every 24 Hours", no_reminders: "No scheduled reminders", source_category: "1. Quotes Source"
   }
 };
-// دعم جزئي للغات المتبقية بالانجليزية لتجنب تضخم الكود
+// دعم للغات المتبقية بالانجليزية
 const langs = ['fr','es','de']; langs.forEach(l => DICT[l] = DICT['en']); 
 
 const generateArray = (base, count) => Array.from({length: count}, (_, i) => `${base} ${i+1}`);
@@ -78,7 +78,7 @@ function applyState() {
   
   c('glassToggle', state.glass); c('imageToggle', state.showImage); c('homeCardsToggle', state.showHomeCards);
   s('langSelect', state.lang); s('notifModeSetting', state.mode); 
-  s('dropDurationSetting', state.duration); s('intervalSelect', state.interval);
+  s('dropDurationSetting', state.duration); 
   
   document.querySelectorAll('.custom-radio-item').forEach(item => {
     if(item.dataset.value === state.quoteSource) item.classList.add('active');
@@ -93,12 +93,13 @@ function applyState() {
       intSel.value = state.interval;
   }
 
-  updateHomeCards(); renderGarden(); renderSchedules();
+  updateHomeCards(); updateStatsChart(); renderGarden(); renderSchedules();
 }
 
 safeOn('langSelect', 'change', e => { state.lang = e.target.value; applyState(); syncNativeAlarms(); });
 safeOn('imageToggle', 'change', e => { state.showImage = e.target.checked; applyState(); syncNativeAlarms(); });
 safeOn('homeCardsToggle', 'change', e => { state.showHomeCards = e.target.checked; applyState(); });
+safeOn('intervalSelect', 'change', e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); });
 window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); syncNativeAlarms(); };
 
 // --- استماع للقلب من القطرة في الأندرويد ---
@@ -110,6 +111,21 @@ if (QatraNative) {
     else if (info.category === 'myGroups') state.stats.selfDev++;
     applyState();
   });
+}
+
+function updateStatsChart() {
+  const drops = state.stats.likes; // استخدام التفاعل كمؤشر أساسي
+  const days = state.stats.days;
+  const maxD = Math.max(drops, 50);
+  
+  const c1 = document.getElementById('chartDropsCircle');
+  if(c1) c1.style.strokeDashoffset = 100.5 - (100.5 * (drops/maxD));
+  
+  const c2 = document.getElementById('chartDaysCircle');
+  if(c2) c2.style.strokeDashoffset = 100.5 - (100.5 * (Math.min(days,30)/30));
+  
+  const txt1 = document.getElementById('chartDropsVal'); if(txt1) txt1.innerText = drops;
+  const txt2 = document.getElementById('chartDaysVal'); if(txt2) txt2.innerText = days;
 }
 
 function updateHomeCards() {
@@ -149,7 +165,7 @@ const WEEK_DAYS = {
 let currentSelectedDays = new Set([0,1,2,3,4,5,6]);
 function renderDaysGrid() {
   const dg = document.getElementById('daysGrid');
-  if(dg) dg.innerHTML = (WEEK_DAYS[state.lang] || WEEK_DAYS['en']).map(d => `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.n}</div>`).join('');
+  if(dg) dg.innerHTML = (WEEK_DAYS[state.lang] || WEEK_DAYS['ar']).map(d => `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.n}</div>`).join('');
 }
 window.toggleDay = (id) => { currentSelectedDays.has(id) ? currentSelectedDays.delete(id) : currentSelectedDays.add(id); renderDaysGrid(); };
 
@@ -228,7 +244,6 @@ window.openQuotesList = (id) => {
   const content = document.getElementById('catSheetContent');
   if(content) {
       content.innerHTML = cat.items.slice(0, 50).map(q => {
-        // أيقونات القلب والنسخ الاحترافية
         return `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);">
           <div style="font-size:15px; font-weight:700;">${q}</div>
           <div style="display:flex; gap:8px;">
@@ -385,7 +400,10 @@ window.startSession = (mins) => {
 
 document.addEventListener('DOMContentLoaded', () => {
   
-  if (QatraNative) QatraNative.askPermissions().catch(e => console.log(e));
+  if (QatraNative) {
+      // إجبار طلب الأذونات فور فتح التطبيق
+      QatraNative.askPermissions().catch(e => console.log(e));
+  }
   
   document.querySelectorAll('.nav-item, .nav-home-btn, .header-btn').forEach(btn => {
     btn.addEventListener('click', () => {
