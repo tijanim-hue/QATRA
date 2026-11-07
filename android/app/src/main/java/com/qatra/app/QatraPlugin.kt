@@ -22,37 +22,38 @@ import java.util.Calendar
 @CapacitorPlugin(name = "QatraNative")
 class QatraPlugin : Plugin() {
 
-    private val likeReceiver = object : BroadcastReceiver() {
+    private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == "com.qatra.app.QUOTE_LIKED") {
-                val category = intent.getStringExtra("category") ?: "dhikr"
                 val ret = JSObject()
-                ret.put("category", category)
+                ret.put("category", intent.getStringExtra("category") ?: "dhikr")
                 notifyListeners("quoteLiked", ret)
+            } else if (intent?.action == "com.qatra.app.OPEN_JOURNAL") {
+                val ret = JSObject()
+                ret.put("quote", intent.getStringExtra("quote") ?: "")
+                notifyListeners("openJournal", ret)
             }
         }
     }
 
     override fun load() {
         super.load()
-        context.registerReceiver(likeReceiver, IntentFilter("com.qatra.app.QUOTE_LIKED"), Context.RECEIVER_EXPORTED)
+        context.registerReceiver(receiver, IntentFilter("com.qatra.app.QUOTE_LIKED"), Context.RECEIVER_EXPORTED)
+        context.registerReceiver(receiver, IntentFilter("com.qatra.app.OPEN_JOURNAL"), Context.RECEIVER_EXPORTED)
     }
 
     @PluginMethod
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
+        var needsOverlay = false
         
-        // 1. أولوية قصوى لإذن الطفو فوق التطبيقات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
-            activity.runOnUiThread {
-                Toast.makeText(context, "الرجاء تفعيل إذن (الظهور فوق التطبيقات) لكي تعمل القطرة 💧", Toast.LENGTH_LONG).show()
-            }
+            needsOverlay = true
+            activity.runOnUiThread { Toast.makeText(context, "الرجاء تفعيل إذن (الظهور فوق التطبيقات) لكي تعمل القطرة 💧", Toast.LENGTH_LONG).show() }
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)
         }
-        
-        // 2. إذن المنبهات الدقيقة
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -61,15 +62,15 @@ class QatraPlugin : Plugin() {
                 context.startActivity(intent)
             }
         }
-        
-        // 3. إذن الإشعارات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
             }
         }
         
-        call.resolve()
+        val ret = JSObject()
+        ret.put("requestedOverlay", needsOverlay)
+        call.resolve(ret)
     }
 
     @PluginMethod

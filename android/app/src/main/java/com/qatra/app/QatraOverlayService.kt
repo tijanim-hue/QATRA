@@ -2,7 +2,6 @@ package com.qatra.app
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -95,10 +94,10 @@ class QatraOverlayService : Service() {
         
         if (showImage) {
             val bgImageName = when (category) {
-                "dhikr", "quran" -> "bg_islamic"
-                "selfDev" -> "bg_motivation"
-                "culture" -> "bg_culture"
-                "myLibrary", "favorites", "poetry" -> "bg_custom"
+                "cat_dhikr", "cat_quran" -> "bg_islamic"
+                "cat_selfDev" -> "bg_motivation"
+                "cat_culture" -> "bg_culture"
+                "myLibrary", "favorites", "cat_poetry", "cat_awareness", "family" -> "bg_custom"
                 else -> "bg_islamic"
             }
             val bgImageView = ImageView(this).apply {
@@ -118,13 +117,12 @@ class QatraOverlayService : Service() {
             setShadowLayer(15f, 0f, 0f, if(showImage) Color.BLACK else Color.parseColor("#00d2ff"))
             setTypeface(null, Typeface.BOLD); setPadding(40, 40, 40, 40)
         }
-        
         cardView.addView(quoteText, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
         val cardParams = FrameLayout.LayoutParams((resources.displayMetrics.widthPixels * 0.85).toInt(), FrameLayout.LayoutParams.WRAP_CONTENT).apply { 
-            gravity = Gravity.CENTER; setMargins(0, 0, 0, 0) 
+            gravity = Gravity.CENTER; setMargins(0, 0, 0, 100) 
         }
 
-        // القلب العائم الاحترافي فوق العبارة
+        // القلب العائم الاحترافي
         val likeButton = TextView(this).apply {
             text = "♡" 
             setTextColor(Color.WHITE)
@@ -141,13 +139,9 @@ class QatraOverlayService : Service() {
             
             setOnClickListener {
                 if (!isLiked) {
-                    isLiked = true
-                    text = "♥"
-                    setTextColor(Color.parseColor("#FF3B30"))
+                    isLiked = true; text = "♥"; setTextColor(Color.parseColor("#FF3B30"))
                     background = GradientDrawable().apply { 
-                        shape = GradientDrawable.OVAL
-                        setColor(Color.parseColor("#33FF3B30"))
-                        setStroke(2, Color.parseColor("#FF3B30"))
+                        shape = GradientDrawable.OVAL; setColor(Color.parseColor("#33FF3B30")); setStroke(2, Color.parseColor("#FF3B30"))
                     }
                     setShadowLayer(30f, 0f, 0f, Color.parseColor("#FF3B30"))
                     
@@ -162,13 +156,51 @@ class QatraOverlayService : Service() {
             }
         }
         val likeParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
-            gravity = Gravity.CENTER // يتم التحكم في مكانه بالأنميشن
+            gravity = Gravity.CENTER; setMargins(0, 450, 0, 0) // أسفل البطاقة
+        }
+
+        // زر "أجب الآن" يظهر فقط في أسئلة الوعي
+        var actionButton: TextView? = null
+        var actionParams: FrameLayout.LayoutParams? = null
+        
+        if (category == "cat_awareness") {
+            actionButton = TextView(this).apply {
+                text = "📝 أجب الآن"
+                setTextColor(Color.WHITE)
+                textSize = 18f
+                gravity = Gravity.CENTER
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 40f
+                    setColor(Color.parseColor("#0EA5E9"))
+                }
+                setPadding(50, 20, 50, 20)
+                elevation = 60f
+                alpha = 0f
+                
+                setOnClickListener {
+                    val intent = Intent("com.qatra.app.OPEN_JOURNAL")
+                    intent.putExtra("quote", quote)
+                    sendBroadcast(intent)
+                    
+                    val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+                    if (launchIntent != null) {
+                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        startActivity(launchIntent)
+                    }
+                    stopSelf()
+                }
+            }
+            actionParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.CENTER; setMargins(0, 700, 0, 0) // أسفل القلب
+            }
         }
 
         overlayContainer?.addView(ripple, rippleParams)
         overlayContainer?.addView(dropView, dropParams)
         overlayContainer?.addView(cardView, cardParams)
         overlayContainer?.addView(likeButton, likeParams) 
+        if (actionButton != null) overlayContainer?.addView(actionButton, actionParams)
         
         params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
         params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -200,7 +232,6 @@ class QatraOverlayService : Service() {
             val rFade = ObjectAnimator.ofFloat(ripple, "alpha", 1f, 0f).setDuration(800)
             AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 
-            // صعود البطاقة
             cardView.translationY = bottomLandingY / 2f
             cardView.scaleX = 0.5f; cardView.scaleY = 0.5f
             val tRise = ObjectAnimator.ofFloat(cardView, "translationY", bottomLandingY / 2f, 0f).setDuration(2500)
@@ -210,23 +241,16 @@ class QatraOverlayService : Service() {
             val tFade = ObjectAnimator.ofFloat(cardView, "alpha", 0f, 1f).setDuration(1500)
             val pulseFade = ObjectAnimator.ofFloat(cardView, "alpha", 1f, 0.4f, 1f).apply { duration = 1200; startDelay = 2500 }
             
-            // صعود القلب فوق البطاقة
-            val heartTargetY = -450f // فوق العبارة
-            likeButton.translationY = bottomLandingY / 2f
-            val hRise = ObjectAnimator.ofFloat(likeButton, "translationY", bottomLandingY / 2f, heartTargetY).setDuration(2500)
-            hRise.interpolator = DecelerateInterpolator(1.5f)
-            val hFade = ObjectAnimator.ofFloat(likeButton, "alpha", 0f, 1f).apply { duration = 1500; startDelay = 1000 }
+            val likeFade = ObjectAnimator.ofFloat(likeButton, "alpha", 0f, 1f).apply { duration = 1500; startDelay = 1000 }
+            val actionFade = ObjectAnimator.ofFloat(actionButton, "alpha", 0f, 1f).apply { duration = 1500; startDelay = 1000 }
             
-            AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade, pulseFade, hRise, hFade); start() }
+            AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade, pulseFade, likeFade, actionFade); start() }
 
-            // تفعيل حركة الطفو المستمرة للقلب بعد استقراره
+            // حركة طفو القلب
             handler.postDelayed({
-                ObjectAnimator.ofFloat(likeButton, "translationY", heartTargetY, heartTargetY - 20f).apply {
-                    duration = 1500
-                    repeatCount = ObjectAnimator.INFINITE
-                    repeatMode = ValueAnimator.REVERSE
-                    interpolator = AccelerateDecelerateInterpolator()
-                    start()
+                ObjectAnimator.ofFloat(likeButton, "translationY", 0f, -20f).apply {
+                    duration = 1500; repeatCount = ObjectAnimator.INFINITE; repeatMode = ValueAnimator.REVERSE
+                    interpolator = AccelerateDecelerateInterpolator(); start()
                 }
             }, 2500)
 
