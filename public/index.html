@@ -101,7 +101,7 @@
     .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 25px; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px;}
 
-    /* ================= الكبسولة العائمة (إصلاح الاصطفاف الأفقي الصارم) ================= */
+    /* ================= الكبسولة العائمة (تعديل الاصطفاف الأفقي للبار السفلي) ================= */
     .floating-nav { 
       position: absolute; 
       bottom: 30px; 
@@ -109,11 +109,10 @@
       transform: translateX(-50%); 
       width: 90%; 
       max-width: 420px; 
-      display: flex !important; 
-      flex-direction: row !important; 
-      flex-wrap: nowrap !important;
-      justify-content: space-evenly !important; 
-      align-items: center !important; 
+      display: flex; /* تغيير إلى display: flex بدون !important */
+      flex-direction: row; /* التأكيد على الاتجاه الأفقي */
+      justify-content: space-evenly; /* توزيع متساوٍ للمساحة */
+      align-items: center; 
       padding: 10px 12px; 
       background: var(--surface); 
       border: 1px solid var(--border); 
@@ -128,13 +127,13 @@
       color: var(--text-dim); 
       padding: 10px; 
       border-radius: 50%; 
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      justify-content: center !important;
+      display: flex; /* استخدام flex للحفاظ على تناسق الأيقونة */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       cursor: pointer; 
       transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      flex: 1; 
+      flex: 1; /* السماح للعناصر بالتمدد لملء المساحة */
       min-width: 50px;
     }
     .nav-item svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; }
@@ -146,9 +145,9 @@
       height: 60px; 
       border-radius: 50%; 
       background: linear-gradient(135deg, var(--primary), var(--secondary)); 
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
+      display: flex; /* استخدام flex لتوسيط الأيقونة */
+      align-items: center;
+      justify-content: center;
       color: #fff; 
       border: 4px solid var(--bg); 
       box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 40%, transparent); 
@@ -341,7 +340,7 @@
     </div>
 
     <!-- الكبسولة السفلية الفاخرة المترتبة أفقياً -->
-    <nav class="bottom-nav">
+    <nav class="floating-nav">
       <!-- 1. المكتبة -->
       <button class="nav-item" data-view="libraryView">
         <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -362,7 +361,7 @@
         <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
       </button>
       
-      <!-- 5. الحديقة (الجوائز - يعمل الآن بشكل سليم) -->
+      <!-- 5. الحديقة (الجوائز) -->
       <button class="nav-item" data-view="gardenView">
         <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 1 8.3C19.2 15.66 15.14 20 11 20z"/><path d="M11 20v-5c0-1.42 1.13-2.61 2.5-2.84"/></svg>
       </button>
