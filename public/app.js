@@ -19,7 +19,7 @@ let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
 
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
 
-// دالة الحماية: تمنع انهيار التطبيق إذا كان الزر غير موجود في الواجهة
+// دالة الحماية
 function safeOn(id, eventType, handler) {
     const el = document.getElementById(id);
     if (el) el.addEventListener(eventType, handler);
@@ -34,7 +34,7 @@ function applyState() {
   const c = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
   const s = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
   
-  c('darkToggle', state.dark); c('glassToggle', state.glass);
+  c('glassToggle', state.glass);
   s('notifModeSetting', state.mode); s('dropDurationSetting', state.duration); s('intervalSelect', state.interval);
 
   const setTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
@@ -45,7 +45,7 @@ function applyState() {
   renderCategories(); renderGarden();
 }
 
-// --- الأيام والمواعيد المخصصة ---
+// --- الأيام والمواعيد ---
 const WEEK_DAYS = [{ id: 0, name: "أحد" }, { id: 1, name: "إثن" }, { id: 2, name: "ثلا" }, { id: 3, name: "أرب" }, { id: 4, name: "خمي" }, { id: 5, name: "جمع" }, { id: 6, name: "سبت" }];
 let currentSelectedDays = new Set([0,1,2,3,4,5,6]);
 
@@ -88,7 +88,7 @@ function renderGarden() {
   if(progEl) progEl.style.width = `${progress}%`;
 }
 
-// --- الأقسام والمكتبة (اقتباسات) ---
+// --- المكتبة ---
 function renderCategories() {
   const container = document.getElementById('categoriesContainer');
   if(!container) return;
@@ -171,16 +171,21 @@ function syncNativeAlarms() {
   state.schedules.forEach(s => QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: getRandomQuote()}).catch(e=>{}));
 }
 
-// --- التأمل والاستماع ---
+// --- التأمل ---
 const randomAudios = ["https://actions.google.com/sounds/v1/water/rain_on_roof.ogg", "https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg", "https://server8.mp3quran.net/afs/001.mp3"];
 let randPlayer = new Audio(); let isRandPlaying = false;
 
 // =======================================================
-// المحرك الرئيسي: تشغيل التطبيق بأمان تام بعد تحميل الواجهة
+// تهيئة التطبيق عند البداية
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. طلب الأذونات فوراً في البداية مع بدء التطبيق
+    if (QatraNative) {
+        QatraNative.askPermissions().catch(e => console.log(e));
+    }
     
-    // 1. ربط الأحداث بأمان (يمنع الكراش الذي تسبب بتوقف الشاشة)
+    // 2. ربط الأحداث بأمان
     safeOn('darkToggle', 'change', e => { state.dark = e.target.checked; applyState(); });
     safeOn('glassToggle', 'change', e => { state.glass = e.target.checked; applyState(); });
     safeOn('notifModeSetting', 'change', e => { state.mode = e.target.value; applyState(); syncNativeAlarms(); });
@@ -214,10 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ربط التنقل السفلي
-    document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
+    // ربط التنقل السفلي والعلوي بشكل سليم
+    document.querySelectorAll('.nav-item, .nav-home-btn, .header-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        if(btn.dataset.view === 'statsSheet') return;
+        if(!btn.dataset.view) return;
+        
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
         const viewEl = document.getElementById(btn.dataset.view);
@@ -226,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // ربط السحب للتحديث لتبديل الألوان بمرونة
+    // ربط السحب للتحديث (تبديل الوضع المظلم)
     let startY = 0;
     const scrollContent = document.getElementById('scrollContent');
     const ptrContainer = document.getElementById('ptrContainer');
@@ -256,14 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {passive:true});
     }
 
-    // 2. تحديث الواجهة عند الإقلاع
     applyState(); renderSchedules(); renderDaysGrid();
     const qtEl = document.getElementById('dailyQuoteText');
     if(qtEl) qtEl.textContent = `"${getRandomQuote()}"`;
     
-    // =====================================================
-    // 3. الإخفاء الإجباري لشاشة الإقلاع (يضمن الدخول للتطبيق دائماً)
-    // =====================================================
+    // إخفاء شاشة الإقلاع بسلام
     setTimeout(() => {
         const splash = document.getElementById('splash');
         if (splash) { 
@@ -272,10 +275,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 2500);
 
-    // 4. طلب الأذونات بهدوء في الخلفية لكي لا تتعارض مع الشاشة
-    if (QatraNative) {
-        setTimeout(() => { 
-            QatraNative.askPermissions().catch(e => console.log(e)); 
-        }, 3500);
-    }
 });
