@@ -2,6 +2,7 @@ package com.qatra.app
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -19,10 +20,10 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
 
 class QatraOverlayService : Service() {
     private var windowManager: WindowManager? = null
@@ -48,7 +49,6 @@ class QatraOverlayService : Service() {
         val screenHeight = resources.displayMetrics.heightPixels.toFloat()
         val bottomLandingY = screenHeight - 200f
 
-        // الشفافية التامة
         overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.TRANSPARENT) }
         
         val layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
@@ -64,7 +64,6 @@ class QatraOverlayService : Service() {
             PixelFormat.TRANSLUCENT
         )
 
-        // 1. القطرة الساقطة
         val dropSize = 100
         val dropView = View(this).apply {
             background = GradientDrawable().apply {
@@ -83,7 +82,6 @@ class QatraOverlayService : Service() {
         }
         val rippleParams = FrameLayout.LayoutParams(100, 40).apply { gravity = Gravity.CENTER }
 
-        // 2. الحاوية للعبارة (مع أو بدون صورة)
         val cardView = FrameLayout(this).apply {
             alpha = 0f
             if (showImage) {
@@ -91,8 +89,7 @@ class QatraOverlayService : Service() {
                     shape = GradientDrawable.RECTANGLE; cornerRadius = 40f
                     setStroke(2, Color.parseColor("#8000d2ff"))
                 }
-                clipToOutline = true
-                elevation = 50f
+                clipToOutline = true; elevation = 50f
             }
         }
         
@@ -117,34 +114,29 @@ class QatraOverlayService : Service() {
         }
 
         val quoteText = TextView(this).apply {
-            text = quote
-            setTextColor(Color.WHITE)
-            textSize = 24f
-            gravity = Gravity.CENTER
+            text = quote; setTextColor(Color.WHITE); textSize = 24f; gravity = Gravity.CENTER
             setShadowLayer(15f, 0f, 0f, if(showImage) Color.BLACK else Color.parseColor("#00d2ff"))
-            setTypeface(null, Typeface.BOLD)
-            setPadding(40, 40, 40, 40)
+            setTypeface(null, Typeface.BOLD); setPadding(40, 40, 40, 40)
         }
         
         cardView.addView(quoteText, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-        val cardParams = FrameLayout.LayoutParams(
-            (resources.displayMetrics.widthPixels * 0.85).toInt(),
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        ).apply { gravity = Gravity.CENTER; setMargins(0, 0, 0, 100) }
+        val cardParams = FrameLayout.LayoutParams((resources.displayMetrics.widthPixels * 0.85).toInt(), FrameLayout.LayoutParams.WRAP_CONTENT).apply { 
+            gravity = Gravity.CENTER; setMargins(0, 0, 0, 0) 
+        }
 
-        // 3. زر الإعجاب العائم الاحترافي
+        // القلب العائم الاحترافي فوق العبارة
         val likeButton = TextView(this).apply {
-            text = "♡" // يمكن استبدالها لاحقاً بـ SVG أو Drawable احترافي
+            text = "♡" 
             setTextColor(Color.WHITE)
             textSize = 34f
             gravity = Gravity.CENTER
             alpha = 0f
             background = GradientDrawable().apply { 
                 shape = GradientDrawable.OVAL
-                colors = intArrayOf(Color.parseColor("#4Dffffff"), Color.parseColor("#1Affffff")) // زجاجي
-                setStroke(1, Color.parseColor("#4Dffffff"))
+                colors = intArrayOf(Color.parseColor("#66000000"), Color.parseColor("#33000000"))
+                setStroke(2, Color.parseColor("#4Dffffff"))
             }
-            setPadding(25, 15, 25, 15)
+            setPadding(35, 20, 35, 20)
             elevation = 60f
             
             setOnClickListener {
@@ -154,7 +146,7 @@ class QatraOverlayService : Service() {
                     setTextColor(Color.parseColor("#FF3B30"))
                     background = GradientDrawable().apply { 
                         shape = GradientDrawable.OVAL
-                        setColor(Color.parseColor("#1AFF3B30"))
+                        setColor(Color.parseColor("#33FF3B30"))
                         setStroke(2, Color.parseColor("#FF3B30"))
                     }
                     setShadowLayer(30f, 0f, 0f, Color.parseColor("#FF3B30"))
@@ -170,8 +162,7 @@ class QatraOverlayService : Service() {
             }
         }
         val likeParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
-            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            setMargins(0, 0, 0, 60)
+            gravity = Gravity.CENTER // يتم التحكم في مكانه بالأنميشن
         }
 
         overlayContainer?.addView(ripple, rippleParams)
@@ -198,7 +189,6 @@ class QatraOverlayService : Service() {
 
         handler.postDelayed({
             dropView.visibility = View.GONE
-            
             try {
                 val popResId = resources.getIdentifier("drop_pop_sound", "raw", packageName)
                 if (popResId != 0) { popPlayer = MediaPlayer.create(this, popResId); popPlayer?.start() }
@@ -210,23 +200,35 @@ class QatraOverlayService : Service() {
             val rFade = ObjectAnimator.ofFloat(ripple, "alpha", 1f, 0f).setDuration(800)
             AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 
+            // صعود البطاقة
             cardView.translationY = bottomLandingY / 2f
             cardView.scaleX = 0.5f; cardView.scaleY = 0.5f
-            
             val tRise = ObjectAnimator.ofFloat(cardView, "translationY", bottomLandingY / 2f, 0f).setDuration(2500)
             tRise.interpolator = DecelerateInterpolator(1.5f)
             val tGrowX = ObjectAnimator.ofFloat(cardView, "scaleX", 0.5f, 1f).setDuration(2500)
             val tGrowY = ObjectAnimator.ofFloat(cardView, "scaleY", 0.5f, 1f).setDuration(2500)
             val tFade = ObjectAnimator.ofFloat(cardView, "alpha", 0f, 1f).setDuration(1500)
+            val pulseFade = ObjectAnimator.ofFloat(cardView, "alpha", 1f, 0.4f, 1f).apply { duration = 1200; startDelay = 2500 }
             
-            val pulseFade = ObjectAnimator.ofFloat(cardView, "alpha", 1f, 0.5f, 1f).apply {
-                duration = 1500
-                startDelay = 2500
-            }
+            // صعود القلب فوق البطاقة
+            val heartTargetY = -450f // فوق العبارة
+            likeButton.translationY = bottomLandingY / 2f
+            val hRise = ObjectAnimator.ofFloat(likeButton, "translationY", bottomLandingY / 2f, heartTargetY).setDuration(2500)
+            hRise.interpolator = DecelerateInterpolator(1.5f)
+            val hFade = ObjectAnimator.ofFloat(likeButton, "alpha", 0f, 1f).apply { duration = 1500; startDelay = 1000 }
             
-            val likeFade = ObjectAnimator.ofFloat(likeButton, "alpha", 0f, 1f).apply { duration = 1500; startDelay = 1000 }
-            
-            AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade, pulseFade, likeFade); start() }
+            AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade, pulseFade, hRise, hFade); start() }
+
+            // تفعيل حركة الطفو المستمرة للقلب بعد استقراره
+            handler.postDelayed({
+                ObjectAnimator.ofFloat(likeButton, "translationY", heartTargetY, heartTargetY - 20f).apply {
+                    duration = 1500
+                    repeatCount = ObjectAnimator.INFINITE
+                    repeatMode = ValueAnimator.REVERSE
+                    interpolator = AccelerateDecelerateInterpolator()
+                    start()
+                }
+            }, 2500)
 
         }, 1000)
 

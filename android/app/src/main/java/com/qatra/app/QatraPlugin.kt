@@ -41,19 +41,18 @@ class QatraPlugin : Plugin() {
     @PluginMethod
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
-        var needsOverlay = false
         
-        // طلب إذن الطفو فوق التطبيقات مع رسالة توجيهية
+        // 1. أولوية قصوى لإذن الطفو فوق التطبيقات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
-            needsOverlay = true
             activity.runOnUiThread {
-                Toast.makeText(context, "الرجاء السماح لـ 'قطرة' بالظهور فوق التطبيقات لتعمل القطرة المائية", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "الرجاء تفعيل إذن (الظهور فوق التطبيقات) لكي تعمل القطرة 💧", Toast.LENGTH_LONG).show()
             }
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             context.startActivity(intent)
         }
         
+        // 2. إذن المنبهات الدقيقة
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -63,15 +62,14 @@ class QatraPlugin : Plugin() {
             }
         }
         
+        // 3. إذن الإشعارات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
             }
         }
         
-        val ret = JSObject()
-        ret.put("requestedOverlay", needsOverlay)
-        call.resolve(ret)
+        call.resolve()
     }
 
     @PluginMethod
