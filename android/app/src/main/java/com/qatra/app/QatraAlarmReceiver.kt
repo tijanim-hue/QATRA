@@ -12,12 +12,13 @@ class QatraAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val quote = intent.getStringExtra("quote") ?: "حان وقت التأمل"
         val category = intent.getStringExtra("category") ?: "dhikr"
+        val showImage = intent.getBooleanExtra("showImage", false)
         val mode = intent.getStringExtra("mode") ?: "both"
         val duration = intent.getIntExtra("duration", 10000)
 
         if (mode == "floating" || mode == "both") {
             val serviceIntent = Intent(context, QatraOverlayService::class.java).apply {
-                putExtra("quote", quote); putExtra("duration", duration); putExtra("category", category)
+                putExtra("quote", quote); putExtra("duration", duration); putExtra("category", category); putExtra("showImage", showImage)
             }
             try { context.startService(serviceIntent) } catch (e: Exception) {}
         }

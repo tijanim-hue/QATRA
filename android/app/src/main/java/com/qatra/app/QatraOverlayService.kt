@@ -30,18 +30,18 @@ class QatraOverlayService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val quote = intent?.getStringExtra("quote") ?: "الحمد لله"
         val category = intent?.getStringExtra("category") ?: "dhikr"
+        val showImage = intent?.getBooleanExtra("showImage", false) ?: false
         val duration = intent?.getIntExtra("duration", 10000) ?: 10000
-        playCinematicAnimation(quote, category, duration.toLong())
+        playCinematicAnimation(quote, category, showImage, duration.toLong())
         return START_NOT_STICKY
     }
 
-    private fun playCinematicAnimation(quote: String, category: String, displayDuration: Long) {
+    private fun playCinematicAnimation(quote: String, category: String, showImage: Boolean, displayDuration: Long) {
         if (overlayContainer != null) return
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val screenHeight = resources.displayMetrics.heightPixels.toFloat()
         val bottomLandingY = screenHeight - 200f
 
-        // الشاشة الزجاجية المظلمة التي تملأ الهاتف بالكامل
         overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#E6030610")) }
         
         var layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
@@ -74,51 +74,56 @@ class QatraOverlayService : Service() {
         }
         val dropParams = FrameLayout.LayoutParams(dropSize, dropSize).apply { gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL }
 
-        // 2. البطاقة المصورة ذات الحواف الدائرية للعبارة
+        val ripple = View(this).apply {
+            background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#8000d2ff")) }
+            alpha = 0f
+            translationY = bottomLandingY - (screenHeight / 2f) + 100f
+        }
+        val rippleParams = FrameLayout.LayoutParams(100, 40).apply { gravity = Gravity.CENTER }
+
+        // 2. الحاوية للعبارة (مع أو بدون صورة)
         val cardView = FrameLayout(this).apply {
             alpha = 0f
-            // الحواف الدائرية والإطار
-            background = GradientDrawable().apply {
-                shape = GradientDrawable.RECTANGLE; cornerRadius = 40f
-                setStroke(2, Color.parseColor("#8000d2ff"))
+            if (showImage) {
+                background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE; cornerRadius = 40f
+                    setStroke(2, Color.parseColor("#8000d2ff"))
+                }
+                clipToOutline = true
+                elevation = 50f
             }
-            clipToOutline = true
-            elevation = 50f
         }
         
-        // الصورة الخلفية للبطاقة بناءً على القسم
-        val bgImageName = when (category) {
-            "dhikr", "quran" -> "bg_islamic"
-            "selfDev" -> "bg_motivation"
-            "culture" -> "bg_culture"
-            "myLibrary" -> "bg_custom"
-            else -> "bg_islamic"
+        if (showImage) {
+            val bgImageName = when (category) {
+                "dhikr", "quran" -> "bg_islamic"
+                "selfDev" -> "bg_motivation"
+                "culture" -> "bg_culture"
+                "myLibrary" -> "bg_custom"
+                else -> "bg_islamic"
+            }
+            val bgImageView = ImageView(this).apply {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                try {
+                    val resId = resources.getIdentifier(bgImageName, "drawable", packageName)
+                    if (resId != 0) setImageResource(resId) else setBackgroundColor(Color.parseColor("#1E293B"))
+                } catch (e: Exception) { setBackgroundColor(Color.parseColor("#1E293B")) }
+            }
+            val darkOverlay = View(this).apply { setBackgroundColor(Color.parseColor("#80000000")) }
+            cardView.addView(bgImageView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            cardView.addView(darkOverlay, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
         }
-        
-        val bgImageView = ImageView(this).apply {
-            scaleType = ImageView.ScaleType.CENTER_CROP
-            try {
-                val resId = resources.getIdentifier(bgImageName, "drawable", packageName)
-                if (resId != 0) setImageResource(resId) else setBackgroundColor(Color.parseColor("#1E293B"))
-            } catch (e: Exception) { setBackgroundColor(Color.parseColor("#1E293B")) }
-        }
-        
-        // تعتيم خفيف فوق الصورة لكي يبرز النص
-        val darkOverlay = View(this).apply { setBackgroundColor(Color.parseColor("#80000000")) }
 
-        // النص الذي سيطبع فوق الصورة
         val quoteText = TextView(this).apply {
             text = quote
             setTextColor(Color.WHITE)
             textSize = 24f
             gravity = Gravity.CENTER
-            setShadowLayer(15f, 0f, 0f, Color.BLACK)
+            setShadowLayer(15f, 0f, 0f, if(showImage) Color.BLACK else Color.parseColor("#00d2ff"))
             setTypeface(null, Typeface.BOLD)
             setPadding(40, 40, 40, 40)
         }
         
-        cardView.addView(bgImageView, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-        cardView.addView(darkOverlay, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
         cardView.addView(quoteText, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
 
         val cardParams = FrameLayout.LayoutParams(
@@ -126,13 +131,13 @@ class QatraOverlayService : Service() {
             FrameLayout.LayoutParams.WRAP_CONTENT
         ).apply { gravity = Gravity.CENTER; setMargins(0, 0, 0, 100) }
 
+        overlayContainer?.addView(ripple, rippleParams)
         overlayContainer?.addView(dropView, dropParams)
         overlayContainer?.addView(cardView, cardParams)
         windowManager?.addView(overlayContainer, params)
 
         val handler = Handler(Looper.getMainLooper())
         
-        // الحركة 1: سقوط القطرة
         dropView.translationY = -screenHeight
         ObjectAnimator.ofFloat(dropView, "translationY", -screenHeight, bottomLandingY).apply {
             duration = 1000; interpolator = AccelerateInterpolator(); start()
@@ -141,14 +146,29 @@ class QatraOverlayService : Service() {
         handler.postDelayed({
             dropView.visibility = View.GONE
             
-            // الحركة 2: ظهور البطاقة المصورة بأسلوب سينمائي
+            ripple.alpha = 1f
+            val rScaleX = ObjectAnimator.ofFloat(ripple, "scaleX", 1f, 15f).setDuration(800)
+            val rScaleY = ObjectAnimator.ofFloat(ripple, "scaleY", 1f, 15f).setDuration(800)
+            val rFade = ObjectAnimator.ofFloat(ripple, "alpha", 1f, 0f).setDuration(800)
+            AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
+
+            // 3. صعود العبارة إلى وسط الشاشة
+            cardView.translationY = bottomLandingY / 2f
             cardView.scaleX = 0.5f; cardView.scaleY = 0.5f
-            val tGrowX = ObjectAnimator.ofFloat(cardView, "scaleX", 0.5f, 1f).setDuration(1500)
-            val tGrowY = ObjectAnimator.ofFloat(cardView, "scaleY", 0.5f, 1f).setDuration(1500)
-            tGrowX.interpolator = DecelerateInterpolator(1.5f)
-            tGrowY.interpolator = DecelerateInterpolator(1.5f)
-            val tFade = ObjectAnimator.ofFloat(cardView, "alpha", 0f, 1f).setDuration(1000)
-            AnimatorSet().apply { playTogether(tGrowX, tGrowY, tFade); start() }
+            
+            val tRise = ObjectAnimator.ofFloat(cardView, "translationY", bottomLandingY / 2f, 0f).setDuration(2500)
+            tRise.interpolator = DecelerateInterpolator(1.5f)
+            val tGrowX = ObjectAnimator.ofFloat(cardView, "scaleX", 0.5f, 1f).setDuration(2500)
+            val tGrowY = ObjectAnimator.ofFloat(cardView, "scaleY", 0.5f, 1f).setDuration(2500)
+            val tFade = ObjectAnimator.ofFloat(cardView, "alpha", 0f, 1f).setDuration(1500)
+            
+            // 4. الوميض اللطيف بعد الاستقرار
+            val pulseFade = ObjectAnimator.ofFloat(cardView, "alpha", 1f, 0.4f, 1f).apply {
+                duration = 1200
+                startDelay = 2500
+            }
+            
+            AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade, pulseFade); start() }
 
         }, 1000)
 

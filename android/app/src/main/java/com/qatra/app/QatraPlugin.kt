@@ -49,10 +49,11 @@ class QatraPlugin : Plugin() {
         val duration = call.getInt("duration") ?: 10000
         val quote = call.getString("quote") ?: "سبحان الله"
         val category = call.getString("category") ?: "dhikr"
+        val showImage = call.getBoolean("showImage") ?: false
         
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
-            putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote); putExtra("category", category)
+            putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote); putExtra("category", category); putExtra("showImage", showImage)
         }
         val pendingIntent = PendingIntent.getBroadcast(context, 99999, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         
@@ -73,10 +74,11 @@ class QatraPlugin : Plugin() {
         val duration = call.getInt("duration") ?: 10000
         val quote = call.getString("quote") ?: "الحمد لله"
         val category = call.getString("category") ?: "dhikr"
+        val showImage = call.getBoolean("showImage") ?: false
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
-            putExtra("id", id); putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote); putExtra("category", category)
+            putExtra("id", id); putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote); putExtra("category", category); putExtra("showImage", showImage)
         }
         val pendingIntent = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
@@ -112,8 +114,9 @@ class QatraPlugin : Plugin() {
         val quote = call.getString("quote") ?: "سبحان الله"
         val category = call.getString("category") ?: "dhikr"
         val duration = call.getInt("duration") ?: 10000
+        val showImage = call.getBoolean("showImage") ?: false
         val serviceIntent = Intent(context, QatraOverlayService::class.java).apply { 
-            putExtra("quote", quote); putExtra("duration", duration); putExtra("category", category)
+            putExtra("quote", quote); putExtra("duration", duration); putExtra("category", category); putExtra("showImage", showImage)
         }
         context.startService(serviceIntent)
         call.resolve()
