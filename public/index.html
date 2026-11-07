@@ -101,7 +101,7 @@ transition: 0.3s;
 .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 25px; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px;}
 
-/* ================= الكبسولة العائمة (تعديل الاصطفاف الأفقي للبار السفلي) ================= */
+/* ================= الكبسولة العائمة ================= */
 .floating-nav {
 position: absolute;
 bottom: 30px;
@@ -420,6 +420,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus { border-color:
 </section>
 </div>
 
+<!-- الكبسولة السفلية الفاخرة المترتبة أفقياً -->
 <nav class="floating-nav">
 <button class="nav-item" data-view="libraryView">
 <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -439,6 +440,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus { border-color:
 </nav>
 </div>
 
+<!-- نافذة الإحصائيات (تفتح من الأيقونة العلوية) -->
 <div class="sheet-overlay" id="statsSheet">
 <div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
 <div class="sheet-handle"></div>
