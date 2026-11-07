@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -24,6 +25,8 @@ import android.widget.TextView
 class QatraOverlayService : Service() {
     private var windowManager: WindowManager? = null
     private var overlayContainer: FrameLayout? = null
+    private var fallPlayer: MediaPlayer? = null
+    private var popPlayer: MediaPlayer? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -42,17 +45,15 @@ class QatraOverlayService : Service() {
         val screenHeight = resources.displayMetrics.heightPixels.toFloat()
         val bottomLandingY = screenHeight - 200f
 
-        overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.parseColor("#E6030610")) }
+        // الشفافية التامة: إزالة أي لون خلفية لكي تظهر القطرة فوق شاشة الهاتف مباشرة
+        overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.TRANSPARENT) }
         
-        var layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+        // الأعلام التي تجبر الشاشة على الامتداد فوق شريط حالة الهاتف والعمل في الخلفية
+        val layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
                           WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or 
                           WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
                           WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                           WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                          
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            layoutFlags = layoutFlags or WindowManager.LayoutParams.FLAG_BLUR_BEHIND
-        }
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
@@ -60,7 +61,6 @@ class QatraOverlayService : Service() {
             layoutFlags,
             PixelFormat.TRANSLUCENT
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) params.blurBehindRadius = 40
 
         // 1. القطرة الساقطة
         val dropSize = 100
@@ -138,6 +138,13 @@ class QatraOverlayService : Service() {
 
         val handler = Handler(Looper.getMainLooper())
         
+        // تشغيل صوت السقوط
+        try {
+            val fallResId = resources.getIdentifier("drop_fall_sound", "raw", packageName)
+            if (fallResId != 0) { fallPlayer = MediaPlayer.create(this, fallResId); fallPlayer?.start() }
+        } catch (e: Exception) {}
+
+        // الحركة 1: سقوط القطرة من أعلى الشاشة
         dropView.translationY = -screenHeight
         ObjectAnimator.ofFloat(dropView, "translationY", -screenHeight, bottomLandingY).apply {
             duration = 1000; interpolator = AccelerateInterpolator(); start()
@@ -146,13 +153,19 @@ class QatraOverlayService : Service() {
         handler.postDelayed({
             dropView.visibility = View.GONE
             
+            // تشغيل صوت الفرقعة
+            try {
+                val popResId = resources.getIdentifier("drop_pop_sound", "raw", packageName)
+                if (popResId != 0) { popPlayer = MediaPlayer.create(this, popResId); popPlayer?.start() }
+            } catch (e: Exception) {}
+
             ripple.alpha = 1f
             val rScaleX = ObjectAnimator.ofFloat(ripple, "scaleX", 1f, 15f).setDuration(800)
             val rScaleY = ObjectAnimator.ofFloat(ripple, "scaleY", 1f, 15f).setDuration(800)
             val rFade = ObjectAnimator.ofFloat(ripple, "alpha", 1f, 0f).setDuration(800)
             AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 
-            // 3. صعود العبارة إلى وسط الشاشة
+            // الحركة 2: صعود العبارة إلى وسط الشاشة
             cardView.translationY = bottomLandingY / 2f
             cardView.scaleX = 0.5f; cardView.scaleY = 0.5f
             
@@ -162,7 +175,7 @@ class QatraOverlayService : Service() {
             val tGrowY = ObjectAnimator.ofFloat(cardView, "scaleY", 0.5f, 1f).setDuration(2500)
             val tFade = ObjectAnimator.ofFloat(cardView, "alpha", 0f, 1f).setDuration(1500)
             
-            // 4. الوميض اللطيف بعد الاستقرار
+            // الحركة 3: وميض العبارة عند الاستقرار
             val pulseFade = ObjectAnimator.ofFloat(cardView, "alpha", 1f, 0.4f, 1f).apply {
                 duration = 1200
                 startDelay = 2500
@@ -180,6 +193,8 @@ class QatraOverlayService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        fallPlayer?.release()
+        popPlayer?.release()
         if (overlayContainer != null) { windowManager?.removeView(overlayContainer); overlayContainer = null }
     }
 }
