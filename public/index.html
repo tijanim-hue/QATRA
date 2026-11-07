@@ -175,6 +175,36 @@ transition: 0.3s;
 select, input[type="text"], input[type="time"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none;}
 select:focus, input[type="text"]:focus, input[type="time"]:focus { border-color: var(--primary); }
 
+/* ================= أزرار الاختيار الاحترافية (Custom Radio Style) ================= */
+.custom-radio-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.custom-radio-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg); border: 1px solid var(--border);
+  padding: 14px 18px; border-radius: 16px; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.custom-radio-item:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
+.custom-radio-item.active {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 700;
+}
+.custom-radio-circle {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--text-dim);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.custom-radio-item.active .custom-radio-circle {
+  border-color: var(--primary);
+}
+.custom-radio-circle::after {
+  content: ''; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--primary); transform: scale(0); transition: 0.2s;
+}
+.custom-radio-item.active .custom-radio-circle::after { transform: scale(1); }
+
 .btn-solid { width: 100%; padding: 18px; border: none; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-size: 16px; font-weight: 800; margin-top: 20px; cursor: pointer; box-shadow: 0 10px 25px color-mix(in srgb, var(--primary) 30%, transparent); transition: transform 0.2s;}
 .btn-solid:active { transform: scale(0.97); }
 .btn-danger { background: rgba(255,0,0,0.1); color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: none; }
@@ -310,17 +340,30 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus { border-color:
 <section class="view" id="dropConfigView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="drop_settings">إعداد قطرتك</h2>
 
-<!-- تحديد مصدر الاقتباس للقطرة -->
+<!-- مصدر العبارات (تصميم احترافي زجاجي بديل للقائمة المنسدلة) -->
 <div class="glass-card">
-  <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="source_category">1. مصدر العبارات</strong>
-  <select id="quoteCategorySetting">
-    <option value="all" data-i18n="all_categories">عشوائي (من كل الأقسام)</option>
-    <option value="dhikr" data-i18n="cat_dhikr">أذكار وأدعية</option>
-    <option value="selfDev" data-i18n="cat_selfDev">تطوير الذات</option>
-    <option value="quran" data-i18n="cat_quran">آيات قرآنية</option>
-    <option value="culture" data-i18n="cat_culture">ثقافة عامة وحكم</option>
-    <option value="myLibrary" data-i18n="my_library">مكتبتي الخاصة</option>
-  </select>
+  <strong style="display:block; margin-bottom:10px; font-size:16px;" data-i18n="source_category">1. مصدر العبارات</strong>
+  <div class="custom-radio-group" id="quoteSourceGroup">
+    <div class="custom-radio-item active" data-value="all" onclick="setQuoteSource('all')">
+      <span data-i18n="all_categories">عشوائي (من كل الأقسام)</span><div class="custom-radio-circle"></div>
+    </div>
+    <div class="custom-radio-item" data-value="dhikr" onclick="setQuoteSource('dhikr')">
+      <span data-i18n="cat_dhikr">أذكار وأدعية</span><div class="custom-radio-circle"></div>
+    </div>
+    <div class="custom-radio-item" data-value="selfDev" onclick="setQuoteSource('selfDev')">
+      <span data-i18n="cat_selfDev">تطوير الذات</span><div class="custom-radio-circle"></div>
+    </div>
+    <div class="custom-radio-item" data-value="quran" onclick="setQuoteSource('quran')">
+      <span data-i18n="cat_quran">آيات قرآنية</span><div class="custom-radio-circle"></div>
+    </div>
+    <div class="custom-radio-item" data-value="culture" onclick="setQuoteSource('culture')">
+      <span data-i18n="cat_culture">ثقافة عامة وحكم</span><div class="custom-radio-circle"></div>
+    </div>
+    <!-- فتح نافذة مكتبتي الخاصة عند اختيارها -->
+    <div class="custom-radio-item" data-value="myLibrary" onclick="setQuoteSource('myLibrary'); document.getElementById('myLibrarySheet').classList.add('show');">
+      <span data-i18n="my_library">مكتبتي الخاصة</span><div class="custom-radio-circle"></div>
+    </div>
+  </div>
 </div>
 
 <div class="glass-card">
@@ -358,7 +401,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus { border-color:
 <section class="view" id="libraryView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="quotes_library">اقتباسات</h2>
 <p style="color:var(--text-dim); font-size:14px; margin-top:0; margin-bottom:20px;" data-i18n="explore_copy">تصفح العبارات وانسخ ما يلهمك.</p>
-<!-- زر فتح مكتبتي الخاصة -->
+<!-- زر فتح مكتبتي الخاصة من قسم الاقتباسات أيضاً -->
 <div class="glass-card action-card" style="margin-bottom: 20px; background: color-mix(in srgb, var(--primary) 5%, transparent);" onclick="document.getElementById('myLibrarySheet').classList.add('show')">
   <div class="card-icon" style="background:var(--primary); color:#fff;"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg></div>
   <div class="card-info">
