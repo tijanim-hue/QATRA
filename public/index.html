@@ -101,7 +101,7 @@
     .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 25px; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px;}
 
-    /* ================= الكبسولة العائمة (تعديل الاصطفاف الأفقي للبار السفلي) ================= */
+    /* ================= الكبسولة العائمة (أفقي) ================= */
     .floating-nav { 
       position: absolute; 
       bottom: 30px; 
@@ -109,10 +109,11 @@
       transform: translateX(-50%); 
       width: 90%; 
       max-width: 420px; 
-      display: flex; /* تغيير إلى display: flex بدون !important */
-      flex-direction: row; /* التأكيد على الاتجاه الأفقي */
-      justify-content: space-evenly; /* توزيع متساوٍ للمساحة */
-      align-items: center; 
+      display: flex !important; 
+      flex-direction: row !important; 
+      flex-wrap: nowrap !important;
+      justify-content: space-evenly !important; 
+      align-items: center !important; 
       padding: 10px 12px; 
       background: var(--surface); 
       border: 1px solid var(--border); 
@@ -127,13 +128,13 @@
       color: var(--text-dim); 
       padding: 10px; 
       border-radius: 50%; 
-      display: flex; /* استخدام flex للحفاظ على تناسق الأيقونة */
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
       cursor: pointer; 
       transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      flex: 1; /* السماح للعناصر بالتمدد لملء المساحة */
+      flex: 1; 
       min-width: 50px;
     }
     .nav-item svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; }
@@ -145,9 +146,9 @@
       height: 60px; 
       border-radius: 50%; 
       background: linear-gradient(135deg, var(--primary), var(--secondary)); 
-      display: flex; /* استخدام flex لتوسيط الأيقونة */
-      align-items: center;
-      justify-content: center;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       color: #fff; 
       border: 4px solid var(--bg); 
       box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 40%, transparent); 
@@ -188,13 +189,22 @@
     .days-grid { display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; }
     .day-chip { flex: 1; padding: 12px 0; text-align: center; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 700; color: var(--text-dim); cursor: pointer; transition: 0.3s; }
     .day-chip.active { background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); border-color: var(--primary); }
+
+    /* التنبيه للنسخ */
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 2000; transition: 0.3s; opacity: 0; }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   </style>
 </head>
 <body class="glass-active dark-mode">
   <svg width="0" height="0" style="position:absolute;">
     <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--secondary)"/></linearGradient></defs>
   </svg>
+  <div class="ambient"></div>
 
+  <!-- تنبيه النسخ -->
+  <div id="copyToast" class="toast" data-i18n="copied">تم النسخ بنجاح</div>
+
+  <!-- شاشة الإقلاع -->
   <div id="splash">
     <div class="splash-drop"></div>
     <div class="splash-title">قطرة</div>
@@ -208,16 +218,22 @@
   <div class="sheet-overlay" id="settingsSheet">
     <div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
       <div class="sheet-handle"></div>
-      <h2 style="margin-top:0;">إعدادات التطبيق</h2>
+      <h2 style="margin-top:0;" data-i18n="app_settings">إعدادات التطبيق</h2>
       <div class="control-row">
-        <span style="font-weight:700; font-size:16px;">الشفافية وتأثير الزجاج 💎</span>
+        <span style="font-weight:700; font-size:16px;" data-i18n="glass_mode">الشفافية وتأثير الزجاج 💎</span>
         <label class="toggle"><input type="checkbox" id="glassToggle"><span class="toggle-track"></span></label>
       </div>
       <div style="margin-top:20px;">
-        <label style="color:var(--text-dim); font-size:14px; font-weight:700;">لغة التطبيق:</label>
-        <select id="langSelect"><option value="ar">العربية</option><option value="en">English</option></select>
+        <label style="color:var(--text-dim); font-size:14px; font-weight:700;" data-i18n="language">لغة التطبيق:</label>
+        <select id="langSelect">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+        </select>
       </div>
-      <button class="btn-solid" onclick="document.getElementById('settingsSheet').classList.remove('show')">تم وحفظ</button>
+      <button class="btn-solid" onclick="document.getElementById('settingsSheet').classList.remove('show')" data-i18n="save_done">تم وحفظ</button>
     </div>
   </div>
 
@@ -226,7 +242,7 @@
       <div class="sheet-handle"></div>
       <h2 style="margin-top:0; color:var(--primary);" id="catSheetTitle">القسم</h2>
       <div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="catSheetContent"></div>
-      <button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')">رجوع</button>
+      <button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')" data-i18n="back">رجوع</button>
     </div>
   </div>
 
@@ -246,20 +262,20 @@
     <div class="content-area" id="scrollContent">
       <div class="ptr-container" id="ptrContainer">
         <div class="ptr-icon" id="ptrIcon"></div>
-        <div class="ptr-text">اسحب لتبديل المظهر</div>
+        <div class="ptr-text" data-i18n="pull_to_switch">اسحب لتبديل المظهر</div>
       </div>
 
       <section class="view active" id="homeView">
         <div class="hero-ring" onclick="document.querySelector('[data-view=\'dropConfigView\']').click()">
           <svg class="hero-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
-          <div class="hero-text">لحظة وعي</div>
-          <div style="color:var(--text-dim); font-size:13px; margin-top:6px; font-weight:600;">اضغط لبرمجة قطرتك</div>
+          <div class="hero-text" data-i18n="moment_zen">لحظة وعي</div>
+          <div style="color:var(--text-dim); font-size:13px; margin-top:6px; font-weight:600;" data-i18n="click_to_program">اضغط لبرمجة قطرتك</div>
         </div>
 
         <div class="glass-card action-card" onclick="fireCinematic()">
           <div class="card-icon" style="color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, transparent);"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <div class="card-info">
-            <div class="card-title">اقتباس اليوم</div>
+            <div class="card-title" data-i18n="quote_of_day">اقتباس اليوم</div>
             <div class="card-sub" id="dailyQuoteText">...</div>
           </div>
           <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
@@ -268,67 +284,80 @@
         <div class="glass-card action-card" onclick="document.querySelector('[data-view=\'dropConfigView\']').click()">
           <div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
           <div class="card-info">
-            <div class="card-title">مواعيدك المبرمجة</div>
-            <div class="card-sub" id="nextReminderText">لا توجد مواعيد</div>
+            <div class="card-title" data-i18n="scheduled_reminders">مواعيدك المبرمجة</div>
+            <div class="card-sub" id="nextReminderText" data-i18n="no_reminders">لا توجد مواعيد</div>
           </div>
           <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
         </div>
       </section>
 
       <section class="view" id="dropConfigView">
-        <h2 style="color:var(--primary); margin-top:0; font-weight:900;">إعداد قطرتك</h2>
+        <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="drop_settings">إعداد قطرتك</h2>
+        
+        <!-- تحديد مصدر الاقتباس للقطرة -->
         <div class="glass-card">
-          <strong style="display:block; margin-bottom:15px; font-size:16px;">1. طريقة العرض وتفضيلاتك</strong>
-          <select id="notifModeSetting">
-            <option value="both">تنبيه النظام + قطرة مائية (معاً)</option>
-            <option value="floating">القطرة المائية فقط</option>
-            <option value="notification">تنبيه النظام فقط</option>
-          </select>
-          <select id="dropDurationSetting">
-            <option value="5000">مدة القطرة: 5 ثوانٍ</option>
-            <option value="10000" selected>مدة القطرة: 10 ثوانٍ</option>
-            <option value="15000">مدة القطرة: 15 ثانية</option>
+          <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="source_category">1. مصدر العبارات</strong>
+          <select id="quoteCategorySetting">
+            <option value="all" data-i18n="all_categories">عشوائي (من كل الأقسام)</option>
+            <option value="dhikr" data-i18n="cat_dhikr">أذكار وأدعية</option>
+            <option value="selfDev" data-i18n="cat_selfDev">تطوير الذات</option>
+            <option value="quran" data-i18n="cat_quran">آيات قرآنية</option>
+            <option value="culture" data-i18n="cat_culture">ثقافة عامة وحكم</option>
           </select>
         </div>
 
         <div class="glass-card">
-          <strong style="display:block; margin-bottom:15px; font-size:16px;">2. جدولة المواعيد (تكرار مستمر)</strong>
-          <select id="intervalSelect">
-            <option value="0">إيقاف التكرار التلقائي</option>
-            <option value="30">كل 30 دقيقة</option>
-            <option value="60">كل 1 ساعة</option>
-            <option value="180">كل 3 ساعات</option>
-            <option value="720">كل 12 ساعة</option>
-            <option value="1440">كل 24 ساعة</option>
+          <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="display_method">2. طريقة العرض وتفضيلاتك</strong>
+          <select id="notifModeSetting">
+            <option value="both" data-i18n="mode_both">تنبيه النظام + قطرة مائية (معاً)</option>
+            <option value="floating" data-i18n="mode_floating">القطرة المائية فقط</option>
+            <option value="notification" data-i18n="mode_notification">تنبيه النظام فقط</option>
           </select>
-          <strong style="display:block; margin:25px 0 15px; font-size:16px; border-top:1px solid var(--border); padding-top:20px;">أو تحديد ساعة وأيام مخصصة:</strong>
+          <select id="dropDurationSetting">
+            <option value="5000" data-i18n="dur_5">مدة القطرة: 5 ثوانٍ</option>
+            <option value="10000" selected data-i18n="dur_10">مدة القطرة: 10 ثوانٍ</option>
+            <option value="15000" data-i18n="dur_15">مدة القطرة: 15 ثانية</option>
+          </select>
+        </div>
+
+        <div class="glass-card">
+          <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="schedule_repeat">3. جدولة المواعيد (تكرار مستمر)</strong>
+          <select id="intervalSelect">
+            <option value="0" data-i18n="stop_repeat">إيقاف التكرار التلقائي</option>
+            <option value="30" data-i18n="every_30">كل 30 دقيقة</option>
+            <option value="60" data-i18n="every_1h">كل 1 ساعة</option>
+            <option value="180" data-i18n="every_3h">كل 3 ساعات</option>
+            <option value="720" data-i18n="every_12h">كل 12 ساعة</option>
+            <option value="1440" data-i18n="every_24h">كل 24 ساعة</option>
+          </select>
+          <strong style="display:block; margin:25px 0 15px; font-size:16px; border-top:1px solid var(--border); padding-top:20px;" data-i18n="custom_schedule">أو تحديد ساعة وأيام مخصصة:</strong>
           <input type="time" id="customTime">
           <div class="days-grid" id="daysGrid"></div>
-          <button class="btn-solid" id="saveScheduleBtn">حفظ الموعد</button>
+          <button class="btn-solid" id="saveScheduleBtn" data-i18n="save_schedule">حفظ الموعد</button>
           <div id="savedSchedulesList" style="margin-top:25px;"></div>
         </div>
       </section>
 
       <section class="view" id="libraryView">
-        <h2 style="color:var(--primary); margin-top:0; font-weight:900;">اقتباسات</h2>
-        <p style="color:var(--text-dim); font-size:14px; margin-top:0; margin-bottom:20px;">اختر العبارات التي ستلهمك في قطرتك المائية.</p>
+        <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="quotes_library">اقتباسات</h2>
+        <p style="color:var(--text-dim); font-size:14px; margin-top:0; margin-bottom:20px;" data-i18n="explore_copy">تصفح العبارات وانسخ ما يلهمك.</p>
         <div id="categoriesContainer"></div>
       </section>
 
       <section class="view" id="meditationView">
-        <h2 style="color:var(--primary); margin-top:0; font-weight:900;">تأمل واسترخاء</h2>
+        <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="meditation">تأمل واسترخاء</h2>
         <div class="glass-card" style="text-align:center; padding:60px 20px; margin-top:20px;">
           <div style="margin:0 auto 25px; width:70px; height:70px; background:color-mix(in srgb, var(--primary) 10%, transparent); color:var(--primary); border-radius:24px; display:grid; place-items:center;">
             <svg viewBox="0 0 24 24" style="width:36px; height:36px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 16v-4m0-4h.01"/></svg>
           </div>
-          <div id="audioStatus" style="font-size:22px; font-weight:900; margin-bottom:10px;">استعد للهدوء</div>
-          <div style="font-size:14px; color:var(--text-dim); margin-bottom:30px;">أصوات طبيعة وقرآن مريح</div>
-          <button class="btn-solid" id="playAudioBtn">▶ تشغيل الآن</button>
+          <div id="audioStatus" style="font-size:22px; font-weight:900; margin-bottom:10px;" data-i18n="ready_relax">استعد للهدوء</div>
+          <div style="font-size:14px; color:var(--text-dim); margin-bottom:30px;" data-i18n="nature_quran">أصوات طبيعة وقرآن مريح</div>
+          <button class="btn-solid" id="playAudioBtn" data-i18n="play_now">▶ تشغيل الآن</button>
         </div>
       </section>
 
       <section class="view" id="gardenView">
-        <h2 style="color:var(--primary); margin-top:0; font-weight:900;">حديقتك</h2>
+        <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="your_garden">حديقتك</h2>
         <div class="glass-card garden-stage">
           <div class="tree-emoji" id="treeEmoji">🌱</div>
           <div style="font-size:26px; font-weight:900; color:var(--primary); margin-bottom:8px;" id="treeLevelName">بذرة النوايا</div>
@@ -341,38 +370,28 @@
 
     <!-- الكبسولة السفلية الفاخرة المترتبة أفقياً -->
     <nav class="floating-nav">
-      <!-- 1. المكتبة -->
       <button class="nav-item" data-view="libraryView">
         <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
       </button>
-      
-      <!-- 2. إعداد القطرة -->
       <button class="nav-item" data-view="dropConfigView">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
       </button>
-
-      <!-- 3. الرئيسية (في المنتصف تماماً) -->
       <button class="nav-home-btn active" data-view="homeView">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
       </button>
-
-      <!-- 4. التأمل -->
       <button class="nav-item" data-view="meditationView">
         <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
       </button>
-      
-      <!-- 5. الحديقة (الجوائز) -->
       <button class="nav-item" data-view="gardenView">
         <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 1 8.3C19.2 15.66 15.14 20 11 20z"/><path d="M11 20v-5c0-1.42 1.13-2.61 2.5-2.84"/></svg>
       </button>
     </nav>
   </div>
 
-  <!-- نافذة الإحصائيات (تفتح من الأيقونة العلوية) -->
   <div class="sheet-overlay" id="statsSheet">
     <div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
       <div class="sheet-handle"></div>
-      <h2 style="margin-top:0;">نشاطك وتقدمك 📈</h2>
+      <h2 style="margin-top:0;" data-i18n="your_progress">نشاطك وتقدمك 📈</h2>
       <div style="width:100%; height:140px; background:var(--bg); border-radius:18px; margin: 25px 0; position:relative; overflow:hidden; border: 1px solid var(--border);">
         <svg viewBox="0 0 100 50" preserveAspectRatio="none" style="width:100%; height:100%;">
           <polyline fill="none" stroke="var(--primary)" stroke-width="2.5" points="0,45 20,30 40,35 60,15 80,20 100,5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -380,11 +399,11 @@
         </svg>
       </div>
       <div style="font-size:16px; font-weight:700;">
-        <div class="control-row"><span>أيام الاستخدام:</span> <span id="statDays">1</span></div>
-        <div class="control-row"><span>الإشعارات النصية:</span> <span id="statNotifs">0</span></div>
-        <div class="control-row" style="border:none;"><span>القطرات السينمائية:</span> <span id="statDrops" style="color:var(--primary);">0</span></div>
+        <div class="control-row"><span data-i18n="usage_days">أيام الاستخدام:</span> <span id="statDays">1</span></div>
+        <div class="control-row"><span data-i18n="total_notifs">الإشعارات النصية:</span> <span id="statNotifs">0</span></div>
+        <div class="control-row" style="border:none;"><span data-i18n="total_drops">القطرات السينمائية:</span> <span id="statDrops" style="color:var(--primary);">0</span></div>
       </div>
-      <button class="btn-solid" onclick="document.getElementById('statsSheet').classList.remove('show')">إغلاق</button>
+      <button class="btn-solid" onclick="document.getElementById('statsSheet').classList.remove('show')" data-i18n="close">إغلاق</button>
     </div>
   </div>
 
