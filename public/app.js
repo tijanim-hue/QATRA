@@ -1,6 +1,6 @@
 "use strict";
 
-const STORE_KEY = "qatra_worldclass_v3"; // لا يزال كما هو لتجنب فقدان البيانات
+const STORE_KEY = "qatra_worldclass_v3";
 
 // === قاموس الترجمة الشامل ===
 const DICT = {
@@ -21,6 +21,7 @@ const DICT = {
     nature_quran: "أصوات طبيعة وقرآن مريح", play_now: "▶ تشغيل الآن", stop_now: "⏸ إيقاف", your_garden: "حديقتك",
     your_progress: "نشاطك وتقدمك 📈", usage_days: "أيام الاستخدام:", total_notifs: "الإشعارات النصية:",
     total_drops: "القطرات السينمائية:", close: "إغلاق", app_settings: "إعدادات التطبيق", glass_mode: "الشفافية وتأثير الزجاج 💎",
+    show_image: "إظهار صورة مع العبارة 🖼️",
     language: "لغة التطبيق:", save_done: "تم وحفظ", back: "رجوع", copied: "تم النسخ بنجاح", delete: "حذف",
     days: "أيام", repeat_on: "تكرار مفعل", schedules_count: "مواعيد مبرمجة", choose_time: "الرجاء اختيار الوقت ويوم واحد على الأقل.",
     quotes_ready: "عبارة جاهزة"
@@ -42,6 +43,7 @@ const DICT = {
     nature_quran: "Nature Sounds & Quran", play_now: "▶ Play Now", stop_now: "⏸ Stop", your_garden: "Your Garden",
     your_progress: "Your Progress 📈", usage_days: "Usage Days:", total_notifs: "Notifications:",
     total_drops: "Cinematic Drops:", close: "Close", app_settings: "App Settings", glass_mode: "Glass Effect 💎",
+    show_image: "Show image with quote 🖼️",
     language: "App Language:", save_done: "Done", back: "Back", copied: "Copied Successfully", delete: "Delete",
     days: "days", repeat_on: "Repeat On", schedules_count: "scheduled", choose_time: "Please choose a time and day.",
     quotes_ready: "Quotes"
@@ -63,6 +65,7 @@ const DICT = {
     nature_quran: "Sons de la nature & Coran", play_now: "▶ Lire", stop_now: "⏸ Arrêter", your_garden: "Votre Jardin",
     your_progress: "Votre Progression 📈", usage_days: "Jours d'utilisation:", total_notifs: "Notifications:",
     total_drops: "Gouttes Cinématiques:", close: "Fermer", app_settings: "Paramètres", glass_mode: "Effet Verre 💎",
+    show_image: "Afficher l'image avec citation 🖼️",
     language: "Langue:", save_done: "Terminé", back: "Retour", copied: "Copié avec succès", delete: "Supprimer",
     days: "jours", repeat_on: "Répétition activée", schedules_count: "programmés", choose_time: "Veuillez choisir une heure.",
     quotes_ready: "Citations"
@@ -84,6 +87,7 @@ const DICT = {
     nature_quran: "Sonidos naturales", play_now: "▶ Reproducir", stop_now: "⏸ Detener", your_garden: "Tu Jardín",
     your_progress: "Tu Progreso 📈", usage_days: "Días de uso:", total_notifs: "Notificaciones:",
     total_drops: "Gotas Cinemáticas:", close: "Cerrar", app_settings: "Ajustes", glass_mode: "Efecto Cristal 💎",
+    show_image: "Mostrar imagen con cita 🖼️",
     language: "Idioma:", save_done: "Hecho", back: "Volver", copied: "Copiado exitosamente", delete: "Borrar",
     days: "días", repeat_on: "Repetición Activada", schedules_count: "programados", choose_time: "Por favor elige la hora.",
     quotes_ready: "Citas"
@@ -105,6 +109,7 @@ const DICT = {
     nature_quran: "Naturgeräusche", play_now: "▶ Abspielen", stop_now: "⏸ Stoppen", your_garden: "Dein Garten",
     your_progress: "Dein Fortschritt 📈", usage_days: "Nutzungstage:", total_notifs: "Benachrichtigungen:",
     total_drops: "Tropfen:", close: "Schließen", app_settings: "Einstellungen", glass_mode: "Glaseffekt 💎",
+    show_image: "Bild mit Zitat anzeigen 🖼️",
     language: "Sprache:", save_done: "Fertig", back: "Zurück", copied: "Erfolgreich kopiert", delete: "Löschen",
     days: "Tage", repeat_on: "Wiederholen ein", schedules_count: "geplant", choose_time: "Bitte wählen Sie eine Zeit.",
     quotes_ready: "Zitate"
@@ -123,7 +128,8 @@ const QUOTES_DB = {
 let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
   lang: 'ar', dark: true, glass: true, mode: 'both', duration: 10000, interval: '0',
   quoteSource: 'all', customQuotes: ["مرحباً بك في قطرة. هذه عبارتك الأولى في مكتبتك."], 
-  schedules: [], stats: { drops: 0, notifs: 0, days: 1 }
+  schedules: [], stats: { drops: 0, notifs: 0, days: 1 },
+  showImage: false // الوضع الافتراضي كما طلبت (بدون صورة)
 };
 
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
@@ -160,12 +166,13 @@ function applyState() {
   const s = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
 
   c('glassToggle', state.glass);
+  c('imageToggle', state.showImage);
   s('langSelect', state.lang);
   s('notifModeSetting', state.mode); 
   s('dropDurationSetting', state.duration); 
   s('intervalSelect', state.interval);
   
-  // تحديث شكل القائمة الراديو الاحترافية
+  // تحديث شكل القائمة الراديو
   document.querySelectorAll('.custom-radio-item').forEach(item => {
     if(item.dataset.value === state.quoteSource) item.classList.add('active');
     else item.classList.remove('active');
@@ -179,8 +186,9 @@ function applyState() {
   renderCategories(); renderGarden(); renderSchedules(); renderMyLibrary();
 }
 
-// تغيير اللغة والمصدر
+// تغيير اللغة والمصدر وإظهار الصورة
 safeOn('langSelect', 'change', e => { state.lang = e.target.value; applyState(); syncNativeAlarms(); });
+safeOn('imageToggle', 'change', e => { state.showImage = e.target.checked; applyState(); syncNativeAlarms(); });
 window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); syncNativeAlarms(); };
 
 // --- مكتبتي الخاصة (إضافة وحذف العبارات المخصصة) ---
@@ -242,7 +250,6 @@ const GARDEN = [
   { max: 5, emoji: '🌱' }, { max: 20, emoji: '🌿' }, { max: 50, emoji: '🪴' },
   { max: 100, emoji: '🌳' }, { max: 200, emoji: '🌸' }, { max: 9999, emoji: '🌲' }
 ];
-// الترجمة المباشرة للحديقة للتسهيل
 const gardenNames = {ar: ['بذرة النوايا','برعم التغيير','نبتة الإصرار','شجرة المعرفة','شجرة مزدهرة','غابة الحكمة'], en: ['Seed of Intention','Sprout of Change','Plant of Persistence','Tree of Knowledge','Blooming Tree','Forest of Wisdom'], fr: ['Graine d\'Intention','Pousse de Changement','Plante de Persistance','Arbre de la Connaissance','Arbre en Fleurs','Forêt de la Sagesse'], es: ['Semilla de Intención','Brote de Cambio','Planta de Persistencia','Árbol del Conocimiento','Árbol Floreciente','Bosque de Sabiduría'], de: ['Samen der Absicht','Spross der Veränderung','Pflanze der Beharrlichkeit','Baum des Wissens','Blühender Baum','Wald der Weisheit']};
 const gardenDescs = {ar: ['كل قطرة تسقي بها روحك تنبت بذرة.','بداية جميلة، استمر!','جذورك تزداد قوة.','أصبحت تستظل بوعيك.','أثمرت جهودك نوراً.','أنت تزرع أرضاً من الوعي.'], en: ['Every drop grows a seed.','Great start, keep going!','Your roots are growing stronger.','Basking in your awareness.','Your efforts are bearing light.','You are planting a land of awareness.'], fr: ['Chaque goutte fait pousser une graine.','Bon début, continuez!','Vos racines se renforcent.','Vous vous prélassez dans la conscience.','Vos efforts portent de la lumière.','Vous plantez une terre de conscience.'], es: ['Cada gota hace crecer una semilla.','¡Buen comienzo, sigue así!','Tus raíces se están fortaleciendo.','Disfrutando de tu conciencia.','Tus esfuerzos dan luz.','Estás plantando una tierra de conciencia.'], de: ['Jeder Tropfen lässt einen Samen wachsen.','Toller Start, mach weiter!','Deine Wurzeln werden stärker.','Du sonnst dich in deinem Bewusstsein.','Deine Bemühungen bringen Licht.','Du pflanzt ein Land des Bewusstseins.']};
 
@@ -319,10 +326,9 @@ window.copyQuote = (txt) => {
 // --- القطرة والمواعيد ---
 function getRandomQuote() {
   let pool = [];
-  let categoryKey = state.quoteSource; // نحتفظ باسم القسم لإرساله للأندرويد لكي يختار الصورة المناسبة
+  let categoryKey = state.quoteSource;
 
   if (state.quoteSource === 'all') {
-    // إذا كان عشوائياً، نختار قسماً عشوائياً أولاً
     const keys = Object.keys(QUOTES_DB);
     categoryKey = keys[Math.floor(Math.random() * keys.length)];
     pool = QUOTES_DB[categoryKey].items;
@@ -336,7 +342,7 @@ function getRandomQuote() {
   return { quote, categoryKey };
 }
 
-// دالة القطرة السينمائية (تحديث: إرسال اسم القسم)
+// دالة القطرة السينمائية (تحديث: تمرير خيار إظهار الصورة)
 window.fireCinematic = async () => {
   const { quote, categoryKey } = getRandomQuote();
   const qtEl = document.getElementById('dailyQuoteText');
@@ -344,8 +350,7 @@ window.fireCinematic = async () => {
 
   if (QatraNative) {
     state.stats.drops++; applyState();
-    // إرسال وضع الشاشة الكاملة واسم القسم (category) لكي يقوم الأندرويد بعرض صورة القسم
-    await QatraNative.showDrop({ quote: quote, category: categoryKey, duration: state.duration, fullScreen: true }).catch(e=>{});
+    await QatraNative.showDrop({ quote: quote, category: categoryKey, duration: state.duration, fullScreen: true, showImage: state.showImage }).catch(e=>{});
   }
 };
 
@@ -375,11 +380,11 @@ window.deleteSchedule = (i) => {
 function syncNativeAlarms() {
   if(!QatraNative) return;
   const { quote, categoryKey } = getRandomQuote();
-  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: quote, category: categoryKey, fullScreen: true }).catch(e=>{});
+  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: quote, category: categoryKey, fullScreen: true, showImage: state.showImage }).catch(e=>{});
   
   state.schedules.forEach(s => {
     const rQuote = getRandomQuote();
-    QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: rQuote.quote, category: rQuote.categoryKey, fullScreen: true}).catch(e=>{});
+    QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: rQuote.quote, category: rQuote.categoryKey, fullScreen: true, showImage: state.showImage}).catch(e=>{});
   });
 }
 
@@ -392,7 +397,6 @@ let randPlayer = new Audio(); let isRandPlaying = false;
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
 
-  // 1. طلب الأذونات فوراً في البداية مع بدء التطبيق
   if (QatraNative) { 
       QatraNative.askPermissions().catch(e => console.log(e)); 
   }
