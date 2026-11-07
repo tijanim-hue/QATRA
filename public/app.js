@@ -1,6 +1,6 @@
 "use strict";
 
-const STORE_KEY = "qatra_worldclass_v4";
+const STORE_KEY = "qatra_worldclass_v3"; // لا يزال كما هو لتجنب فقدان البيانات
 
 // === قاموس الترجمة الشامل ===
 const DICT = {
@@ -242,6 +242,7 @@ const GARDEN = [
   { max: 5, emoji: '🌱' }, { max: 20, emoji: '🌿' }, { max: 50, emoji: '🪴' },
   { max: 100, emoji: '🌳' }, { max: 200, emoji: '🌸' }, { max: 9999, emoji: '🌲' }
 ];
+// الترجمة المباشرة للحديقة للتسهيل
 const gardenNames = {ar: ['بذرة النوايا','برعم التغيير','نبتة الإصرار','شجرة المعرفة','شجرة مزدهرة','غابة الحكمة'], en: ['Seed of Intention','Sprout of Change','Plant of Persistence','Tree of Knowledge','Blooming Tree','Forest of Wisdom'], fr: ['Graine d\'Intention','Pousse de Changement','Plante de Persistance','Arbre de la Connaissance','Arbre en Fleurs','Forêt de la Sagesse'], es: ['Semilla de Intención','Brote de Cambio','Planta de Persistencia','Árbol del Conocimiento','Árbol Floreciente','Bosque de Sabiduría'], de: ['Samen der Absicht','Spross der Veränderung','Pflanze der Beharrlichkeit','Baum des Wissens','Blühender Baum','Wald der Weisheit']};
 const gardenDescs = {ar: ['كل قطرة تسقي بها روحك تنبت بذرة.','بداية جميلة، استمر!','جذورك تزداد قوة.','أصبحت تستظل بوعيك.','أثمرت جهودك نوراً.','أنت تزرع أرضاً من الوعي.'], en: ['Every drop grows a seed.','Great start, keep going!','Your roots are growing stronger.','Basking in your awareness.','Your efforts are bearing light.','You are planting a land of awareness.'], fr: ['Chaque goutte fait pousser une graine.','Bon début, continuez!','Vos racines se renforcent.','Vous vous prélassez dans la conscience.','Vos efforts portent de la lumière.','Vous plantez une terre de conscience.'], es: ['Cada gota hace crecer una semilla.','¡Buen comienzo, sigue así!','Tus raíces se están fortaleciendo.','Disfrutando de tu conciencia.','Tus esfuerzos dan luz.','Estás plantando una tierra de conciencia.'], de: ['Jeder Tropfen lässt einen Samen wachsen.','Toller Start, mach weiter!','Deine Wurzeln werden stärker.','Du sonnst dich in deinem Bewusstsein.','Deine Bemühungen bringen Licht.','Du pflanzt ein Land des Bewusstseins.']};
 
@@ -318,25 +319,33 @@ window.copyQuote = (txt) => {
 // --- القطرة والمواعيد ---
 function getRandomQuote() {
   let pool = [];
+  let categoryKey = state.quoteSource; // نحتفظ باسم القسم لإرساله للأندرويد لكي يختار الصورة المناسبة
+
   if (state.quoteSource === 'all') {
-    Object.keys(QUOTES_DB).forEach(k => { pool = pool.concat(QUOTES_DB[k].items); });
+    // إذا كان عشوائياً، نختار قسماً عشوائياً أولاً
+    const keys = Object.keys(QUOTES_DB);
+    categoryKey = keys[Math.floor(Math.random() * keys.length)];
+    pool = QUOTES_DB[categoryKey].items;
   } else if (state.quoteSource === 'myLibrary') {
     pool = state.customQuotes.length > 0 ? state.customQuotes : ["أضف عبارات في مكتبتك الخاصة"];
   } else {
     pool = QUOTES_DB[state.quoteSource].items;
   }
-  return pool[Math.floor(Math.random() * pool.length)];
+
+  const quote = pool[Math.floor(Math.random() * pool.length)];
+  return { quote, categoryKey };
 }
 
-// دالة القطرة السينمائية
+// دالة القطرة السينمائية (تحديث: إرسال اسم القسم)
 window.fireCinematic = async () => {
-  const quote = getRandomQuote();
+  const { quote, categoryKey } = getRandomQuote();
   const qtEl = document.getElementById('dailyQuoteText');
   if (qtEl) qtEl.textContent = `"${quote}"`;
 
   if (QatraNative) {
     state.stats.drops++; applyState();
-    await QatraNative.showDrop({ quote: quote, duration: state.duration, fullScreen: true }).catch(e=>{});
+    // إرسال وضع الشاشة الكاملة واسم القسم (category) لكي يقوم الأندرويد بعرض صورة القسم
+    await QatraNative.showDrop({ quote: quote, category: categoryKey, duration: state.duration, fullScreen: true }).catch(e=>{});
   }
 };
 
@@ -365,8 +374,13 @@ window.deleteSchedule = (i) => {
 
 function syncNativeAlarms() {
   if(!QatraNative) return;
-  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote(), fullScreen: true }).catch(e=>{});
-  state.schedules.forEach(s => QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: getRandomQuote(), fullScreen: true}).catch(e=>{}));
+  const { quote, categoryKey } = getRandomQuote();
+  QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: quote, category: categoryKey, fullScreen: true }).catch(e=>{});
+  
+  state.schedules.forEach(s => {
+    const rQuote = getRandomQuote();
+    QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: rQuote.quote, category: rQuote.categoryKey, fullScreen: true}).catch(e=>{});
+  });
 }
 
 // --- التأمل ---
@@ -458,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   applyState(); renderSchedules(); renderDaysGrid();
   const qtEl = document.getElementById('dailyQuoteText');
-  if(qtEl) qtEl.textContent = `"${getRandomQuote()}"`;
+  if(qtEl) qtEl.textContent = `"${getRandomQuote().quote}"`;
 
   setTimeout(() => {
     const splash = document.getElementById('splash');
