@@ -1,8 +1,7 @@
 "use strict";
 
-const STORE_KEY = "qatra_worldclass_v6";
+const STORE_KEY = "qatra_worldclass_v7";
 
-// === قاموس الترجمة ===
 const DICT = {
   ar: {
     app_title: "قطرة | QATRA", pull_to_switch: "اسحب لتبديل المظهر", moment_zen: "لحظة وعي", click_to_program: "اضغط لبرمجة قطرتك", 
@@ -20,7 +19,8 @@ const DICT = {
     short_sessions: "جلسات قصيرة", app_settings: "إعدادات التطبيق", glass_mode: "الشفافية وتأثير الزجاج 💎", show_image: "إظهار صورة مع العبارة 🖼️",
     show_home_cards: "إظهار بطاقات الرئيسية 📱", language: "لغة التطبيق:", save_done: "تم وحفظ", back: "رجوع", copied: "تم النسخ بنجاح", 
     delete: "حذف", days: "أيام", quotes_ready: "عبارة جاهزة", rain: "🌧️ المطر", sea: "🌊 البحر", forest: "🌲 الغابة", birds: "🕊️ الطيور",
-    all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مجموعاتي الخاصة", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", every_3h: "كل 3 ساعات", every_12h: "كل 12 ساعة", every_24h: "كل 24 ساعة", no_reminders: "لا توجد مواعيد", source_category: "1. مصدر العبارات"
+    all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مجموعاتي الخاصة", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", every_3h: "كل 3 ساعات", every_12h: "كل 12 ساعة", every_24h: "كل 24 ساعة", no_reminders: "لا توجد مواعيد", source_category: "1. مصدر العبارات",
+    cat_awareness: "أسئلة وعي (جديد)", cat_family: "قطرات لأحبائي (عائلتي)", my_journal: "دفتر الأثر (تأملاتي)", family_drops: "قطرات لأحبائي"
   },
   en: {
     app_title: "Qatra | Drop", pull_to_switch: "Pull to switch theme", moment_zen: "Moment of Zen", click_to_program: "Tap to config", 
@@ -37,19 +37,32 @@ const DICT = {
     quran_recitation: "Quran", short_sessions: "Short Sessions", app_settings: "App Settings", glass_mode: "Glass Effect 💎", 
     show_image: "Show image 🖼️", show_home_cards: "Show Home Cards 📱", language: "App Language:", save_done: "Done", back: "Back", 
     copied: "Copied!", delete: "Delete", days: "days", quotes_ready: "Quotes", rain: "🌧️ Rain", sea: "🌊 Sea", forest: "🌲 Forest", birds: "🕊️ Birds",
-    all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development", cat_quran: "Quranic Verses", cat_culture: "Culture", cat_poetry: "Poetry", my_library: "My Groups", stop_repeat: "Stop Auto Repeat", every_30: "Every 30 Mins", every_1h: "Every 1 Hour", every_3h: "Every 3 Hours", every_12h: "Every 12 Hours", every_24h: "Every 24 Hours", no_reminders: "No scheduled reminders", source_category: "1. Quotes Source"
+    all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development", cat_quran: "Quranic Verses", cat_culture: "Culture", cat_poetry: "Poetry", my_library: "My Groups", stop_repeat: "Stop Auto Repeat", every_30: "Every 30 Mins", every_1h: "Every 1 Hour", every_3h: "Every 3 Hours", every_12h: "Every 12 Hours", every_24h: "Every 24 Hours", no_reminders: "No scheduled reminders", source_category: "1. Quotes Source", cat_awareness: "Awareness Questions", cat_family: "Family Drops", my_journal: "My Reflection Journal", family_drops: "Family Drops"
   }
 };
-// دعم للغات المتبقية بالانجليزية
 const langs = ['fr','es','de']; langs.forEach(l => DICT[l] = DICT['en']); 
 
-// === قاعدة بيانات العبارات المخصصة ===
+// === قاعدة البيانات المدمجة بالكامل ===
 const QUOTES_DB = {
+  awareness: { // القسم الجديد
+    key: "cat_awareness",
+    icon: '<path d="M9 21h6v-1H9v1zm3-19C6.48 2 2 6.48 2 12c0 2.85 1.2 5.41 3.11 7.24.38.36.61.88.61 1.42V21c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-.34c0-.54.23-1.06.61-1.42C20.8 17.41 22 14.85 22 12c0-5.52-4.48-10-10-10zm2 14h-4v-2h4v2zm0-4h-4V7h4v5z"/>',
+    items: [
+      "ما الشيء الذي يستحق امتنانك اليوم؟",
+      "ما الخطوة الصغيرة التي تستطيع القيام بها الآن؟",
+      "هل هناك شخص يستحق منك كلمة طيبة اليوم؟",
+      "ما الشيء الذي تعلمته من تجربة صعبة مررت بها؟",
+      "ما الأمر الذي تستطيع التخلي عنه اليوم لتشعر براحة أكبر؟",
+      "ما النعمة التي اعتدت وجودها ولم تعد تنتبه إليها؟",
+      "ما القرار الصغير الذي قد يجعل يومك أفضل؟",
+      "ما الفكرة التي تشغل ذهنك وتحتاج إلى إعادة النظر فيها؟"
+    ]
+  },
   dhikr: { 
     key: "cat_dhikr", 
     icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', 
     items: [
-      "سبحان الله وبحمده سبحان الله العظيم.",
+      "سبحان الله وبحمده، سبحان الله العظيم.",
       "لا إله إلا أنت سبحانك إني كنت من الظالمين.",
       "اللهم إنك عفو تحب العفو فاعف عني.",
       "يا حي يا قيوم برحمتك أستغيث.",
@@ -562,16 +575,6 @@ const QUOTES_DB = {
       "الشقاء نتيجة البعد عن الله واتباع الهوى.",
       "الدنيا دار ممر والآخرة دار مقر.",
       "الجنة حلم المؤمنين ومبتغى الصالحين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
-      "النار عذاب أليم ومأوى الكافرين.",
       "النار عذاب أليم ومأوى الكافرين."
     ] 
   }
@@ -684,7 +687,8 @@ const MORNING_ALERTS = [
 let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
   lang: 'ar', dark: true, glass: true, mode: 'both', duration: 10000, interval: '0', showImage: false, showHomeCards: true,
   quoteSource: 'all', schedules: [], groups: { 'favorites': [], 'myQuotes': [] }, 
-  stats: { drops: 0, likes: 0, dhikr: 0, culture: 0, selfDev: 0, poetry: 0, days: 1 }
+  journal: [], family: [],
+  stats: { drops: 0, likes: 0, dhikr: 0, culture: 0, selfDev: 0, poetry: 0, days: 1, lastDate: new Date().toDateString() }
 };
 
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
@@ -731,7 +735,6 @@ safeOn('homeCardsToggle', 'change', e => { state.showHomeCards = e.target.checke
 safeOn('intervalSelect', 'change', e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); });
 window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); syncNativeAlarms(); };
 
-// --- استماع للقلب من القطرة في الأندرويد ---
 if (QatraNative) {
   QatraNative.addListener('quoteLiked', (info) => {
     state.stats.likes++;
@@ -778,12 +781,10 @@ function updateHomeCards() {
   const tiEl = document.getElementById('todayImpactText'); if(tiEl) tiEl.innerText = `لقد تفاعلت مع ${state.stats.likes} قطرات اليوم`;
   const tipEl = document.getElementById('todayImpactProgress'); if(tipEl) tipEl.style.width = Math.min((state.stats.likes / 10)*100, 100) + '%';
   
-  // تحديث رسالة "لحظتك الحالية" من الرسائل الصباحية المخصصة
   const cmEl = document.getElementById('currentMomentText'); 
   if(cmEl) cmEl.innerText = MORNING_ALERTS[Math.floor(Math.random() * MORNING_ALERTS.length)];
 }
 
-// --- الأيام والمواعيد والبرمجة الذكية ---
 const WEEK_DAYS = {
   ar: [{id:0,n:"أحد"},{id:1,n:"إثن"},{id:2,n:"ثلا"},{id:3,n:"أرب"},{id:4,n:"خمي"},{id:5,n:"جمع"},{id:6,n:"سبت"}],
   en: [{id:0,n:"Sun"},{id:1,n:"Mon"},{id:2,n:"Tue"},{id:3,n:"Wed"},{id:4,n:"Thu"},{id:5,n:"Fri"},{id:6,n:"Sat"}]
@@ -832,7 +833,6 @@ function renderSchedules() {
 }
 window.deleteSchedule = (i) => { if(QatraNative && state.schedules[i]) QatraNative.cancel({id: state.schedules[i].id}); state.schedules.splice(i,1); applyState(); syncNativeAlarms(); };
 
-// --- الحديقة المتعددة الأشجار ---
 function getTreeStage(score) {
   const G = [{ m: 5, e: '🌱' }, { m: 20, e: '🌿' }, { m: 50, e: '🪴' }, { m: 100, e: '🌳' }, { m: 200, e: '🌸' }];
   for(let i=0; i<G.length; i++) if(score < G[i].m) return G[i].e; return '🌲';
@@ -847,14 +847,13 @@ function renderGarden() {
   tEl('totalDaysActiveText', `تفاعلت لمدة ${s.days} أيام`);
 }
 
-// --- المكتبة والمجموعات (أيقونات احترافية للقلب والنسخ) ---
 window.showCategoryList = () => { document.getElementById('categorySheet').classList.add('show'); renderCategories(); }
 window.showGroupsManager = () => { document.getElementById('groupsManagerArea').style.display = 'block'; renderGroupsList(); };
 
 function renderCategories() {
   const container = document.getElementById('catSheetContent');
   if(!container) return;
-  container.innerHTML = Object.keys(QUOTES_DB).map(key => {
+  container.innerHTML = Object.keys(QUOTES_DB).filter(k => k !== 'awareness').map(key => {
     const cat = QUOTES_DB[key];
     return `<div class="glass-card action-card" onclick="openQuotesList('${key}')" style="margin-bottom:10px;">
       <div class="card-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg></div>
@@ -873,6 +872,9 @@ window.openQuotesList = (id) => {
         return `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);">
           <div style="font-size:15px; font-weight:700;">${q}</div>
           <div style="display:flex; gap:8px;">
+            <button onclick="shareQuotePrompt('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:#F59E0B; cursor:pointer;">
+              <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            </button>
             <button onclick="copyQuote('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:var(--primary); cursor:pointer;">
               <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             </button>
@@ -920,7 +922,18 @@ window.openGroup = (k) => {
   const titleEl = document.getElementById('groupViewTitle'); if(titleEl) titleEl.innerText = (k==='favorites'?'مفضلاتي':(k==='myQuotes'?'عباراتي الخاصة':k));
   const addDiv = document.getElementById('addToGroupDiv'); if(addDiv) addDiv.style.display = (k==='favorites' ? 'none' : 'flex');
   const c = document.getElementById('groupViewContent');
-  if(c) c.innerHTML = state.groups[k].map((q,i) => `<div class="my-quote-item"><div style="flex:1;">${q}</div><button onclick="removeQuoteFromGroup('${k}',${i})" class="delete-btn">حذف</button></div>`).join('');
+  if(c) {
+    c.innerHTML = state.groups[k].map((q,i) => `
+      <div class="my-quote-item">
+        <div style="flex:1;">${q}</div>
+        <div style="display:flex; gap:8px;">
+          <button onclick="shareQuotePrompt('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:#F59E0B; cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          </button>
+          <button onclick="removeQuoteFromGroup('${k}',${i})" class="delete-btn">حذف</button>
+        </div>
+      </div>`).join('');
+  }
   document.getElementById('groupViewSheet').classList.add('show');
 };
 window.removeQuoteFromGroup = (k, i) => { state.groups[k].splice(i,1); applyState(); openGroup(k); };
@@ -932,19 +945,196 @@ window.addQuoteToCurrentGroup = () => {
   }
 }
 
+// --- دفتر الأثر (Journal) ---
+window.openJournalSheet = () => {
+    document.getElementById('journalSheet').classList.add('show');
+    renderJournal();
+}
+
+function renderJournal() {
+    const content = document.getElementById('journalContent');
+    if (!content) return;
+    if (state.journal.length === 0) {
+        content.innerHTML = `<p style="text-align:center; color:var(--text-dim); margin-top:40px;">لا توجد تأملات مسجلة بعد.</p>`;
+        return;
+    }
+    content.innerHTML = state.journal.map((j, i) => `
+        <div class="journal-item">
+            <div style="font-size:12px; color:var(--primary); margin-bottom:5px;">${j.date}</div>
+            <div style="font-size:15px; font-weight:800; margin-bottom:8px;">${j.question}</div>
+            <div style="font-size:14px; color:var(--text-dim); margin-bottom:10px;">"${j.answer}"</div>
+            <button onclick="deleteJournal(${i})" class="delete-btn" style="font-size:11px; padding:5px 10px;">حذف</button>
+        </div>
+    `).join('');
+}
+
+window.deleteJournal = (i) => {
+    state.journal.splice(i, 1);
+    applyState();
+    renderJournal();
+}
+
+// هذه الدالة ستُستدعى عند فتح التطبيق للإجابة
+window.openAnswerSheet = (questionText) => {
+    document.getElementById('activeQuestionText').innerText = questionText;
+    document.getElementById('answerInput').value = "";
+    document.getElementById('answerSheet').classList.add('show');
+}
+
+window.saveReflection = () => {
+    const q = document.getElementById('activeQuestionText').innerText;
+    const a = document.getElementById('answerInput').value.trim();
+    if (a !== "") {
+        state.journal.unshift({ question: q, answer: a, date: new Date().toLocaleDateString('ar-EG') });
+        applyState();
+        document.getElementById('answerSheet').classList.remove('show');
+        alert("تم حفظ تأملك بنجاح في دفتر الأثر.");
+    }
+}
+
+// --- قطرات لأحبائي (Family Drops) ---
+window.openFamilySheet = () => {
+    document.getElementById('familySheet').classList.add('show');
+    renderFamily();
+}
+
+function renderFamily() {
+    const content = document.getElementById('familyContent');
+    if (!content) return;
+    content.innerHTML = state.family.map((f, i) => `
+        <div class="my-quote-item">
+            <div style="flex:1;">
+                <div style="font-size:15px; font-weight:800;">${f.name}</div>
+                <div style="font-size:12px; color:var(--text-dim);">${f.relation}</div>
+            </div>
+            <button onclick="shareQuotePrompt('إلى ${f.name} العزيز...\\nأسأل الله أن يجعل يومك مليئاً بالخير.\\n\\nتفضل هذه القطرة:', true)" class="btn-solid" style="margin:0; width:auto; padding:8px 15px; background:linear-gradient(135deg, #F43F5E, #FB923C);">أرسل قطرة 💧</button>
+            <button onclick="deleteFamily(${i})" class="delete-btn" style="margin-right:10px;">حذف</button>
+        </div>
+    `).join('');
+}
+
+window.addFamilyMember = () => {
+    const name = document.getElementById('newFamilyName').value.trim();
+    const rel = document.getElementById('newFamilyRel').value;
+    if (name !== "") {
+        state.family.push({ name: name, relation: rel });
+        document.getElementById('newFamilyName').value = "";
+        applyState();
+        renderFamily();
+    }
+}
+window.deleteFamily = (i) => {
+    state.family.splice(i, 1);
+    applyState();
+    renderFamily();
+}
+
+// --- المشاركة وتوليد الصور عبر Canvas ---
+let currentShareText = "";
+window.shareQuotePrompt = (text, isFamily = false) => {
+    currentShareText = text;
+    document.getElementById('shareQuoteText').innerText = isFamily ? text : `"${text}"`;
+    document.getElementById('shareSheet').classList.add('show');
+}
+
+window.shareAsText = () => {
+    const shareData = { title: 'قطرة | QATRA', text: currentShareText + "\n\n💧 تطبيق قطرة" };
+    if (navigator.share) {
+        navigator.share(shareData).catch(e => console.log('Share error:', e));
+    } else {
+        copyQuote(currentShareText);
+    }
+    document.getElementById('shareSheet').classList.remove('show');
+}
+
+window.shareAsImage = async () => {
+    const canvas = document.getElementById('shareCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // إعداد أبعاد 9:16 (Story format)
+    canvas.width = 1080; 
+    canvas.height = 1920;
+    
+    // رسم خلفية متدرجة زجاجية احترافية
+    const grd = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    grd.addColorStop(0, "#0EA5E9");
+    grd.addColorStop(1, "#8B5CF6");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = "rgba(11, 17, 33, 0.85)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // كتابة النص
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.direction = "rtl";
+    
+    // الشعار والزخرفة
+    ctx.font = "bold 60px Cairo";
+    ctx.fillText("💧 قـطـرة", canvas.width / 2, 300);
+    
+    // التفاف النص (Word Wrap)
+    ctx.font = "bold 80px Cairo";
+    const words = currentShareText.split(' ');
+    let line = '';
+    let y = canvas.height / 2 - 100;
+    const maxWidth = 900;
+    const lineHeight = 120;
+
+    for(let n = 0; n < words.length; n++) {
+      let testLine = line + words[n] + ' ';
+      let metrics = ctx.measureText(testLine);
+      let testWidth = metrics.width;
+      if (testWidth > maxWidth && n > 0) {
+        ctx.fillText(line, canvas.width / 2, y);
+        line = words[n] + ' ';
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, canvas.width / 2, y);
+
+    // الختم
+    ctx.font = "normal 40px Cairo";
+    ctx.fillStyle = "#94A3B8";
+    ctx.fillText("قطرة صغيرة، أثر كبير.", canvas.width / 2, canvas.height - 200);
+
+    // تحويل الكانفاس إلى صورة ومشاركتها
+    canvas.toBlob(async (blob) => {
+        try {
+            const file = new File([blob], 'qatra_drop.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: 'قطرة | QATRA',
+                    text: 'تأمل هذه القطرة 💧',
+                    files: [file]
+                });
+            } else {
+                alert("مشاركة الصور غير مدعومة في متصفحك الحالي.");
+            }
+        } catch (e) { console.log('Share failed', e); }
+        document.getElementById('shareSheet').classList.remove('show');
+    }, 'image/png');
+}
+
+
 // --- القطرة السينمائية ودمج المصادر ---
 function getRandomQuote() {
   let pool = [];
   let categoryKey = state.quoteSource;
   
   if (state.quoteSource === 'all') {
-    const keys = Object.keys(QUOTES_DB);
+    const keys = Object.keys(QUOTES_DB).filter(k => k !== 'awareness');
     categoryKey = keys[Math.floor(Math.random() * keys.length)];
     pool = QUOTES_DB[categoryKey].items;
   } else if (state.quoteSource === 'myGroups') {
     Object.keys(state.groups).forEach(k => { pool = pool.concat(state.groups[k]); });
     if(pool.length === 0) pool = ["أضف عبارات في مجموعاتك لتظهر هنا."];
     categoryKey = "myGroups";
+  } else if (state.quoteSource === 'family') {
+      pool = ["اضغط لترسل قطرة لأحبائك"];
   } else {
     pool = QUOTES_DB[state.quoteSource].items;
   }
@@ -955,6 +1145,13 @@ function getRandomQuote() {
 window.fireCinematic = async () => {
   const { quote, categoryKey } = getRandomQuote();
   const qtEl = document.getElementById('dailyQuoteText'); if (qtEl) qtEl.textContent = `"${quote}"`;
+  
+  // إذا كانت القطرة سؤال وعي، نفتح الدفتر للإجابة بدلاً من الإشعار العائم
+  if (categoryKey === 'cat_awareness' && !QatraNative) {
+      openAnswerSheet(quote);
+      return;
+  }
+
   if (QatraNative) {
     state.stats.drops++; applyState();
     await QatraNative.showDrop({ quote: quote, category: categoryKey, duration: state.duration, fullScreen: true, showImage: state.showImage }).catch(e=>{});
@@ -1025,11 +1222,7 @@ window.startSession = (mins) => {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  
-  if (QatraNative) {
-      // إجبار طلب الأذونات فور فتح التطبيق
-      QatraNative.askPermissions().catch(e => console.log(e));
-  }
+  if (QatraNative) { QatraNative.askPermissions().catch(e => console.log(e)); }
   
   document.querySelectorAll('.nav-item, .nav-home-btn, .header-btn').forEach(btn => {
     btn.addEventListener('click', () => {
