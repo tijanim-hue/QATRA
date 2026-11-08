@@ -45,25 +45,26 @@ class QatraPlugin : Plugin() {
     fun askPermissions(call: PluginCall) {
         val activity = activity ?: return call.reject("No activity")
         var hasOverlay = true
-        var hasAlarm = true
         
+        // 1. طلب إذن الظهور فوق التطبيقات (الأهم للقطرة)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             hasOverlay = false
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
         }
         
+        // 2. طلب إذن المنبهات الدقيقة (للجدولة)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
-                hasAlarm = false
                 val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             }
         }
         
+        // 3. طلب إذن الإشعارات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
@@ -72,7 +73,17 @@ class QatraPlugin : Plugin() {
         
         val ret = JSObject()
         ret.put("hasOverlay", hasOverlay)
-        ret.put("hasAlarm", hasAlarm)
+        call.resolve(ret)
+    }
+
+    @PluginMethod
+    fun checkPermissions(call: PluginCall) {
+        var hasOverlay = true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
+            hasOverlay = false
+        }
+        val ret = JSObject()
+        ret.put("hasOverlay", hasOverlay)
         call.resolve(ret)
     }
 
