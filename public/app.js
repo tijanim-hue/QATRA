@@ -18,7 +18,8 @@ sakeena: "سكينة", sakeena_desc: "اختر مساحتك للهدوء وال�
 short_sessions: "جلسات قصيرة", app_settings: "إعدادات التطبيق", glass_mode: "الشفافية وتأثير الزجاج 💎", show_image: "إظهار صورة مع العبارة 🖼️",
 show_home_cards: "إظهار بطاقات الرئيسية 📱", language: "لغة التطبيق:", save_done: "تم وحفظ", back: "رجوع", copied: "تم النسخ بنجاح",
 delete: "حذف", days: "أيام", quotes_ready: "عبارة جاهزة", rain: "🌧️ المطر", sea: "🌊 البحر", forest: "🌲 الغابة", birds: "🕊️ الطيور",
-all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مجموعاتي الخاصة", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", every_3h: "كل 3 ساعات", every_12h: "كل 12 ساعة", every_24h: "كل 24 ساعة", no_reminders: "لا توجد مواعيد", source_category: "1. مصدر العبارات"
+all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مجموعاتي الخاصة", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", every_3h: "كل 3 ساعات", every_12h: "كل 12 ساعة", every_24h: "كل 24 ساعة", no_reminders: "لا توجد مواعيد", source_category: "1. مصدر العبارات",
+surprise_me: "فاجئني", tap_for_drop: "اكتشف الآن قطرة جديدة"
 },
 en: {
 app_title: "Qatra | Drop", pull_to_switch: "Pull to switch theme", moment_zen: "Moment of Zen", click_to_program: "Tap to config",
@@ -35,7 +36,8 @@ tree_gratitude_desc: "Poetry", sakeena: "Sakeena", sakeena_desc: "Choose your sp
 quran_recitation: "Quran", short_sessions: "Short Sessions", app_settings: "App Settings", glass_mode: "Glass Effect 💎",
 show_image: "Show image 🖼️", show_home_cards: "Show Home Cards 📱", language: "App Language:", save_done: "Done", back: "Back",
 copied: "Copied!", delete: "Delete", days: "days", quotes_ready: "Quotes", rain: "🌧️ Rain", sea: "🌊 Sea", forest: "🌲 Forest", birds: "🕊️ Birds",
-all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development", cat_quran: "Quranic Verses", cat_culture: "Culture", cat_poetry: "Poetry", my_library: "My Groups", stop_repeat: "Stop Auto Repeat", every_30: "Every 30 Mins", every_1h: "Every 1 Hour", every_3h: "Every 3 Hours", every_12h: "Every 12 Hours", every_24h: "Every 24 Hours", no_reminders: "No scheduled reminders", source_category: "1. Quotes Source"
+all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development", cat_quran: "Quranic Verses", cat_culture: "Culture", cat_poetry: "Poetry", my_library: "My Groups", stop_repeat: "Stop Auto Repeat", every_30: "Every 30 Mins", every_1h: "Every 1 Hour", every_3h: "Every 3 Hours", every_12h: "Every 12 Hours", every_24h: "Every 24 Hours", no_reminders: "No scheduled reminders", source_category: "1. Quotes Source",
+surprise_me: "Surprise me", tap_for_drop: "Discover a new drop now"
 }
 };
 // دعم للغات المتبقية بالانجليزية
@@ -682,6 +684,27 @@ quoteSource: 'all', schedules: [], groups: { 'favorites': [], 'myQuotes': [] },
 stats: { drops: 0, likes: 0, dhikr: 0, culture: 0, selfDev: 0, poetry: 0, days: 1 }
 };
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
+
+// وظيفة طلب الأذونات الإجبارية عند بدء التطبيق (Permission Blocker)
+function checkPermissionsOnStart() {
+    if (QatraNative) {
+        QatraNative.askPermissions().then(res => {
+            if (!res.hasOverlay) {
+                document.getElementById('permissionBlocker').classList.add('show');
+            }
+        }).catch(e => console.log(e));
+    }
+}
+window.requestOverlayPermission = () => {
+    if (QatraNative) {
+        QatraNative.askPermissions().then(res => {
+            if (res.hasOverlay) {
+                document.getElementById('permissionBlocker').classList.remove('show');
+            }
+        });
+    }
+}
+
 function getTranslation(key) { return (DICT[state.lang] && DICT[state.lang][key]) ? DICT[state.lang][key] : (DICT['en'][key] || key); }
 function safeOn(id, eventType, handler) { const el = document.getElementById(id); if (el) el.addEventListener(eventType, handler); }
 function applyState() {
@@ -801,7 +824,7 @@ applyState(); renderSchedules(); syncNativeAlarms();
 function renderSchedules() {
 const list = document.getElementById('savedSchedulesList');
 if(!list) return;
-list.innerHTML = state.schedules.map((s,i) => `<div class="action-card" style="padding:15px; border:1px solid var(--border); border-radius:16px; margin-bottom:10px;"><div class="card-info"><div class="card-title">${s.time}</div><div class="card-sub">${s.days.length} ${getTranslation('days')}</div></div><button class="delete-btn" onclick="deleteSchedule(${i})">${getTranslation('delete')}</button></div>`).join('');
+list.innerHTML = state.schedules.map((s, i) => `<div class="modern-row" style="background:var(--bg); padding:18px; border-radius:18px; margin-bottom:12px; border:1px solid var(--border); display:flex; justify-content:space-between;"><strong style="font-size:18px;">${s.time}</strong> <button onclick="deleteSchedule(${i})" style="background:rgba(255,0,0,0.1); border:none; color:#ff4d4d; font-weight:bold; cursor:pointer; padding:8px 16px; border-radius:10px;">${getTranslation('delete')}</button></div>`).join('');
 updateHomeCards();
 }
 window.deleteSchedule = (i) => { if(QatraNative && state.schedules[i]) QatraNative.cancel({id: state.schedules[i].id}); state.schedules.splice(i,1); applyState(); syncNativeAlarms(); };
@@ -828,8 +851,8 @@ if(!container) return;
 container.innerHTML = Object.keys(QUOTES_DB).map(key => {
 const cat = QUOTES_DB[key];
 return `<div class="glass-card action-card" onclick="openQuotesList('${key}')" style="margin-bottom:10px;">
-<div class="card-icon" style="background:var(--primary); color:#fff; border-radius:12px; width:40px; height:40px;">${cat.icon}</div>
-<div class="card-info"><div class="card-title" style="font-size:15px;">${getTranslation(cat.key)}</div></div>
+<div class="card-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg></div>
+<div class="card-info"><div class="card-title">${getTranslation(cat.key)}</div></div>
 <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
 </div>`;
 }).join('');
@@ -843,7 +866,10 @@ content.innerHTML = cat.items.slice(0, 50).map(q => {
 return `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);">
 <div style="font-size:15px; font-weight:700;">${q}</div>
 <div style="display:flex; gap:8px;">
-<button onclick="copyQuote('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:var(--secondary); cursor:pointer;">
+<button onclick="copyQuote('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:var(--primary); cursor:pointer;">
+<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+</button>
+<button onclick="addToFavorites('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:var(--secondary); cursor:pointer;">
 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
 </button>
 </div>
@@ -865,10 +891,12 @@ state.groups['favorites'].push(txt); applyState(); alert('تمت الإضافة 
 function renderGroupsList() {
 const list = document.getElementById('customGroupsList');
 if(!list) return;
-list.innerHTML = Object.keys(state.groups).filter(k=> k!=='favorites' && k!=='myQuotes').map(k => `<div class="action-card" style="padding:15px; border:1px solid var(--border); border-radius:16px; margin-bottom:10px;" onclick="openGroup('${k}')">
-<div class="card-info"><div class="card-title">${k}</div></div>
-<button class="delete-btn" onclick="deleteGroup('${k}'); event.stopPropagation();">${getTranslation('delete')}</button>
-</div>`).join('');
+list.innerHTML = Object.keys(state.groups).filter(k=> k!=='favorites' && k!=='myQuotes').map(k => `
+<div class="action-card" style="padding:15px; border:1px solid var(--border); border-radius:16px; margin-bottom:10px;" onclick="openGroup('${k}')">
+<div class="card-info"><div class="card-title">${k}</div><div class="card-sub">${state.groups[k].length} عبارة</div></div>
+<button onclick="event.stopPropagation(); deleteGroup('${k}')" class="delete-btn">حذف</button>
+</div>
+`).join('');
 }
 safeOn('createGroupBtn', 'click', () => {
 const name = document.getElementById('newGroupNameInput').value.trim();
@@ -881,7 +909,7 @@ currentOpenGroup = k;
 const titleEl = document.getElementById('groupViewTitle'); if(titleEl) titleEl.innerText = (k==='favorites'?'مفضلاتي':(k==='myQuotes'?'عباراتي الخاصة':k));
 const addDiv = document.getElementById('addToGroupDiv'); if(addDiv) addDiv.style.display = (k==='favorites' ? 'none' : 'flex');
 const c = document.getElementById('groupViewContent');
-if(c) c.innerHTML = state.groups[k].map((q,i) => `<div class="my-quote-item"><div style="flex:1;">${q}</div><button onclick="removeQuoteFromGroup('${k}',${i})" class="delete-btn">${getTranslation('delete')}</button></div>`).join('');
+if(c) c.innerHTML = state.groups[k].map((q,i) => `<div class="my-quote-item"><div style="flex:1;">${q}</div><button onclick="removeQuoteFromGroup('${k}',${i})" class="delete-btn">حذف</button></div>`).join('');
 document.getElementById('groupViewSheet').classList.add('show');
 };
 window.removeQuoteFromGroup = (k, i) => { state.groups[k].splice(i,1); applyState(); openGroup(k); };
@@ -931,17 +959,17 @@ let randPlayer = new Audio();
 let audioUpdateInterval;
 window.playAudio = (type, title) => {
 randPlayer.pause();
-const aMap = {
-'rain': 'https://actions.google.com/sounds/v1/water/rain_on_roof.ogg',
-'sea': 'https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg',
+const aMap = { 
+'rain': 'https://actions.google.com/sounds/v1/water/rain_on_roof.ogg', 
+'sea': 'https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg', 
 'forest': 'https://actions.google.com/sounds/v1/water/stream_flowing_slowly.ogg',
 'birds': 'https://actions.google.com/sounds/v1/animals/birds_singing.ogg',
 'quran1': 'https://server8.mp3quran.net/afs/001.mp3',
 'quran2': 'https://server8.mp3quran.net/afs/018.mp3',
 'quran3': 'https://server8.mp3quran.net/afs/067.mp3'
 };
-if(aMap[type]) {
-randPlayer.src = aMap[type];
+if(aMap[type]) { 
+randPlayer.src = aMap[type]; 
 randPlayer.play();
 document.getElementById('audioTitleText').innerText = title || "جاري التشغيل";
 document.getElementById('globalAudioPlayer').classList.add('show');
@@ -973,11 +1001,10 @@ window.startSession = (mins) => {
 alert(`بدأت جلسة ${mins} دقائق. يرجى الاسترخاء وإغلاق عينيك.`);
 setTimeout(() => alert("انتهت الجلسة بنجاح."), mins * 60000);
 }
+
 document.addEventListener('DOMContentLoaded', () => {
-if (QatraNative) {
-// إجبار طلب الأذونات فور فتح التطبيق
-QatraNative.askPermissions().catch(e => console.log(e));
-}
+checkPermissionsOnStart();
+
 document.querySelectorAll('.nav-item, .nav-home-btn, .header-btn').forEach(btn => {
 btn.addEventListener('click', () => {
 if(!btn.dataset.view) return;
@@ -997,7 +1024,7 @@ scrollContent.addEventListener('touchstart', e => { if(scrollContent.scrollTop =
 scrollContent.addEventListener('touchmove', e => {
 if (startY > 0 && scrollContent.scrollTop === 0) {
 let y = e.touches[0].clientY - startY;
-if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform =`rotate(${y*4}deg)`; }
+if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform = `rotate(${y*4}deg)`; }
 }
 }, {passive:true});
 scrollContent.addEventListener('touchend', e => {
