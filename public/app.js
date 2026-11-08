@@ -289,35 +289,60 @@ window.addMyQuote = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (QatraNative && !localStorage.getItem('perms_granted')) {
-        document.getElementById('permissionBlocker').style.display = 'flex';
-    }
-    document.getElementById('grantPermsBtn')?.addEventListener('click', () => {
-        if(QatraNative) {
-            QatraNative.askPermissions().then(() => { localStorage.setItem('perms_granted', 'true'); document.getElementById('permissionBlocker').style.display = 'none'; }).catch(()=>{});
+    try {
+        if (QatraNative && !localStorage.getItem('perms_granted')) {
+            const blocker = document.getElementById('permissionBlocker');
+            if (blocker) blocker.style.display = 'flex';
         }
-    });
-
-    document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if(!btn.dataset.view) return;
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
-            document.getElementById(btn.dataset.view).classList.add('active');
-            btn.classList.add('active');
-            if(btn.dataset.view === 'libraryView') renderLibraryCategories();
+        
+        document.getElementById('grantPermsBtn')?.addEventListener('click', () => {
+            if(QatraNative) {
+                QatraNative.askPermissions().then(() => { 
+                    localStorage.setItem('perms_granted', 'true'); 
+                    const blocker = document.getElementById('permissionBlocker');
+                    if (blocker) blocker.style.display = 'none'; 
+                }).catch(()=>{});
+            } else {
+                localStorage.setItem('perms_granted', 'true');
+                const blocker = document.getElementById('permissionBlocker');
+                if (blocker) blocker.style.display = 'none';
+            }
         });
-    });
 
-    document.getElementById('langSelect')?.addEventListener('change', e => { state.lang = e.target.value; applyState(); renderLibraryCategories(); });
-    
-    initPullToCloseSheets();
-    initPullToRefresh();
-    applyState();
-    
-    // إخفاء شاشة البداية
-    setTimeout(() => { 
-        const splash = document.getElementById('splash'); 
-        if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 800); } 
-    }, 2500);
+        document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(!btn.dataset.view) return;
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
+                const targetView = document.getElementById(btn.dataset.view);
+                if (targetView) targetView.classList.add('active');
+                btn.classList.add('active');
+                if(btn.dataset.view === 'libraryView') renderLibraryCategories();
+            });
+        });
+
+        const langSelect = document.getElementById('langSelect');
+        if (langSelect) {
+            langSelect.addEventListener('change', e => { 
+                state.lang = e.target.value; 
+                applyState(); 
+                renderLibraryCategories(); 
+            });
+        }
+        
+        initPullToCloseSheets();
+        initPullToRefresh();
+        applyState();
+    } catch (err) {
+        console.error("Initialization error: ", err);
+    } finally {
+        // ضمان إزالة شاشة البداية مهما حدث لكي لا يعلق التطبيق أبداً
+        setTimeout(() => { 
+            const splash = document.getElementById('splash'); 
+            if (splash) { 
+                splash.style.opacity = '0'; 
+                setTimeout(() => splash.remove(), 800); 
+            } 
+        }, 1500);
+    }
 });
