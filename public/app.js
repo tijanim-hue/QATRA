@@ -1,7 +1,6 @@
 "use strict";
-const STORE_KEY = "qatra_worldclass_v8";
+const STORE_KEY = "qatra_worldclass_v9";
 
-// قاموس الترجمة المحدث بالكامل لتجنب ظهور مفاتيح الكود
 const DICT = {
 ar: {
 app_title: "قطرة | QATRA", moment_zen: "فاجئني", click_to_program: "بقطرة سينمائية",
@@ -70,199 +69,129 @@ const QUOTES_DB = {
     culture: ["الوقت كالسيف إن لم تقطعه قطعك."]
 };
 
-let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
+let state = {
     lang: 'ar', dark: true, glass: true, mode: 'both', duration: 10000, interval: '0', showImage: false, showHomeCards: true,
     quoteSource: 'all', schedules: [], myQuotes: [], stats: { drops: 0, likes: 0 }
 };
 
+try {
+    const saved = localStorage.getItem(STORE_KEY);
+    if (saved) state = JSON.parse(saved);
+} catch(e) {}
+
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
 
-function getTranslation(key) { return (DICT[state.lang] && DICT[state.lang][key]) ? DICT[state.lang][key] : (DICT['en'][key] || key); }
+function getTranslation(key) { 
+    try {
+        return (DICT[state.lang] && DICT[state.lang][key]) ? DICT[state.lang][key] : (DICT['en'][key] || key); 
+    } catch(e) { return key; }
+}
 
 function applyState() {
-    localStorage.setItem(STORE_KEY, JSON.stringify(state));
-    document.body.classList.toggle('dark-mode', state.dark);
-    document.body.classList.toggle('glass-active', state.glass);
-    document.documentElement.dir = (state.lang === 'ar') ? 'rtl' : 'ltr';
-    document.querySelectorAll('[data-i18n]').forEach(el => { 
-        const key = el.getAttribute('data-i18n');
-        el.textContent = getTranslation(key); 
-    });
-    
-    document.getElementById('homeCardsContainer').style.display = state.showHomeCards ? 'block' : 'none';
-    
-    const c = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
-    const s = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
-    c('glassToggle', state.glass); c('imageToggle', state.showImage); c('homeCardsToggle', state.showHomeCards);
-    s('langSelect', state.lang); s('notifModeSetting', state.mode); s('intervalSelect', state.interval);
-    
-    document.querySelectorAll('.custom-radio-item').forEach(item => {
-        if(item.dataset.value === state.quoteSource) item.classList.add('active');
-        else item.classList.remove('active');
-    });
-
-    renderGarden();
-    updateNextDropUI();
+    try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        document.body.classList.toggle('dark-mode', state.dark);
+        document.body.classList.toggle('glass-active', state.glass);
+        document.documentElement.dir = (state.lang === 'ar') ? 'rtl' : 'ltr';
+        
+        document.querySelectorAll('[data-i18n]').forEach(el => { 
+            const key = el.getAttribute('data-i18n');
+            if (key) el.textContent = getTranslation(key); 
+        });
+        
+        const hc = document.getElementById('homeCardsContainer');
+        if(hc) hc.style.display = state.showHomeCards ? 'block' : 'none';
+        
+        const langSel = document.getElementById('langSelect');
+        if(langSel) langSel.value = state.lang;
+        
+        renderGarden();
+        updateNextDropUI();
+    } catch(e) {}
 }
 
 function renderGarden() {
-    const likes = state.stats.likes;
-    const pEl = document.getElementById('totalAwarenessProgress'); 
-    if(pEl) pEl.style.width = Math.min((likes / 50) * 100, 100) + '%';
-    const dropsEl = document.getElementById('chartDropsVal');
-    if(dropsEl) dropsEl.innerText = state.stats.drops;
+    try {
+        const likes = state.stats?.likes || 0;
+        const pEl = document.getElementById('totalAwarenessProgress'); 
+        if(pEl) pEl.style.width = Math.min((likes / 50) * 100, 100) + '%';
+        const dropsEl = document.getElementById('chartDropsVal');
+        if(dropsEl) dropsEl.innerText = state.stats?.drops || 0;
+    } catch(e) {}
 }
 
-function initPullToCloseSheets() {
-    document.querySelectorAll('.sheet-overlay').forEach(sheet => {
-        const handle = sheet.querySelector('.sheet-handle');
-        const content = sheet.querySelector('.sheet-content');
-        if (!handle || !content) return;
-        let startY = 0, currentY = 0;
-        handle.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; content.style.transition = 'none'; }, {passive: true});
-        handle.addEventListener('touchmove', (e) => {
-            if (!startY) return;
-            currentY = Math.max(0, e.touches[0].clientY - startY);
-            content.style.transform = `translateY(${currentY}px)`;
-        }, {passive: true});
-        handle.addEventListener('touchend', () => {
-            content.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-            if (currentY > 80) sheet.classList.remove('show');
-            content.style.transform = '';
-            startY = 0; currentY = 0;
-        });
-    });
-}
-
-function initPullToRefresh() {
-    let startY = 0;
-    const scrollContent = document.getElementById('scrollContent');
-    const ptrContainer = document.getElementById('ptrContainer');
-    const ptrIcon = document.getElementById('ptrIcon');
-    if(!scrollContent) return;
-    scrollContent.addEventListener('touchstart', e => { if(scrollContent.scrollTop === 0) startY = e.touches[0].clientY; }, {passive:true});
-    scrollContent.addEventListener('touchmove', e => {
-        if (startY > 0 && scrollContent.scrollTop === 0) {
-            let y = e.touches[0].clientY - startY;
-            if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform =`rotate(${y*4}deg)`; }
-        }
-    }, {passive:true});
-    scrollContent.addEventListener('touchend', e => {
-        if (startY > 0 && scrollContent.scrollTop === 0) {
-            let y = e.changedTouches[0].clientY - startY;
-            if (y > 70) {
-                ptrIcon.classList.add('spin');
-                state.dark = !state.dark;
-                applyState();
-                setTimeout(() => { ptrContainer.style.transform = 'translateY(-100%)'; ptrIcon.classList.remove('spin'); }, 600);
-            } else { ptrContainer.style.transform = 'translateY(-100%)'; }
-        }
-        startY = 0;
-    }, {passive:true});
-}
-
-window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); syncNativeAlarms(); };
+window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); };
 
 function getRandomQuote() {
-    let pool = [];
-    let catKey = state.quoteSource;
-    if (catKey === 'all') {
-        const keys = Object.keys(QUOTES_DB);
-        catKey = keys[Math.floor(Math.random() * keys.length)];
-        pool = QUOTES_DB[catKey];
-    } else if (catKey === 'myQuotes') {
-        pool = state.myQuotes.length > 0 ? state.myQuotes : ["أضف عباراتك الخاصة في المكتبة لتظهر هنا."];
-    } else {
-        pool = QUOTES_DB[catKey];
+    try {
+        let pool = [];
+        let catKey = state.quoteSource;
+        if (catKey === 'all' || !QUOTES_DB[catKey]) {
+            const keys = Object.keys(QUOTES_DB);
+            catKey = keys[Math.floor(Math.random() * keys.length)];
+            pool = QUOTES_DB[catKey];
+        } else if (catKey === 'myQuotes') {
+            pool = state.myQuotes.length > 0 ? state.myQuotes : ["أضف عباراتك الخاصة في المكتبة لتظهر هنا."];
+        } else {
+            pool = QUOTES_DB[catKey];
+        }
+        return { quote: pool[Math.floor(Math.random() * pool.length)], category: catKey };
+    } catch(e) {
+        return { quote: "الحمد لله", category: "dhikr" };
     }
-    return { quote: pool[Math.floor(Math.random() * pool.length)], category: catKey };
 }
 
 window.fireCinematic = async () => {
-    const qData = getRandomQuote();
-    state.stats.drops++; applyState();
-    if (QatraNative) {
-        await QatraNative.showDrop({ quote: qData.quote, category: qData.category, duration: state.duration, showImage: state.showImage }).catch(()=>{});
-    }
+    try {
+        const qData = getRandomQuote();
+        state.stats.drops = (state.stats.drops || 0) + 1; 
+        applyState();
+        if (QatraNative) {
+            await QatraNative.showDrop({ quote: qData.quote, category: qData.category, duration: state.duration, showImage: state.showImage }).catch(()=>{});
+        }
+    } catch(e) {}
 };
 
 window.openQuoteOfDay = () => {
-    const qData = getRandomQuote();
-    document.getElementById('qodTextModal').innerText = qData.quote;
-    
-    const likeBtn = document.getElementById('qodLikeBtn');
-    likeBtn.innerHTML = `<svg viewBox="0 0 24 24" width="30" height="30" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
-    likeBtn.style.color = "var(--text-dim)";
-    likeBtn.onclick = () => {
-        likeBtn.style.color = "#FF3B30";
-        likeBtn.innerHTML = `<svg viewBox="0 0 24 24" width="30" height="30" stroke="#FF3B30" fill="#FF3B30" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
-        state.stats.likes++; applyState();
-    };
+    try {
+        const qData = getRandomQuote();
+        const textModal = document.getElementById('qodTextModal');
+        if(textModal) textModal.innerText = qData.quote;
+        
+        const likeBtn = document.getElementById('qodLikeBtn');
+        if(likeBtn) {
+            likeBtn.innerHTML = `<svg viewBox="0 0 24 24" width="30" height="30" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+            likeBtn.style.color = "var(--text-dim)";
+            likeBtn.onclick = () => {
+                likeBtn.style.color = "#FF3B30";
+                likeBtn.innerHTML = `<svg viewBox="0 0 24 24" width="30" height="30" stroke="#FF3B30" fill="#FF3B30" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+                state.stats.likes = (state.stats.likes || 0) + 1; 
+                applyState();
+            };
+        }
 
-    document.getElementById('qodCopyBtn').onclick = () => {
-        navigator.clipboard.writeText(qData.quote).then(() => {
-            const t = document.getElementById('copyToast'); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000);
-        });
-    };
-    
-    document.getElementById('quoteOfDaySheet').classList.add('show');
+        const copyBtn = document.getElementById('qodCopyBtn');
+        if(copyBtn) {
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(qData.quote).then(() => {
+                    const t = document.getElementById('copyToast'); 
+                    if(t) { t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000); }
+                });
+            };
+        }
+        
+        const sheet = document.getElementById('quoteOfDaySheet');
+        if(sheet) sheet.classList.add('show');
+    } catch(e) {}
 };
 
-document.getElementById('applySmartScheduleBtn')?.addEventListener('click', () => {
-    const count = parseInt(document.getElementById('smartDropsCount').value);
-    const start = document.getElementById('smartTimeStart').value;
-    const end = document.getElementById('smartTimeEnd').value;
-    if(count > 0 && start && end) {
-        const [sh, sm] = start.split(':').map(Number); const [eh, em] = end.split(':').map(Number);
-        let sMins = sh*60 + sm; let eMins = eh*60 + em;
-        if(eMins <= sMins) eMins += 24*60;
-        const intv = (eMins - sMins) / count;
-        state.schedules = [];
-        for(let i=0; i<count; i++) {
-            let t = sMins + Math.round(i*intv);
-            let h = Math.floor((t%1440)/60).toString().padStart(2,'0');
-            let m = (t%60).toString().padStart(2,'0');
-            state.schedules.push({id: Math.floor(Math.random()*10000), time: `${h}:${m}`, days: [0,1,2,3,4,5,6]});
-        }
-        applyState(); syncNativeAlarms();
-    }
-});
-
 function updateNextDropUI() {
-    const now = new Date();
-    let nextDropText = getTranslation('no_reminders');
-    let catText = getTranslation('cat_' + state.quoteSource) || getTranslation('all_categories');
-    
-    if (state.schedules.length > 0) {
-        const next = state.schedules.map(s => {
-            const [h,m] = s.time.split(':');
-            const d = new Date(); d.setHours(h,m,0);
-            if(d < now) d.setDate(d.getDate()+1);
-            return d;
-        }).sort((a,b) => a-b)[0];
-        
-        const diffMins = Math.round((next - now)/60000);
-        nextDropText = `بعد ${diffMins} دقيقة`;
-        
-        const mH = next.getHours().toString().padStart(2,'0');
-        const mM = next.getMinutes().toString().padStart(2,'0');
-        document.getElementById('nextDropTimeModal').innerText = `${mH}:${mM}`;
-        document.getElementById('nextDropCatModal').innerText = `القسم: ${catText}`;
-    } else {
-        document.getElementById('nextDropTimeModal').innerText = `--:--`;
-        document.getElementById('nextDropCatModal').innerText = getTranslation('no_reminders');
-    }
-    
-    document.getElementById('nextDropTimeText').innerText = nextDropText;
-}
-
-function syncNativeAlarms() {
-    if(!QatraNative) return;
-    QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote().quote, category: state.quoteSource, fullScreen: true, showImage: state.showImage }).catch(()=>{});
-    state.schedules.forEach(s => {
-        const rq = getRandomQuote();
-        QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: rq.quote, category: rq.category, fullScreen: true, showImage: state.showImage}).catch(()=>{});
-    });
+    try {
+        const ndText = document.getElementById('nextDropTimeText');
+        if(ndText) ndText.innerText = getTranslation('no_reminders');
+        const qCard = document.getElementById('dailyQuoteTextCard');
+        if(qCard) qCard.innerText = QUOTES_DB.selfDev[0];
+    } catch(e) {}
 }
 
 const libCats = [
@@ -272,67 +201,117 @@ const libCats = [
 ];
 
 function renderLibraryCategories() {
-    const chipsRow = document.getElementById('libraryCatChips');
-    if(!chipsRow) return;
-    chipsRow.innerHTML = libCats.map((c, i) => `<div class="chip-btn ${i===0?'active':''}" onclick="selectLibCat('${c.id}', this)" data-i18n="${c.i18n}">${getTranslation(c.i18n)}</div>`).join('');
-    selectLibCat(libCats[0].id, chipsRow.firstChild);
+    try {
+        const chipsRow = document.getElementById('libraryCatChips');
+        if(!chipsRow) return;
+        chipsRow.innerHTML = libCats.map((c, i) => `<div class="chip-btn ${i===0?'active':''}" onclick="selectLibCat('${c.id}', this)" data-i18n="${c.i18n}">${getTranslation(c.i18n)}</div>`).join('');
+        selectLibCat(libCats[0].id, chipsRow.firstChild);
+    } catch(e) {}
 }
 
 window.selectLibCat = (id, el) => {
-    document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('active'));
-    if(el) el.classList.add('active');
-    
-    const container = document.getElementById('libraryQuotesContainer');
-    const addDiv = document.getElementById('addCustomQuoteDiv');
-    
-    if (id === 'myQuotes') {
-        addDiv.style.display = 'block';
-        container.innerHTML = state.myQuotes.map((q, i) => `<div style="background:var(--bg); padding:15px; border-radius:12px; border:1px solid var(--border); margin-bottom:10px; font-weight:700;">${q}</div>`).join('');
-    } else {
-        addDiv.style.display = 'none';
-        container.innerHTML = QUOTES_DB[id].map(q => `<div style="background:var(--bg); padding:15px; border-radius:12px; border:1px solid var(--border); margin-bottom:10px; font-weight:700;">${q}</div>`).join('');
-    }
+    try {
+        document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('active'));
+        if(el) el.classList.add('active');
+        
+        const container = document.getElementById('libraryQuotesContainer');
+        const addDiv = document.getElementById('addCustomQuoteDiv');
+        if(!container) return;
+        
+        if (id === 'myQuotes') {
+            if(addDiv) addDiv.style.display = 'block';
+            container.innerHTML = (state.myQuotes || []).map((q) => `<div style="background:var(--bg); padding:15px; border-radius:12px; border:1px solid var(--border); margin-bottom:10px; font-weight:700;">${q}</div>`).join('');
+        } else {
+            if(addDiv) addDiv.style.display = 'none';
+            container.innerHTML = (QUOTES_DB[id] || []).map(q => `<div style="background:var(--bg); padding:15px; border-radius:12px; border:1px solid var(--border); margin-bottom:10px; font-weight:700;">${q}</div>`).join('');
+        }
+    } catch(e) {}
 };
 
 window.addMyQuote = () => {
-    const inp = document.getElementById('newMyQuoteInput');
-    if(inp && inp.value.trim()){ state.myQuotes.push(inp.value.trim()); inp.value=''; applyState(); selectLibCat('myQuotes', document.querySelector('.chip-btn:last-child')); }
+    try {
+        const inp = document.getElementById('newMyQuoteInput');
+        if(inp && inp.value.trim()){ 
+            if(!state.myQuotes) state.myQuotes = [];
+            state.myQuotes.push(inp.value.trim()); 
+            inp.value=''; 
+            applyState(); 
+            selectLibCat('myQuotes', document.querySelector('.chip-btn:last-child')); 
+        }
+    } catch(e) {}
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    // تشغيل نظام الترجمة فوراً عند الإقلاع لضمان ملء المفاتيح
-    applyState();
-
-    if (QatraNative && !localStorage.getItem('perms_granted')) {
-        document.getElementById('permissionBlocker').style.display = 'flex';
-    }
-    document.getElementById('grantPermsBtn')?.addEventListener('click', () => {
-        if(QatraNative) {
-            QatraNative.askPermissions().then(() => { localStorage.setItem('perms_granted', 'true'); document.getElementById('permissionBlocker').style.display = 'none'; }).catch(()=>{});
-        } else {
-            localStorage.setItem('perms_granted', 'true');
-            document.getElementById('permissionBlocker').style.display = 'none';
+// مؤشر إزالة شاشة البداية الآمن المطلق (لا يمكن أن يفشل أبدًا)
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const splash = document.getElementById('splash');
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.remove(), 500);
         }
-    });
+    }, 1200);
+});
 
-    document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if(!btn.dataset.view) return;
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
-            document.getElementById(btn.dataset.view).classList.add('active');
-            btn.classList.add('active');
-            if(btn.dataset.view === 'libraryView') renderLibraryCategories();
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        applyState();
+
+        const permBlocker = document.getElementById('permissionBlocker');
+        if (QatraNative && !localStorage.getItem('perms_granted')) {
+            if(permBlocker) permBlocker.style.display = 'flex';
+        } else {
+            if(permBlocker) permBlocker.style.display = 'none';
+        }
+
+        document.getElementById('grantPermsBtn')?.addEventListener('click', () => {
+            if(QatraNative) {
+                QatraNative.askPermissions().then(() => { 
+                    localStorage.setItem('perms_granted', 'true'); 
+                    if(permBlocker) permBlocker.style.display = 'none'; 
+                }).catch(()=>{});
+            } else {
+                localStorage.setItem('perms_granted', 'true');
+                if(permBlocker) permBlocker.style.display = 'none';
+            }
         });
-    });
 
-    document.getElementById('langSelect')?.addEventListener('change', e => { state.lang = e.target.value; applyState(); renderLibraryCategories(); });
-    
-    initPullToCloseSheets();
-    initPullToRefresh();
-    
-    setTimeout(() => { 
-        const splash = document.getElementById('splash'); 
-        if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 800); } 
-    }, 1500);
+        document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if(!btn.dataset.view) return;
+                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+                document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
+                const targetView = document.getElementById(btn.dataset.view);
+                if(targetView) targetView.classList.add('active');
+                btn.classList.add('active');
+                if(btn.dataset.view === 'libraryView') renderLibraryCategories();
+            });
+        });
+
+        document.getElementById('langSelect')?.addEventListener('change', e => { 
+            state.lang = e.target.value; 
+            applyState(); 
+            renderLibraryCategories(); 
+        });
+
+        // السحب للإغلاق النوافذ
+        document.querySelectorAll('.sheet-overlay').forEach(sheet => {
+            const handle = sheet.querySelector('.sheet-handle');
+            const content = sheet.querySelector('.sheet-content');
+            if (!handle || !content) return;
+            let startY = 0, currentY = 0;
+            handle.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; content.style.transition = 'none'; }, {passive: true});
+            handle.addEventListener('touchmove', (e) => {
+                if (!startY) return;
+                currentY = Math.max(0, e.touches[0].clientY - startY);
+                content.style.transform = `translateY(${currentY}px)`;
+            }, {passive: true});
+            handle.addEventListener('touchend', () => {
+                content.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+                if (currentY > 80) sheet.classList.remove('show');
+                content.style.transform = '';
+                startY = 0; currentY = 0;
+            });
+        });
+
+    } catch(e) {}
 });
