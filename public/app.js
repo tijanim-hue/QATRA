@@ -1,5 +1,5 @@
 "use strict";
-const STORE_KEY = "qatra_worldclass_v9";
+const STORE_KEY = "qatra_worldclass_v10";
 
 const DICT = {
 ar: {
@@ -241,7 +241,6 @@ window.addMyQuote = () => {
     } catch(e) {}
 };
 
-// مؤشر إزالة شاشة البداية الآمن المطلق (لا يمكن أن يفشل أبدًا)
 window.addEventListener('load', () => {
     setTimeout(() => {
         const splash = document.getElementById('splash');
@@ -257,19 +256,27 @@ document.addEventListener('DOMContentLoaded', () => {
         applyState();
 
         const permBlocker = document.getElementById('permissionBlocker');
-        if (QatraNative && !localStorage.getItem('perms_granted')) {
+        
+        // التحقق مما إذا تم منح الأذونات مسبقاً
+        if (!localStorage.getItem('perms_granted')) {
             if(permBlocker) permBlocker.style.display = 'flex';
         } else {
             if(permBlocker) permBlocker.style.display = 'none';
         }
 
+        // عند الضغط على زر منح الصلاحيات
         document.getElementById('grantPermsBtn')?.addEventListener('click', () => {
             if(QatraNative) {
                 QatraNative.askPermissions().then(() => { 
                     localStorage.setItem('perms_granted', 'true'); 
                     if(permBlocker) permBlocker.style.display = 'none'; 
-                }).catch(()=>{});
+                }).catch(() => {
+                    // حتى لو حدث استثناء من الأندرويد، نسمح بالتخطّي لكي لا يعلق المستخدم
+                    localStorage.setItem('perms_granted', 'true');
+                    if(permBlocker) permBlocker.style.display = 'none';
+                });
             } else {
+                // وضع المتصفح أو في حال عدم توفر البلوجن
                 localStorage.setItem('perms_granted', 'true');
                 if(permBlocker) permBlocker.style.display = 'none';
             }
