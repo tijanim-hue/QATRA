@@ -1,7 +1,7 @@
 "use strict";
 const STORE_KEY = "qatra_worldclass_v8";
 
-// قاموس الترجمة (عربي، إنجليزي، فرنسي) بدون رموز في الإعدادات
+// قاموس الترجمة المحدث بالكامل لتجنب ظهور مفاتيح الكود
 const DICT = {
 ar: {
 app_title: "قطرة | QATRA", moment_zen: "فاجئني", click_to_program: "بقطرة سينمائية",
@@ -16,7 +16,10 @@ tree_serenity: "السكينة", tree_awareness: "الوعي", sakeena: "سكي�
 app_settings: "إعدادات التطبيق", glass_mode: "الشفافية وتأثير الزجاج", show_image: "إظهار صورة مع العبارة",
 show_home_cards: "إظهار بطاقات الرئيسية", language: "لغة التطبيق:", save_done: "تم وحفظ", back: "رجوع",
 copied: "تم النسخ بنجاح", days: "أيام", rain: "المطر", sea: "البحر",
-all_categories: "عشوائي", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة وحكم", cat_poetry: "أبيات شعرية", my_custom_quotes: "عباراتي الخاصة", stop_repeat: "إيقاف التكرار", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", no_reminders: "لا توجد مواعيد", source_category: "مصدر العبارات", perm_title: "مرحباً بك في قطرة", perm_desc: "نحتاج لمنح أذونات الطفو للعمل.", perm_grant: "منح الصلاحيات",
+all_categories: "عشوائي", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة وحكم", cat_poetry: "أبيات شعرية", my_custom_quotes: "عباراتي الخاصة", stop_repeat: "إيقاف التكرار", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", no_reminders: "لا توجد مواعيد", source_category: "مصدر العبارات", 
+perm_title: "مرحباً بك في قطرة", 
+perm_desc: "لكي تتمكن القطرة من الطفو على شاشتك وتنبيهك، نحتاج لمنح بعض الأذونات الأساسية للنظام.", 
+perm_grant: "منح الصلاحيات والبدء",
 quote_of_day: "اقتباس اليوم", drops: "قطرة"
 },
 en: {
@@ -32,7 +35,11 @@ tree_serenity: "Serenity", tree_awareness: "Awareness", sakeena: "Sakeena", natu
 app_settings: "App Settings", glass_mode: "Glass Effect", show_image: "Show Image",
 show_home_cards: "Show Home Cards", language: "Language:", save_done: "Done", back: "Back",
 copied: "Copied!", days: "days", rain: "Rain", sea: "Sea",
-all_categories: "Random", cat_dhikr: "Dhikr", cat_selfDev: "Self Dev", cat_quran: "Quran", cat_culture: "Culture", cat_poetry: "Poetry", my_custom_quotes: "My Quotes", stop_repeat: "Stop", every_30: "30 Mins", every_1h: "1 Hour", no_reminders: "No reminders", source_category: "Quote Source", perm_title: "Welcome", perm_desc: "We need overlay permissions.", perm_grant: "Grant", quote_of_day: "Quote of the Day", drops: "Drops"
+all_categories: "Random", cat_dhikr: "Dhikr", cat_selfDev: "Self Dev", cat_quran: "Quran", cat_culture: "Culture", cat_poetry: "Poetry", my_custom_quotes: "My Quotes", stop_repeat: "Stop", every_30: "30 Mins", every_1h: "1 Hour", no_reminders: "No reminders", source_category: "Quote Source", 
+perm_title: "Welcome to QATRA", 
+perm_desc: "To allow Drops to float on your screen, we need system permissions.", 
+perm_grant: "Grant Permissions & Start", 
+quote_of_day: "Quote of the Day", drops: "Drops"
 },
 fr: {
 app_title: "Qatra", moment_zen: "Surprends-moi", click_to_program: "Goutte Cinématique",
@@ -47,11 +54,14 @@ tree_serenity: "Sérénité", tree_awareness: "Conscience", sakeena: "Sakeena", 
 app_settings: "Paramètres", glass_mode: "Effet Verre", show_image: "Afficher Image",
 show_home_cards: "Afficher Cartes", language: "Langue:", save_done: "Terminé", back: "Retour",
 copied: "Copié!", days: "Jours", rain: "Pluie", sea: "Mer",
-all_categories: "Aléatoire", cat_dhikr: "Dhikr", cat_selfDev: "Dév Personnel", cat_quran: "Coran", cat_culture: "Culture", cat_poetry: "Poésie", my_custom_quotes: "Mes Citations", stop_repeat: "Arrêter", every_30: "30 Mins", every_1h: "1 Heure", no_reminders: "Aucun", source_category: "Source", perm_title: "Bienvenue", perm_desc: "Permissions requises.", perm_grant: "Accorder", quote_of_day: "Citation du Jour", drops: "Gouttes"
+all_categories: "Aléatoire", cat_dhikr: "Dhikr", cat_selfDev: "Dév Personnel", cat_quran: "Coran", cat_culture: "Culture", cat_poetry: "Poésie", my_custom_quotes: "Mes Citations", stop_repeat: "Arrêter", every_30: "30 Mins", every_1h: "1 Heure", no_reminders: "Aucun", source_category: "Source", 
+perm_title: "Bienvenue dans Qatra", 
+perm_desc: "Pour autoriser les gouttes à flotter sur votre écran, nous avons besoin de permissions.", 
+perm_grant: "Accorder les permissions", 
+quote_of_day: "Citation du Jour", drops: "Gouttes"
 }
 };
 
-// الأقسام والعبارات
 const QUOTES_DB = {
     dhikr: ["سبحان الله وبحمده، سبحان الله العظيم.", "لا إله إلا أنت سبحانك إني كنت من الظالمين.", "اللهم إنك عفو تحب العفو فاعف عني."],
     quran: ["وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ", "إِنَّ مَعَ الْعُسْرِ يُسْرًا"],
@@ -74,7 +84,10 @@ function applyState() {
     document.body.classList.toggle('dark-mode', state.dark);
     document.body.classList.toggle('glass-active', state.glass);
     document.documentElement.dir = (state.lang === 'ar') ? 'rtl' : 'ltr';
-    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = getTranslation(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n]').forEach(el => { 
+        const key = el.getAttribute('data-i18n');
+        el.textContent = getTranslation(key); 
+    });
     
     document.getElementById('homeCardsContainer').style.display = state.showHomeCards ? 'block' : 'none';
     
@@ -100,7 +113,6 @@ function renderGarden() {
     if(dropsEl) dropsEl.innerText = state.stats.drops;
 }
 
-// السحب للإغلاق النوافذ
 function initPullToCloseSheets() {
     document.querySelectorAll('.sheet-overlay').forEach(sheet => {
         const handle = sheet.querySelector('.sheet-handle');
@@ -122,7 +134,6 @@ function initPullToCloseSheets() {
     });
 }
 
-// السحب للوضع الداكن
 function initPullToRefresh() {
     let startY = 0;
     const scrollContent = document.getElementById('scrollContent');
@@ -289,60 +300,39 @@ window.addMyQuote = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    try {
-        if (QatraNative && !localStorage.getItem('perms_granted')) {
-            const blocker = document.getElementById('permissionBlocker');
-            if (blocker) blocker.style.display = 'flex';
-        }
-        
-        document.getElementById('grantPermsBtn')?.addEventListener('click', () => {
-            if(QatraNative) {
-                QatraNative.askPermissions().then(() => { 
-                    localStorage.setItem('perms_granted', 'true'); 
-                    const blocker = document.getElementById('permissionBlocker');
-                    if (blocker) blocker.style.display = 'none'; 
-                }).catch(()=>{});
-            } else {
-                localStorage.setItem('perms_granted', 'true');
-                const blocker = document.getElementById('permissionBlocker');
-                if (blocker) blocker.style.display = 'none';
-            }
-        });
+    // تشغيل نظام الترجمة فوراً عند الإقلاع لضمان ملء المفاتيح
+    applyState();
 
-        document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if(!btn.dataset.view) return;
-                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
-                const targetView = document.getElementById(btn.dataset.view);
-                if (targetView) targetView.classList.add('active');
-                btn.classList.add('active');
-                if(btn.dataset.view === 'libraryView') renderLibraryCategories();
-            });
-        });
-
-        const langSelect = document.getElementById('langSelect');
-        if (langSelect) {
-            langSelect.addEventListener('change', e => { 
-                state.lang = e.target.value; 
-                applyState(); 
-                renderLibraryCategories(); 
-            });
-        }
-        
-        initPullToCloseSheets();
-        initPullToRefresh();
-        applyState();
-    } catch (err) {
-        console.error("Initialization error: ", err);
-    } finally {
-        // ضمان إزالة شاشة البداية مهما حدث لكي لا يعلق التطبيق أبداً
-        setTimeout(() => { 
-            const splash = document.getElementById('splash'); 
-            if (splash) { 
-                splash.style.opacity = '0'; 
-                setTimeout(() => splash.remove(), 800); 
-            } 
-        }, 1500);
+    if (QatraNative && !localStorage.getItem('perms_granted')) {
+        document.getElementById('permissionBlocker').style.display = 'flex';
     }
+    document.getElementById('grantPermsBtn')?.addEventListener('click', () => {
+        if(QatraNative) {
+            QatraNative.askPermissions().then(() => { localStorage.setItem('perms_granted', 'true'); document.getElementById('permissionBlocker').style.display = 'none'; }).catch(()=>{});
+        } else {
+            localStorage.setItem('perms_granted', 'true');
+            document.getElementById('permissionBlocker').style.display = 'none';
+        }
+    });
+
+    document.querySelectorAll('.nav-item, .nav-home-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if(!btn.dataset.view) return;
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
+            document.getElementById(btn.dataset.view).classList.add('active');
+            btn.classList.add('active');
+            if(btn.dataset.view === 'libraryView') renderLibraryCategories();
+        });
+    });
+
+    document.getElementById('langSelect')?.addEventListener('change', e => { state.lang = e.target.value; applyState(); renderLibraryCategories(); });
+    
+    initPullToCloseSheets();
+    initPullToRefresh();
+    
+    setTimeout(() => { 
+        const splash = document.getElementById('splash'); 
+        if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 800); } 
+    }, 1500);
 });
