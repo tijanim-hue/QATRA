@@ -46,7 +46,6 @@ class QatraPlugin : Plugin() {
         val activity = activity ?: return call.reject("No activity")
         var hasOverlay = true
         
-        // 1. طلب إذن الظهور فوق التطبيقات (الأهم للقطرة)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             hasOverlay = false
             val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
@@ -54,7 +53,6 @@ class QatraPlugin : Plugin() {
             context.startActivity(intent)
         }
         
-        // 2. طلب إذن المنبهات الدقيقة (للجدولة)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -64,7 +62,6 @@ class QatraPlugin : Plugin() {
             }
         }
         
-        // 3. طلب إذن الإشعارات
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
@@ -76,8 +73,9 @@ class QatraPlugin : Plugin() {
         call.resolve(ret)
     }
 
+    // تم تغيير الاسم هنا من checkPermissions إلى verifyPermissions لتجنب التعارض
     @PluginMethod
-    fun checkPermissions(call: PluginCall) {
+    fun verifyPermissions(call: PluginCall) {
         var hasOverlay = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
             hasOverlay = false
