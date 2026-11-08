@@ -15,26 +15,22 @@
 --shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
 --card-radius: 28px;
 }
-
 body.dark-mode {
 --bg: #0B1121; --surface: #151E32; --border: rgba(255, 255, 255, 0.03);
 --text: #F8FAFC; --text-dim: #94A3B8;
 --primary: #38BDF8; --secondary: #A78BFA;
 --shadow: 0 10px 30px -10px rgba(0,0,0,0.4);
 }
-
 body.glass-active .glass-card, body.glass-active .floating-nav, body.glass-active .topbar, body.glass-active .audio-player {
 background: rgba(15, 20, 30, 0.35) !important;
 backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
 border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
-
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: "Cairo", sans-serif; transition: background 0.5s ease, color 0.5s ease; }
 
 /* خلفية محيطية */
 .ambient { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.08), transparent 40%), radial-gradient(circle at 90% 80%, rgba(157, 0, 255, 0.08), transparent 40%); }
-
 .app-container { display: flex; flex-direction: column; width: 100%; height: 100%; max-width: 500px; margin: auto; position: relative; }
 
 /* شاشة الإقلاع السينمائية */
@@ -52,18 +48,12 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 /* ================= شاشة الأذونات الإجبارية ================= */
 #permissionBlocker { position: fixed; inset: 0; background: #0B1121; z-index: 9998; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
 #permissionBlocker.show { display: flex; }
-.perm-icon-wrapper { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(167,139,250,0.2)); display: grid; place-items: center; margin-bottom: 25px; animation: pulse 2s infinite alternate; }
-@keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56,189,248,0.4); } 100% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(56,189,248,0); } }
-.perm-icon { width: 50px; height: 50px; color: var(--primary); }
-.perm-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 15px; }
-.perm-desc { font-size: 15px; color: var(--text-dim); margin-bottom: 35px; line-height: 1.6; }
+.perm-icon { width: 80px; height: 80px; margin-bottom: 20px; color: var(--primary); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+.perm-title { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 10px; }
+.perm-desc { font-size: 15px; color: var(--text-dim); margin-bottom: 30px; line-height: 1.6; }
 
-/* ================= رسائل النظام الاحترافية (Toasts) ================= */
-.custom-toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(50px); background: rgba(21, 30, 50, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 700; z-index: 9999; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.custom-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-.custom-toast-icon svg { width: 20px; height: 20px; }
-
-/* الهيدر */
+/* ההידר */
 .header { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: space-between !important; align-items: center !important; width: 100%; padding: 25px 24px 15px; z-index: 10; background: transparent; transition: 0.3s; }
 .header-btn { background: none; border: none; color: var(--text); padding: 8px; cursor: pointer; display: grid; place-items: center; }
 .header-btn svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2.2; }
@@ -91,26 +81,137 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .card-title { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
 .card-sub { font-size: 13px; color: var(--text-dim); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;}
 
-/* ================= دائرة فاجئني (التصميم العالمي) ================= */
-.surprise-circle-container { display: flex; flex-direction: column; align-items: center; margin: 30px 0 40px; }
-.surprise-ring { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(56,189,248,0.15) 0%, rgba(11,17,33,1) 80%); border: 1px solid rgba(56, 189, 248, 0.3); box-shadow: 0 0 30px rgba(56, 189, 248, 0.15), inset 0 0 20px rgba(56, 189, 248, 0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
-.surprise-ring::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, rgba(167, 139, 250, 0.2), transparent 30%); animation: rotateGlow 4s linear infinite; }
-@keyframes rotateGlow { 100% { transform: rotate(360deg); } }
-.surprise-ring-inner { position: absolute; inset: 4px; border-radius: 50%; background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; }
-.surprise-ring:active { transform: scale(0.95); }
-.drop-icon-3d { width: 60px; height: 60px; margin-bottom: 8px; fill: url(#grad); filter: drop-shadow(0 8px 16px rgba(56,189,248,0.6)); animation: floatDrop 3s ease-in-out infinite; }
-@keyframes floatDrop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.surprise-title { font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 0.5px; z-index: 2; margin-bottom: 4px;}
-.surprise-sub { font-size: 13px; font-weight: 600; color: var(--text-dim); z-index: 2;}
-.surprise-play-btn { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); display: grid; place-items: center; margin-top: 10px; z-index:2; }
-.surprise-play-btn svg { width: 14px; height: 14px; fill: #fff; margin-left: 2px; }
+/* ================= الدائرة المركزية (التصميم الجديد) ================= */
+.hero-circle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0 40px 0;
+}
 
-/* الكبسولة العائمة */
-.floating-nav { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 420px; display: flex; flex-direction: row; justify-content: space-evenly; align-items: center; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 40px; z-index: 100; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); transition: background 0.5s; }
-.nav-item { background: transparent; border: none; color: var(--text-dim); padding: 10px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); flex: 1; min-width: 50px; }
+.hero-circle {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.15) 0%, rgba(11, 17, 33, 1) 70%);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 0 40px rgba(56, 189, 248, 0.1), inset 0 0 20px rgba(56, 189, 248, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.hero-circle:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.2), inset 0 0 10px rgba(56, 189, 248, 0.1);
+}
+
+.hero-circle::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(transparent, rgba(167, 139, 250, 0.15), transparent 30%);
+    animation: rotateGlow 6s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotateGlow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hero-drop-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+    fill: url(#grad);
+    filter: drop-shadow(0 4px 10px rgba(56, 189, 248, 0.5));
+    z-index: 2;
+    animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.hero-title-main {
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 5px;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero-subtitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    z-index: 2;
+}
+
+/* ================= الكبسولة العائمة ================= */
+.floating-nav {
+position: absolute;
+bottom: 30px;
+left: 50%;
+transform: translateX(-50%);
+width: 90%;
+max-width: 420px;
+display: flex;
+flex-direction: row;
+justify-content: space-evenly;
+align-items: center;
+padding: 10px 12px;
+background: var(--surface);
+border: 1px solid var(--border);
+border-radius: 40px;
+z-index: 100;
+box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+transition: background 0.5s;
+}
+.nav-item {
+background: transparent;
+border: none;
+color: var(--text-dim);
+padding: 10px;
+border-radius: 50%;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+flex: 1;
+min-width: 50px;
+}
 .nav-item svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; }
 .nav-item.active { color: var(--primary); }
-.nav-home-btn { flex: none; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: #fff; border: 4px solid var(--bg); box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 40%, transparent); transform: translateY(-20px); cursor: pointer; transition: 0.3s; }
+.nav-home-btn {
+flex: none;
+width: 60px;
+height: 60px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+display: flex;
+align-items: center;
+justify-content: center;
+color: #fff;
+border: 4px solid var(--bg);
+box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 40%, transparent);
+transform: translateY(-20px);
+cursor: pointer;
+transition: 0.3s;
+}
 .nav-home-btn svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2.5;}
 .nav-home-btn:active { transform: translateY(-15px) scale(0.95); }
 
@@ -119,19 +220,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .view.active { display: block; }
 @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* الإعدادات وعناصر التحكم */
-.control-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-.control-row:last-child { border-bottom: none; }
-.toggle { width: 50px; height: 28px; position: relative; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-track { position: absolute; inset: 0; border-radius: 30px; background: var(--border); transition: 0.3s; }
-.toggle-track::before { content: ""; position: absolute; width: 22px; height: 22px; right: 3px; top: 3px; border-radius: 50%; background: var(--text); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
-.toggle input:checked + .toggle-track { background: var(--primary); }
-.toggle input:checked + .toggle-track::before { transform: translateX(-22px); background: #fff;}
-select, input[type="text"], input[type="time"], input[type="number"], textarea { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none;}
-select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="number"]:focus, textarea:focus { border-color: var(--primary); }
-
-/* أزرار الاختيار وأيام الأسبوع */
+/* أزرار الاختيار الاحترافية */
 .custom-radio-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 .custom-radio-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); padding: 14px 18px; border-radius: 16px; cursor: pointer; transition: all 0.2s ease; }
 .custom-radio-item:hover { border-color: color-mix(in srgb, var(--primary) 40%, transparent); }
@@ -140,12 +229,15 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 .custom-radio-item.active .custom-radio-circle { border-color: var(--primary); }
 .custom-radio-circle::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); transform: scale(0); transition: 0.2s; }
 .custom-radio-item.active .custom-radio-circle::after { transform: scale(1); }
+
+/* أيام الأسبوع */
 .days-grid { display: flex; gap: 6px; margin-top: 15px; justify-content: space-between; flex-wrap: wrap;}
 .day-chip { flex: 1; padding: 10px 0; min-width:40px; text-align: center; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--text-dim); cursor: pointer; transition: 0.3s; }
 .day-chip.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border-color: transparent; box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 30%, transparent);}
 
 .btn-solid { width: 100%; padding: 18px; border: none; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-size: 16px; font-weight: 800; margin-top: 20px; cursor: pointer; box-shadow: 0 10px 25px color-mix(in srgb, var(--primary) 30%, transparent); transition: transform 0.2s;}
 .btn-solid:active { transform: scale(0.97); }
+.btn-danger { background: rgba(255,0,0,0.1); color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: none; }
 
 /* النوافذ الشاملة */
 .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(4px); }
@@ -155,19 +247,41 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .sheet-handle { width: 45px; height: 5px; background: var(--border); border-radius: 5px; margin: 0 auto 25px; }
 
-/* عناصر قائمة المكتبة ودفتر الأثر */
-.my-quote-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 15px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+/* التنبيه الاحترافي (Toasts) */
+.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(15, 20, 30, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 700; z-index: 2000; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast-icon { display: flex; align-items: center; justify-content: center; }
+.toast-icon svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+.my-quote-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
 .delete-btn { background: rgba(255,0,0,0.1); color: #ff4d4d; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-/* الحديقة */
-.garden-stage { text-align: center; padding: 20px; }
-.garden-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-.garden-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 15px; text-align: center; }
-.tree-emoji { font-size: 45px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); margin-bottom: 10px; display: inline-block; animation: floatObj 4s ease-in-out infinite alternate;}
-.progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 15px; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px;}
+/* المشغل الصوتي العائم */
+.audio-player { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(150px); width: 85%; max-width: 400px; background: var(--surface); border-radius: 24px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; z-index: 90; box-shadow: 0 15px 35px rgba(0,0,0,0.2); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; pointer-events:none; }
+.audio-player.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events:auto; }
+.audio-controls { display: flex; align-items: center; gap: 10px; }
+.audio-btn { background: none; border: none; color: var(--primary); cursor: pointer; display: grid; place-items: center; padding: 5px; }
+.audio-btn svg { width: 28px; height: 28px; fill: currentColor; }
+.audio-info { flex: 1; min-width: 0;}
+.audio-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.audio-progress-bar { width: 100%; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.audio-progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.1s linear; }
+.audio-close { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 5px; }
+.audio-close svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
 
-/* ================= نافذة اقتباس اليوم ================= */
+/* الإعدادات والتحكم */
+.control-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.control-row:last-child { border-bottom: none; }
+.toggle { width: 50px; height: 28px; position: relative; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track { position: absolute; inset: 0; border-radius: 30px; background: var(--border); transition: 0.3s; }
+.toggle-track::before { content: ""; position: absolute; width: 22px; height: 22px; right: 3px; top: 3px; border-radius: 50%; background: var(--text); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+.toggle input:checked + .toggle-track { background: var(--primary); }
+.toggle input:checked + .toggle-track::before { transform: translateX(-22px); background: #fff;}
+select, input[type="text"], input[type="time"], input[type="number"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none;}
+select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="number"]:focus { border-color: var(--primary); }
+
+/* ================= نافذة اقتباس اليوم (QOTD) ================= */
 .qotd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
 .qotd-overlay.show { display: flex; opacity: 1; }
 .qotd-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 30px; padding: 40px 30px; width: 85%; max-width: 400px; text-align: center; transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
@@ -196,13 +310,15 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 </div>
 
-<!-- رسائل النظام الاحترافية -->
-<div id="customToast" class="custom-toast">
-  <div class="custom-toast-icon" id="customToastIcon"></div>
-  <div id="customToastMsg">تم الإجراء بنجاح</div>
+<!-- رسائل النظام الاحترافية (Custom Toasts) -->
+<div id="copyToast" class="toast">
+  <div class="toast-icon" id="toastIcon">
+      <!-- SVG يضاف برمجياً -->
+  </div>
+  <div id="toastMessage">تم الإجراء بنجاح</div>
 </div>
 
-<!-- نافذة الأذونات الإجبارية (تظهر قبل الدخول للتطبيق) -->
+<!-- ================= نافذة الأذونات الإجبارية ================= -->
 <div id="permissionBlocker">
   <div class="perm-icon-wrapper">
     <svg class="perm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -240,10 +356,9 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <svg viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
 </div>
 <button class="header-btn" onclick="document.getElementById('settingsSheet').classList.add('show')">
-<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
 </button>
 </header>
-
 <div class="content-area" id="scrollContent">
 <div class="ptr-container" id="ptrContainer">
 <div class="ptr-icon" id="ptrIcon"></div>
@@ -251,46 +366,42 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 
 <section class="view active" id="homeView">
-<!-- دائرة "فاجئني" الفاخرة المضيئة (مطابقة للصورة المرفقة) -->
-<div class="surprise-circle-container">
-  <div class="surprise-ring" onclick="fireCinematic()">
-    <div class="surprise-ring-inner">
-      <svg class="drop-icon-3d" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
-      <div class="surprise-title" data-i18n="surprise_me">فاجئني</div>
-      <div class="surprise-sub" data-i18n="tap_for_drop">اكتشف الآن قطرة جديدة</div>
-      <div class="surprise-play-btn"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9v-18z"/></svg></div>
-    </div>
+<!-- الدائرة المركزية (التصميم الجديد) -->
+<div class="hero-circle-container">
+  <div class="hero-circle" onclick="document.querySelector('[data-view=\'dropConfigView\']').click()">
+    <svg class="hero-drop-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
+    <div class="hero-title-main" data-i18n="moment_zen">لحظة وعي</div>
+    <div class="hero-subtitle" data-i18n="click_to_program">اضغط لبرمجة قطرتك</div>
   </div>
 </div>
 
 <div id="homeCardsContainer">
-  <div class="glass-card action-card">
-    <div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-    <div class="card-info">
-      <div class="card-title" data-i18n="next_drop">قطرتك القادمة</div>
-      <div class="card-sub" id="nextDropTimeText">لا توجد مواعيد</div>
-      <div style="font-size:11px; color:var(--primary); margin-top:2px;" id="nextDropCategoryText">الفئة: عشوائي</div>
-    </div>
-  </div>
-  
-  <div class="glass-card action-card" onclick="document.getElementById('statsSheet').classList.add('show')">
-    <div class="card-icon" style="color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, transparent);"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-    <div class="card-info">
-      <div class="card-title" data-i18n="today_impact">أثر اليوم</div>
-      <div class="card-sub" id="todayImpactText">لقد تفاعلت مع 0 قطرات اليوم</div>
-      <div class="progress-bar" style="height:4px; margin-top:8px;"><div class="progress-fill" id="todayImpactProgress" style="width:0%;"></div></div>
-    </div>
-  </div>
-
-  <div class="glass-card action-card">
-    <div class="card-icon" style="color:#F59E0B; background:color-mix(in srgb, #F59E0B 10%, transparent);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
-    <div class="card-info">
-      <div class="card-title" data-i18n="current_moment">لحظتك الحالية</div>
-      <div class="card-sub" id="currentMomentText" style="white-space:normal; line-height:1.4;">...</div>
-    </div>
-  </div>
+<div class="glass-card action-card" onclick="document.querySelector('[data-view=\'dropConfigView\']').click()">
+<div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+<div class="card-info">
+<div class="card-title" data-i18n="next_drop">قطرتك القادمة</div>
+<div class="card-sub" id="nextDropTimeText">لا توجد مواعيد</div>
+<div style="font-size:11px; color:var(--primary); margin-top:2px;" id="nextDropCategoryText">الفئة: عشوائي</div>
+</div>
+</div>
+<div class="glass-card action-card" onclick="document.getElementById('statsSheet').classList.add('show')">
+<div class="card-icon" style="color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, transparent);"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+<div class="card-info">
+<div class="card-title" data-i18n="today_impact">أثر اليوم</div>
+<div class="card-sub" id="todayImpactText">لقد تفاعلت مع 0 قطرات اليوم</div>
+<div class="progress-bar" style="height:4px; margin-top:8px;"><div class="progress-fill" id="todayImpactProgress" style="width:0%;"></div></div>
+</div>
+</div>
+<div class="glass-card action-card">
+<div class="card-icon" style="color:#F59E0B; background:color-mix(in srgb, #F59E0B 10%, transparent);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
+<div class="card-info">
+<div class="card-title" data-i18n="current_moment">لحظتك الحالية</div>
+<div class="card-sub" id="currentMomentText">...</div>
+</div>
+</div>
 </div>
 
+<!-- اقتباس اليوم (مربوط بالنافذة الزجاجية) -->
 <div class="glass-card action-card" onclick="openQuoteOfTheDay()" style="margin-top:20px;">
 <div class="card-icon" style="color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, transparent);"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
 <div class="card-info">
@@ -304,40 +415,32 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <!-- ================= إعدادات قطرتي ================= -->
 <section class="view" id="dropConfigView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="drop_settings">إعدادات قطرتي</h2>
-
 <div class="glass-card">
-  <strong style="display:block; margin-bottom:10px; font-size:16px;" data-i18n="source_category">1. مصدر العبارات</strong>
-  <div class="custom-radio-group" id="quoteSourceGroup">
-    <div class="custom-radio-item active" data-value="all" onclick="setQuoteSource('all')">
-      <span data-i18n="all_categories">عشوائي (من كل الأقسام)</span><div class="custom-radio-circle"></div>
-    </div>
-    <div class="custom-radio-item" data-value="awareness" onclick="setQuoteSource('awareness')">
-      <span data-i18n="cat_awareness">أسئلة وعي (جديد)</span><div class="custom-radio-circle"></div>
-    </div>
-    <div class="custom-radio-item" data-value="dhikr" onclick="setQuoteSource('dhikr')">
-      <span data-i18n="cat_dhikr">أذكار وأدعية</span><div class="custom-radio-circle"></div>
-    </div>
-    <div class="custom-radio-item" data-value="poetry" onclick="setQuoteSource('poetry')">
-      <span data-i18n="cat_poetry">أبيات شعرية</span><div class="custom-radio-circle"></div>
-    </div>
-    <div class="custom-radio-item" data-value="selfDev" onclick="setQuoteSource('selfDev')">
-      <span data-i18n="cat_selfDev">تطوير الذات</span><div class="custom-radio-circle"></div>
-    </div>
-    <div class="custom-radio-item" data-value="quran" onclick="setQuoteSource('quran')">
-      <span data-i18n="cat_quran">آيات قرآنية</span><div class="custom-radio-circle"></div>
-    </div>
-    <div class="custom-radio-item" data-value="culture" onclick="setQuoteSource('culture')">
-      <span data-i18n="cat_culture">ثقافة عامة وحكم</span><div class="custom-radio-circle"></div>
-    </div>
-    <div class="custom-radio-item" data-value="myGroups" onclick="setQuoteSource('myGroups'); showGroupsManager();">
-      <span data-i18n="my_groups">مجموعاتي الخاصة</span><div class="custom-radio-circle"></div>
-    </div>
-    <div class="custom-radio-item" data-value="family" onclick="setQuoteSource('family'); document.getElementById('familySheet').classList.add('show');">
-      <span data-i18n="cat_family">قطرات لأحبائي (عائلتي)</span><div class="custom-radio-circle"></div>
-    </div>
-  </div>
+<strong style="display:block; margin-bottom:10px; font-size:16px;" data-i18n="source_category">1. مصدر العبارات</strong>
+<div class="custom-radio-group" id="quoteSourceGroup">
+<div class="custom-radio-item active" data-value="all" onclick="setQuoteSource('all')">
+<span data-i18n="all_categories">عشوائي (من كل الأقسام)</span><div class="custom-radio-circle"></div>
 </div>
-
+<div class="custom-radio-item" data-value="dhikr" onclick="setQuoteSource('dhikr')">
+<span data-i18n="cat_dhikr">أذكار وأدعية</span><div class="custom-radio-circle"></div>
+</div>
+<div class="custom-radio-item" data-value="poetry" onclick="setQuoteSource('poetry')">
+<span data-i18n="cat_poetry">أبيات شعرية</span><div class="custom-radio-circle"></div>
+</div>
+<div class="custom-radio-item" data-value="selfDev" onclick="setQuoteSource('selfDev')">
+<span data-i18n="cat_selfDev">تطوير الذات</span><div class="custom-radio-circle"></div>
+</div>
+<div class="custom-radio-item" data-value="quran" onclick="setQuoteSource('quran')">
+<span data-i18n="cat_quran">آيات قرآنية</span><div class="custom-radio-circle"></div>
+</div>
+<div class="custom-radio-item" data-value="culture" onclick="setQuoteSource('culture')">
+<span data-i18n="cat_culture">ثقافة عامة وحكم</span><div class="custom-radio-circle"></div>
+</div>
+<div class="custom-radio-item" data-value="myGroups" onclick="setQuoteSource('myGroups'); showGroupsManager();">
+<span data-i18n="my_library">مجموعاتي الخاصة</span><div class="custom-radio-circle"></div>
+</div>
+</div>
+</div>
 <div class="glass-card">
 <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="display_method">2. طريقة العرض وتفضيلاتك</strong>
 <select id="notifModeSetting">
@@ -351,25 +454,21 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <option value="15000" data-i18n="dur_15">مدة القطرة: 15 ثانية</option>
 </select>
 </div>
-
-<!-- البرمجة الذكية -->
 <div class="glass-card">
 <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="smart_schedule">3. البرمجة الذكية (توزيع تلقائي)</strong>
 <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-  <span style="font-size:14px; font-weight:600;" data-i18n="i_want">أريد</span>
-  <input type="number" id="smartDropsCount" min="1" max="20" value="5" style="width:80px; margin:0; padding:10px; text-align:center;">
-  <span style="font-size:14px; font-weight:600;" data-i18n="drops_daily">قطرات يومياً</span>
+<span style="font-size:14px; font-weight:600;" data-i18n="i_want">أريد</span>
+<input type="number" id="smartDropsCount" min="1" max="20" value="5" style="width:80px; margin:0; padding:10px; text-align:center;">
+<span style="font-size:14px; font-weight:600;" data-i18n="drops_daily">قطرات يومياً</span>
 </div>
 <div style="display:flex; gap:10px; align-items:center;">
-  <span style="font-size:14px; font-weight:600;" data-i18n="from">من</span>
-  <input type="time" id="smartTimeStart" value="08:00" style="margin:0; padding:10px;">
-  <span style="font-size:14px; font-weight:600;" data-i18n="to">إلى</span>
-  <input type="time" id="smartTimeEnd" value="22:00" style="margin:0; padding:10px;">
+<span style="font-size:14px; font-weight:600;" data-i18n="from">من</span>
+<input type="time" id="smartTimeStart" value="08:00" style="margin:0; padding:10px;">
+<span style="font-size:14px; font-weight:600;" data-i18n="to">إلى</span>
+<input type="time" id="smartTimeEnd" value="22:00" style="margin:0; padding:10px;">
 </div>
 <button class="btn-solid" id="applySmartScheduleBtn" data-i18n="apply_smart">تطبيق البرمجة الذكية</button>
 </div>
-
-<!-- الجدولة اليدوية -->
 <div class="glass-card">
 <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="manual_schedule">الجدولة اليدوية (تكرار مستمر)</strong>
 <select id="intervalSelect"></select>
@@ -380,118 +479,113 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <div id="savedSchedulesList" style="margin-top:25px;"></div>
 </div>
 </section>
-
 <!-- ================= المكتبة الشخصية (Library View) ================= -->
 <section class="view" id="libraryView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="personal_library">المكتبة الشخصية</h2>
 <p style="color:var(--text-dim); font-size:14px; margin-top:0; margin-bottom:20px;" data-i18n="library_desc">احتفظ بالمعاني التي تلامس قلبك، ونظمها في مجموعاتك الخاصة.</p>
-
 <div class="glass-card" style="padding:0; overflow:hidden;">
-  <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="document.getElementById('journalSheet').classList.add('show')">
-    <div class="card-icon" style="background:#8B5CF6; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
-    <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_journal">دفتر الأثر (تأملاتي)</div></div>
-    <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
-  </div>
-  <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="document.getElementById('familySheet').classList.add('show')">
-    <div class="card-icon" style="background:#F43F5E; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-    <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="family_drops">قطرات لأحبائي</div></div>
-    <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
-  </div>
-  <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="openDiscoverQuotes()">
-    <div class="card-icon" style="background:var(--primary); color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
-    <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="discover_quotes">اكتشف العبارات</div></div>
-    <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
-  </div>
-  <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="openGroup('favorites')">
-    <div class="card-icon" style="background:var(--secondary); color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-    <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_favorites">مفضلاتي</div></div>
-    <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
-  </div>
-  <div class="action-card" style="padding:15px 20px;" onclick="showGroupsManager()">
-    <div class="card-icon" style="background:#F59E0B; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
-    <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_groups">مجموعاتي</div></div>
-    <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
-  </div>
+<div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="showCategoryList()">
+<div class="card-icon" style="background:var(--primary); color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+<div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="discover_quotes">اكتشف العبارات</div></div>
+<div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
 </div>
-
+<div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="openGroup('favorites')">
+<div class="card-icon" style="background:var(--secondary); color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+<div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_favorites">مفضلاتي</div></div>
+<div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
+</div>
+<div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="showGroupsManager()">
+<div class="card-icon" style="background:#F59E0B; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
+<div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_groups">مجموعاتي</div></div>
+<div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
+</div>
+</div>
 <div id="groupsManagerArea" style="display:none; margin-top:20px;">
-  <h3 style="font-size:16px;" data-i18n="create_group">إنشاء مجموعة جديدة</h3>
-  <div style="display:flex; gap:10px; margin-bottom:15px;">
-    <input type="text" id="newGroupNameInput" placeholder="مثال: عبارات للأيام الصعبة" style="margin:0; flex:1;">
-    <button class="btn-solid" id="createGroupBtn" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
-  </div>
-  <div id="customGroupsList"></div>
+<h3 style="font-size:16px;" data-i18n="create_group">إنشاء مجموعة جديدة</h3>
+<div style="display:flex; gap:10px; margin-bottom:15px;">
+<input type="text" id="newGroupNameInput" placeholder="مثال: عبارات للأيام الصعبة" style="margin:0; flex:1;">
+<button class="btn-solid" id="createGroupBtn" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
+</div>
+<div id="customGroupsList"></div>
 </div>
 </section>
-
 <!-- ================= مساحة سكينة (Meditation View) ================= -->
 <section class="view" id="meditationView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="sakeena">سكينة</h2>
 <p style="color:var(--text-dim); font-size:14px; margin-top:0; margin-bottom:20px;" data-i18n="sakeena_desc">اختر مساحتك للهدوء والاسترخاء.</p>
-
 <div class="glass-card" style="padding:15px; margin-bottom:15px;">
-  <h3 style="margin-top:0; font-size:16px; color:var(--primary);" data-i18n="nature_sounds">أصوات الطبيعة</h3>
-  <div style="display:flex; flex-wrap:wrap; gap:10px;">
-    <button class="day-chip" onclick="playAudio('rain', 'المطر')" data-i18n="rain">🌧️ المطر</button>
-    <button class="day-chip" onclick="playAudio('sea', 'البحر')" data-i18n="sea">🌊 البحر</button>
-    <button class="day-chip" onclick="playAudio('forest', 'الغابة')" data-i18n="forest">🌲 الغابة</button>
-    <button class="day-chip" onclick="playAudio('birds', 'الطيور')" data-i18n="birds">🕊️ الطيور</button>
-  </div>
+<h3 style="margin-top:0; font-size:16px; color:var(--primary);" data-i18n="nature_sounds">أصوات الطبيعة</h3>
+<div style="display:flex; flex-wrap:wrap; gap:10px;">
+<button class="day-chip" onclick="playAudio('rain', 'المطر')" data-i18n="rain">🌧️ المطر</button>
+<button class="day-chip" onclick="playAudio('sea', 'البحر')" data-i18n="sea">🌊 البحر</button>
+<button class="day-chip" onclick="playAudio('forest', 'الغابة')" data-i18n="forest">🌲 الغابة</button>
+<button class="day-chip" onclick="playAudio('birds', 'الطيور')" data-i18n="birds">🕊️ الطيور</button>
 </div>
-
-<div class="glass-card" style="padding:15px; margin-bottom:15px;">
-  <h3 style="margin-top:0; font-size:16px; color:var(--secondary);" data-i18n="quran_recitation">القرآن الكريم</h3>
-  <div style="display:flex; flex-wrap:wrap; gap:10px;">
-    <button class="day-chip" onclick="playAudio('quran1', 'سورة البقرة')">سورة البقرة</button>
-    <button class="day-chip" onclick="playAudio('quran2', 'سورة الكهف')">سورة الكهف</button>
-    <button class="day-chip" onclick="playAudio('quran3', 'سورة الملك')">سورة الملك</button>
-  </div>
 </div>
-
 <div class="glass-card" style="padding:15px; margin-bottom:15px;">
-  <h3 style="margin-top:0; font-size:16px; color:#10B981;" data-i18n="short_sessions">جلسات قصيرة</h3>
-  <div style="display:flex; flex-wrap:wrap; gap:10px;">
-    <button class="day-chip" onclick="startSession(1)">دقيقة هدوء</button>
-    <button class="day-chip" onclick="startSession(3)">3 دقائق تأمل</button>
-    <button class="day-chip" onclick="startSession(5)">5 دقائق استرخاء</button>
-  </div>
+<h3 style="margin-top:0; font-size:16px; color:var(--secondary);" data-i18n="quran_recitation">القرآن الكريم</h3>
+<div style="display:flex; flex-wrap:wrap; gap:10px;">
+<button class="day-chip" onclick="playAudio('quran1', 'سورة البقرة')">سورة البقرة</button>
+<button class="day-chip" onclick="playAudio('quran2', 'سورة الكهف')">سورة الكهف</button>
+<button class="day-chip" onclick="playAudio('quran3', 'سورة الملك')">سورة الملك</button>
+</div>
+</div>
+<div class="glass-card" style="padding:15px; margin-bottom:15px;">
+<h3 style="margin-top:0; font-size:16px; color:#10B981;" data-i18n="short_sessions">جلسات قصيرة</h3>
+<div style="display:flex; flex-wrap:wrap; gap:10px;">
+<button class="day-chip" onclick="startSession(1)">دقيقة هدوء</button>
+<button class="day-chip" onclick="startSession(3)">3 دقائق تأمل</button>
+<button class="day-chip" onclick="startSession(5)">5 دقائق استرخاء</button>
+</div>
 </div>
 </section>
-
 <!-- ================= حديقتي المتعددة الأشجار ================= -->
 <section class="view" id="gardenView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="your_garden">حديقتك</h2>
 <div class="glass-card garden-stage">
-  <div style="font-size:18px; font-weight:800; margin-bottom:15px;" data-i18n="level_of_awareness">مستوى الوعي العام</div>
-  <div class="progress-bar"><div class="progress-fill" id="totalAwarenessProgress" style="width:0%;"></div></div>
-  <div style="font-size:14px; font-weight:700; color:var(--text-dim); margin-top:10px;" id="totalDaysActiveText">تفاعلت لمدة 1 أيام</div>
+<div style="font-size:18px; font-weight:800; margin-bottom:15px;" data-i18n="level_of_awareness">مستوى الوعي العام</div>
+<div class="progress-bar"><div class="progress-fill" id="totalAwarenessProgress" style="width:0%;"></div></div>
+<div style="font-size:14px; font-weight:700; color:var(--text-dim); margin-top:10px;" id="totalDaysActiveText">تفاعلت لمدة 1 أيام</div>
 </div>
-
 <div class="garden-grid">
-  <div class="garden-card">
-    <div style="font-size:40px; margin-bottom:10px;" id="treeEmoji_dhikr">🌱</div>
-    <div style="font-size:14px; font-weight:800; color:var(--primary);" data-i18n="tree_serenity">شجرة السكينة</div>
-    <div style="font-size:11px; color:var(--text-dim);" data-i18n="tree_serenity_desc">الأذكار والقرآن</div>
-  </div>
-  <div class="garden-card">
-    <div style="font-size:40px; margin-bottom:10px;" id="treeEmoji_culture">🌱</div>
-    <div style="font-size:14px; font-weight:800; color:var(--secondary);" data-i18n="tree_knowledge">شجرة المعرفة</div>
-    <div style="font-size:11px; color:var(--text-dim);" data-i18n="tree_knowledge_desc">الثقافة العامة</div>
-  </div>
-  <div class="garden-card">
-    <div style="font-size:40px; margin-bottom:10px;" id="treeEmoji_selfDev">🌱</div>
-    <div style="font-size:14px; font-weight:800; color:#10B981;" data-i18n="tree_awareness">شجرة الوعي</div>
-    <div style="font-size:11px; color:var(--text-dim);" data-i18n="tree_awareness_desc">تطوير الذات</div>
-  </div>
-  <div class="garden-card">
-    <div style="font-size:40px; margin-bottom:10px;" id="treeEmoji_poetry">🌱</div>
-    <div style="font-size:14px; font-weight:800; color:#F59E0B;" data-i18n="tree_gratitude">شجرة الامتنان</div>
-    <div style="font-size:11px; color:var(--text-dim);" data-i18n="tree_gratitude_desc">الشعر والمشاعر</div>
-  </div>
+<div class="garden-card">
+<div style="font-size:40px; margin-bottom:10px;" id="treeEmoji_dhikr">🌱</div>
+<div style="font-size:14px; font-weight:800; color:var(--primary);" data-i18n="tree_serenity">شجرة السكينة</div>
+<div style="font-size:11px; color:var(--text-dim);" data-i18n="tree_serenity_desc">الأذكار والقرآن</div>
+</div>
+<div class="garden-card">
+<div style="font-size:40px; margin-bottom:10px;" id="treeEmoji_culture">🌱</div>
+<div style="font-size:14px; font-weight:800; color:var(--secondary);" data-i18n="tree_knowledge">شجرة المعرفة</div>
+<div style="font-size:11px; color:var(--text-dim);" data-i18n="tree_knowledge_desc">الثقافة العامة</div>
+</div>
+<div class="garden-card">
+<div style="font-size:40px; margin-bottom:10px;" id="treeEmoji_selfDev">🌱</div>
+<div style="font-size:14px; font-weight:800; color:#10B981;" data-i18n="tree_awareness">شجرة الوعي</div>
+<div style="font-size:11px; color:var(--text-dim);" data-i18n="tree_awareness_desc">تطوير الذات</div>
+</div>
+<div class="garden-card">
+<div style="font-size:40px; margin-bottom:10px;" id="treeEmoji_poetry">🌱</div>
+<div style="font-size:14px; font-weight:800; color:#F59E0B;" data-i18n="tree_gratitude">شجرة الامتنان</div>
+<div style="font-size:11px; color:var(--text-dim);" data-i18n="tree_gratitude_desc">الشعر والمشاعر</div>
+</div>
 </div>
 </section>
 </div>
-
+<!-- ================= المشغل الصوتي العائم (سكينة) ================= -->
+<div class="audio-player" id="globalAudioPlayer">
+<div class="audio-info">
+<div class="audio-title" id="audioTitleText">جاري الاستماع...</div>
+<div class="audio-progress-bar"><div class="audio-progress-fill" id="audioProgressFill"></div></div>
+</div>
+<div class="audio-controls">
+<button class="audio-btn" id="audioPlayPauseBtn" onclick="togglePlayPause()">
+<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+</button>
+<button class="audio-close" onclick="closeAudioPlayer()">
+<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+</button>
+</div>
+</div>
 <nav class="floating-nav">
 <button class="nav-item" data-view="libraryView">
 <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -510,75 +604,1114 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </button>
 </nav>
 </div>
-
-<!-- ================= النوافذ المنبثقة الشاملة (الإعدادات والأقسام) ================= -->
-
+<!-- ================= نافذة الإحصائيات (تحديث المخطط الدائري) ================= -->
+<div class="sheet-overlay" id="statsSheet">
+<div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0;" data-i18n="your_progress">نشاطك وتقدمك 📈</h2>
+<div style="display:flex; justify-content:space-around; align-items:center; padding: 20px 0; border-bottom:1px solid var(--border); margin-bottom:15px;">
+<!-- الدائرة 1: القطرات -->
+<div style="position:relative; width:100px; height:100px;">
+<svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
+<circle cx="18" cy="18" r="16" fill="none" stroke="var(--border)" stroke-width="3"></circle>
+<circle id="chartDropsCircle" cx="18" cy="18" r="16" fill="none" stroke="var(--primary)" stroke-width="3" stroke-dasharray="100.5" stroke-dashoffset="100.5" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease-out; filter:drop-shadow(0 0 5px var(--primary));"></circle>
+</svg>
+<div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+<span style="font-size:24px; font-weight:900; line-height:1;" id="chartDropsVal">0</span>
+<span style="font-size:11px; color:var(--text-dim); font-weight:700;">قطرة</span>
+</div>
+</div>
+<!-- الدائرة 2: الأيام -->
+<div style="position:relative; width:100px; height:100px;">
+<svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);">
+<circle cx="18" cy="18" r="16" fill="none" stroke="var(--border)" stroke-width="3"></circle>
+<circle id="chartDaysCircle" cx="18" cy="18" r="16" fill="none" stroke="var(--secondary)" stroke-width="3" stroke-dasharray="100.5" stroke-dashoffset="100.5" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease-out; filter:drop-shadow(0 0 5px var(--secondary));"></circle>
+</svg>
+<div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+<span style="font-size:24px; font-weight:900; line-height:1;" id="chartDaysVal">1</span>
+<span style="font-size:11px; color:var(--text-dim); font-weight:700;" data-i18n="days">أيام</span>
+</div>
+</div>
+</div>
+<button class="btn-solid" onclick="document.getElementById('statsSheet').classList.remove('show')" data-i18n="close">إغلاق</button>
+</div>
+</div>
 <div class="sheet-overlay" id="settingsSheet">
 <div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
 <div class="sheet-handle"></div>
 <h2 style="margin-top:0;" data-i18n="app_settings">إعدادات التطبيق</h2>
 <div class="control-row">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div class="setting-icon" style="background:color-mix(in srgb, var(--primary) 15%, transparent); color:var(--primary);"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-    <span style="font-weight:700; font-size:15px;" data-i18n="glass_mode">الشفافية والزجاج</span>
-  </div>
-  <label class="toggle"><input type="checkbox" id="glassToggle"><span class="toggle-track"></span></label>
+<span style="font-weight:700; font-size:16px;" data-i18n="glass_mode">الشفافية وتأثير الزجاج 💎</span>
+<label class="toggle"><input type="checkbox" id="glassToggle"><span class="toggle-track"></span></label>
 </div>
 <div class="control-row">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div class="setting-icon" style="background:color-mix(in srgb, #F59E0B 15%, transparent); color:#F59E0B;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-    <span style="font-weight:700; font-size:15px;" data-i18n="show_image">إظهار صورة العبارة</span>
-  </div>
-  <label class="toggle"><input type="checkbox" id="imageToggle"><span class="toggle-track"></span></label>
+<span style="font-weight:700; font-size:16px;" data-i18n="show_image">إظهار صورة مع العبارة 🖼️</span>
+<label class="toggle"><input type="checkbox" id="imageToggle"><span class="toggle-track"></span></label>
 </div>
 <div class="control-row">
-  <div style="display:flex; align-items:center; gap:12px;">
-    <div class="setting-icon" style="background:color-mix(in srgb, #10B981 15%, transparent); color:#10B981;"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
-    <span style="font-weight:700; font-size:15px;" data-i18n="show_home_cards">بطاقات الرئيسية</span>
-  </div>
-  <label class="toggle"><input type="checkbox" id="homeCardsToggle"><span class="toggle-track"></span></label>
+<span style="font-weight:700; font-size:16px;" data-i18n="show_home_cards">إظهار بطاقات الرئيسية 📱</span>
+<label class="toggle"><input type="checkbox" id="homeCardsToggle"><span class="toggle-track"></span></label>
 </div>
 <div style="margin-top:20px;">
-  <label style="color:var(--text-dim); font-size:14px; font-weight:700;" data-i18n="language">لغة التطبيق:</label>
-  <select id="langSelect">
-    <option value="ar">العربية</option>
-    <option value="en">English</option>
-    <option value="fr">Français</option>
-    <option value="es">Español</option>
-    <option value="de">Deutsch</option>
-  </select>
+<label style="color:var(--text-dim); font-size:14px; font-weight:700;" data-i18n="language">لغة التطبيق:</label>
+<select id="langSelect">
+<option value="ar">العربية</option>
+<option value="en">English</option>
+<option value="fr">Français</option>
+<option value="es">Español</option>
+<option value="de">Deutsch</option>
+</select>
 </div>
 <button class="btn-solid" onclick="document.getElementById('settingsSheet').classList.remove('show')" data-i18n="save_done">تم وحفظ</button>
 </div>
 </div>
-
-<div class="sheet-overlay" id="statsSheet">
-<div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-overlay" id="categorySheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
 <div class="sheet-handle"></div>
-<h2 style="margin-top:0;" data-i18n="your_progress">نشاطك وتقدمك 📈</h2>
-<div style="width:100%; height:140px; background:var(--bg); border-radius:18px; margin: 25px 0; position:relative; overflow:hidden; border: 1px solid var(--border);">
-<svg viewBox="0 0 100 50" preserveAspectRatio="none" style="width:100%; height:100%;">
-<polyline fill="none" stroke="var(--primary)" stroke-width="2.5" points="0,45 20,30 40,35 60,15 80,20 100,5" stroke-linecap="round" stroke-linejoin="round"/>
-<polygon fill="color-mix(in srgb, var(--primary) 15%, transparent)" points="0,50 0,45 20,30 40,35 60,15 80,20 100,5 100,50" />
-</svg>
-</div>
-<button class="btn-solid" onclick="document.getElementById('statsSheet').classList.remove('show')" data-i18n="close">إغلاق</button>
+<h2 style="margin-top:0; color:var(--primary);" id="catSheetTitle">القسم</h2>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="catSheetContent"></div>
+<button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')" data-i18n="back">رجوع</button>
 </div>
 </div>
-
+<!-- نافذة عرض العبارات داخل مجموعة مخصصة -->
 <div class="sheet-overlay" id="groupViewSheet">
 <div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
 <div class="sheet-handle"></div>
 <h2 style="margin-top:0; color:var(--primary);" id="groupViewTitle">اسم المجموعة</h2>
 <div style="display:flex; gap:10px; margin-bottom:15px;" id="addToGroupDiv">
-  <input type="text" id="newGroupQuoteInput" placeholder="أدخل عبارتك هنا..." style="margin:0; flex:1;">
-  <button class="btn-solid" onclick="addQuoteToCurrentGroup()" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
+<input type="text" id="newGroupQuoteInput" placeholder="أدخل عبارتك هنا..." style="margin:0; flex:1;">
+<button class="btn-solid" onclick="addQuoteToCurrentGroup()" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
 </div>
 <div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="groupViewContent"></div>
 <button class="btn-solid" onclick="document.getElementById('groupViewSheet').classList.remove('show')" data-i18n="back">رجوع</button>
 </div>
 </div>
-
 <script src="app.js"></script>
 </body>
 </html>
+و 
+"use strict";
+const STORE_KEY = "qatra_worldclass_v6";
+// === قاموس الترجمة ===
+const DICT = {
+ar: {
+app_title: "قطرة | QATRA", pull_to_switch: "اسحب لتبديل المظهر", moment_zen: "لحظة وعي", click_to_program: "اضغط لبرمجة قطرتك",
+next_drop: "قطرتك القادمة", today_impact: "أثر اليوم", current_moment: "لحظتك الحالية", drop_settings: "إعدادات قطرتي",
+display_method: "طريقة العرض وتفضيلاتك", mode_both: "تنبيه النظام + قطرة مائية (معاً)", mode_floating: "القطرة المائية فقط",
+mode_notification: "تنبيه النظام فقط", dur_5: "مدة القطرة: 5 ثوانٍ", dur_10: "مدة القطرة: 10 ثوانٍ", dur_15: "مدة القطرة: 15 ثانية",
+smart_schedule: "البرمجة الذكية (توزيع تلقائي)", i_want: "أريد", drops_daily: "قطرات يومياً", from: "من", to: "إلى", apply_smart: "تطبيق البرمجة الذكية",
+manual_schedule: "الجدولة اليدوية (تكرار مستمر)", custom_schedule: "تحديد ساعة وأيام مخصصة:", save_schedule: "حفظ الموعد",
+personal_library: "المكتبة الشخصية", library_desc: "احتفظ بالمعاني التي تلامس قلبك، ونظمها في مجموعاتك.",
+discover_quotes: "اكتشف العبارات", my_favorites: "مفضلاتي", my_groups: "مجموعاتي", my_custom_quotes: "عباراتي الخاصة",
+create_group: "إنشاء مجموعة جديدة", add: "إضافة", your_garden: "حديقتك", level_of_awareness: "مستوى الوعي العام",
+tree_serenity: "شجرة السكينة", tree_serenity_desc: "الأذكار والقرآن", tree_knowledge: "شجرة المعرفة", tree_knowledge_desc: "الثقافة العامة",
+tree_awareness: "شجرة الوعي", tree_awareness_desc: "تطوير الذات", tree_gratitude: "شجرة الامتنان", tree_gratitude_desc: "الشعر والمشاعر",
+sakeena: "سكينة", sakeena_desc: "اختر مساحتك للهدوء والاسترخاء.", nature_sounds: "أصوات الطبيعة", quran_recitation: "القرآن الكريم",
+short_sessions: "جلسات قصيرة", app_settings: "إعدادات التطبيق", glass_mode: "الشفافية وتأثير الزجاج 💎", show_image: "إظهار صورة مع العبارة 🖼️",
+show_home_cards: "إظهار بطاقات الرئيسية 📱", language: "لغة التطبيق:", save_done: "تم وحفظ", back: "رجوع", copied: "تم النسخ بنجاح",
+delete: "حذف", days: "أيام", quotes_ready: "عبارة جاهزة", rain: "🌧️ المطر", sea: "🌊 البحر", forest: "🌲 الغابة", birds: "🕊️ الطيور",
+all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مجموعاتي الخاصة", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", every_3h: "كل 3 ساعات", every_12h: "كل 12 ساعة", every_24h: "كل 24 ساعة", no_reminders: "لا توجد مواعيد", source_category: "1. مصدر العبارات"
+},
+en: {
+app_title: "Qatra | Drop", pull_to_switch: "Pull to switch theme", moment_zen: "Moment of Zen", click_to_program: "Tap to config",
+next_drop: "Next Drop", today_impact: "Today's Impact", current_moment: "Current Moment", drop_settings: "My Drop Settings",
+display_method: "Display Mode", mode_both: "Notification + Drop", mode_floating: "Drop Only", mode_notification: "Notification Only",
+dur_5: "Duration: 5 Secs", dur_10: "Duration: 10 Secs", dur_15: "Duration: 15 Secs", smart_schedule: "Smart Schedule",
+i_want: "I want", drops_daily: "drops daily", from: "From", to: "To", apply_smart: "Apply Schedule", manual_schedule: "Manual Schedule",
+custom_schedule: "Custom time & days:", save_schedule: "Save Schedule", personal_library: "Personal Library",
+library_desc: "Keep the meanings that touch your heart.", discover_quotes: "Discover Quotes", my_favorites: "My Favorites",
+my_groups: "My Groups", my_custom_quotes: "My Custom Quotes", create_group: "Create New Group", add: "Add", your_garden: "Your Garden",
+level_of_awareness: "Awareness Level", tree_serenity: "Serenity Tree", tree_serenity_desc: "Dhikr & Quran", tree_knowledge: "Knowledge Tree",
+tree_knowledge_desc: "Culture", tree_awareness: "Awareness Tree", tree_awareness_desc: "Self Dev", tree_gratitude: "Gratitude Tree",
+tree_gratitude_desc: "Poetry", sakeena: "Sakeena", sakeena_desc: "Choose your space to relax.", nature_sounds: "Nature Sounds",
+quran_recitation: "Quran", short_sessions: "Short Sessions", app_settings: "App Settings", glass_mode: "Glass Effect 💎",
+show_image: "Show image 🖼️", show_home_cards: "Show Home Cards 📱", language: "App Language:", save_done: "Done", back: "Back",
+copied: "Copied!", delete: "Delete", days: "days", quotes_ready: "Quotes", rain: "🌧️ Rain", sea: "🌊 Sea", forest: "🌲 Forest", birds: "🕊️ Birds",
+all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self Development", cat_quran: "Quranic Verses", cat_culture: "Culture", cat_poetry: "Poetry", my_library: "My Groups", stop_repeat: "Stop Auto Repeat", every_30: "Every 30 Mins", every_1h: "Every 1 Hour", every_3h: "Every 3 Hours", every_12h: "Every 12 Hours", every_24h: "Every 24 Hours", no_reminders: "No scheduled reminders", source_category: "1. Quotes Source"
+}
+};
+// دعم للغات المتبقية بالانجليزية
+const langs = ['fr','es','de']; langs.forEach(l => DICT[l] = DICT['en']);
+// === قاعدة بيانات العبارات المخصصة ===
+const QUOTES_DB = {
+dhikr: {
+key: "cat_dhikr",
+icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+items: [
+"سبحان الله وبحمده سبحان الله العظيم.",
+"لا إله إلا أنت سبحانك إني كنت من الظالمين.",
+"اللهم إنك عفو تحب العفو فاعف عني.",
+"يا حي يا قيوم برحمتك أستغيث.",
+"أستغفر الله العظيم الذي لا إله إلا هو الحي القيوم وأتوب إليه.",
+"لا إله إلا الله وحده لا شريك له له الملك وله الحمد وهو على كل شيء قدير.",
+"اللهم صل وسلم وبارك على نبينا محمد.",
+"حسبنا الله ونعم الوكيل.",
+"لا حول ولا قوة إلا بالله العلي العظيم.",
+"اللهم آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار.",
+"اللهم إني أسألك الهدى والتقى والعفاف والغنى.",
+"اللهم مقلب القلوب ثبت قلبي على دينك.",
+"رضيت بالله ربا وبالإسلام دينا وبمحمد نبيا.",
+"بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم.",
+"أعوذ بكلمات الله التامات من شر ما خلق.",
+"اللهم إني أعوذ بك من الهم والحزن.",
+"اللهم إني أعوذ بك من العجز والكسل.",
+"اللهم إني أعوذ بك من الجبن والبخل.",
+"اللهم إني أعوذ بك من غلبة الدين وقهر الرجال.",
+"اللهم إني أسألك العفو والعافية في الدنيا والآخرة.",
+"اللهم استر عوراتي وآمن روعاتي.",
+"اللهم احفظني من بين يدي ومن خلفي وعن يميني وعن شمالي.",
+"أستغفر الله وأتوب إليه.",
+"اللهم اغفر لي ذنبي كله دقه وجله وأوله وآخره.",
+"اللهم اجعل في قلبي نورا وفي بصري نورا.",
+"سبحان الله عدد ما خلق سبحان الله ملء ما خلق.",
+"الحمد لله عدد ما خلق الحمد لله ملء ما خلق.",
+"لا إله إلا الله عدد ما خلق لا إله إلا الله ملء ما خلق.",
+"الله أكبر عدد ما خلق الله أكبر ملء ما خلق.",
+"اللهم إني أسألك الجنة وما قرب إليها من قول أو عمل.",
+"اللهم إني أعوذ بك من النار وما قرب إليها من قول أو عمل.",
+"اللهم أحسن عاقبتنا في الأمور كلها.",
+"اللهم أجرنا من خزي الدنيا وعذاب الآخرة.",
+"اللهم قني عذابك يوم تبعث عبادك.",
+"يا مقلب القلوب ثبت قلبي على دينك.",
+"يا مصرف القلوب صرف قلوبنا على طاعتك.",
+"اللهم أعني على ذكرك وشكرك وحسن عبادتك.",
+"اللهم إني ظلمت نفسي ظلما كثيرا ولا يغفر الذنوب إلا أنت.",
+"فاغفر لي مغفرة من عندك وارحمني إنك أنت الغفور الرحيم.",
+"اللهم إني أسألك علما نافعا ورزقا طيبا وعملا متقبلا.",
+"اللهم إني أعوذ بك من علم لا ينفع ومن قلب لا يخشع.",
+"اللهم إني أعوذ بك من نفس لا تشبع ومن دعوة لا يستجاب لها.",
+"اللهم رحمتك أرجو فلا تكلني إلى نفسي طرفة عين.",
+"اللهم أصلح لي شأني كله لا إله إلا أنت.",
+"لا إله إلا الله العظيم الحليم.",
+"لا إله إلا الله رب العرش العظيم.",
+"لا إله إلا الله رب السماوات ورب الأرض ورب العرش الكريم.",
+"اللهم اغفر لي وارحمني واهدني واجبرني وعافني وارزقني.",
+"اللهم إني أسألك من الخير كله عاجله وآجله ما علمت منه وما لم أعلم.",
+"اللهم إني أعوذ بك من الشر كله عاجله وآجله ما علمت منه وما لم أعلم.",
+"اللهم إني أسألك من خير ما سألك عبدك ونبيك.",
+"اللهم إني أعوذ بك من شر ما عاذ به عبدك ونبيك.",
+"اللهم ما قضيت لي من قضاء فاجعل عاقبته رشدا.",
+"اللهم اكفني بحلالك عن حرامك وأغنني بفضلك عمن سواك.",
+"اللهم طهر قلبي من النفاق وعملي من الرياء ولساني من الكذب وعيني من الخيانة.",
+"اللهم إنك تعلم خائنة الأعين وما تخفي الصدور.",
+"اللهم اجعلني شكورا واجعلني صبورا واجعلني في عيني صغيرا وفي أعين الناس كبيرا.",
+"اللهم اغفر للمؤمنين والمؤمنات والمسلمين والمسلمات الأحياء منهم والأموات.",
+"اللهم إني أسألك عيشة نقية وميتة سوية ومردا غير مخز ولا فاضح.",
+"اللهم إني أسألك الفردوس الأعلى من الجنة.",
+"اللهم أجرني من النار.",
+"اللهم إني أسألك حبك وحب من يحبك وحب عمل يقربني إلى حبك.",
+"اللهم اجعل حبك أحب إلي من نفسي وأهلي ومن الماء البارد.",
+"اللهم ارزقني حلاوة الإيمان.",
+"اللهم زيني بزينة الإيمان واجعلني هاديا مهديا.",
+"اللهم اهدني وسددني.",
+"اللهم إني أسألك الهدى والسداد.",
+"اللهم إني أعوذ بك من زوال نعمتك وتحول عافيتك وفجاءة نقمتك وجميع سخطك.",
+"اللهم إني أعوذ بك من جهد البلاء ودرك الشقاء وسوء القضاء وشماتة الأعداء.",
+"اللهم مصرف القلوب صرف قلوبنا على طاعتك.",
+"اللهم أصلح لي ديني الذي هو عصمة أمري.",
+"اللهم أصلح لي دنياي التي فيها معاشي.",
+"اللهم أصلح لي آخرتي التي فيها معادي.",
+"اللهم اجعل الحياة زيادة لي في كل خير.",
+"اللهم اجعل الموت راحة لي من كل شر.",
+"اللهم رب جبرائيل وميكائيل وإسرافيل فاطر السماوات والأرض عالم الغيب والشهادة.",
+"أنت تحكم بين عبادك فيما كانوا فيه يختلفون.",
+"اهدني لما اختلف فيه من الحق بإذنك إنك تهدي من تشاء إلى صراط مستقيم.",
+"اللهم إني أسألك العافية في الدنيا والآخرة.",
+"اللهم متعني بسمعي وبصري واجعلهما الوارث مني.",
+"اللهم انصرني على من ظلمني وخذ منه بثأري.",
+"اللهم إني أعوذ بك من البرص والجنون والجذام ومن سيئ الأسقام.",
+"اللهم إني أعوذ بك من الفقر والقلة والذلة.",
+"اللهم إني أعوذ بك من أن أظلم أو أظلم.",
+"اللهم إني أعوذ بك من يوم السوء ومن ليلة السوء ومن ساعة السوء ومن صاحب السوء ومن جار السوء.",
+"اللهم ارزقني حسن الخاتمة.",
+"اللهم توفني مسلما وألحقني بالصالحين.",
+"اللهم اغفر لي خطيئتي وجهلي وإسرافي في أمري وما أنت أعلم به مني.",
+"اللهم اغفر لي جدي وهزلي وخطئي وعمدي وكل ذلك عندي.",
+"اللهم اغفر لي ما قدمت وما أخرت وما أسررت وما أعلنت وما أنت أعلم به مني.",
+"أنت المقدم وأنت المؤخر وأنت على كل شيء قدير.",
+"اللهم ارزقني توبة نصوحا قبل الموت.",
+"اللهم اجعل قبري روضة من رياض الجنة.",
+"اللهم يسر حسابي ويمن كتابي.",
+"اللهم اجعلني من الذين يستمعون القول فيتبعون أحسنه.",
+"اللهم إني أسألك النعيم المقيم الذي لا يحول ولا يزول.",
+"اللهم إني أسألك الأمن يوم الخوف.",
+"اللهم اكشف عني كل بلوى ونجني من كل كرب.",
+"اللهم إني أسألك الرضا بعد القضاء وبرد العيش بعد الموت.",
+"اللهم إني أسألك لذة النظر إلى وجهك والشوق إلى لقائك."
+ ]
+},
+selfDev: {
+key: "cat_selfDev",
+icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+items: [
+"الهدوء ليس ضعفا بل هو قوة التحكم في الذات.",
+"كل إنجاز عظيم بدأ بقرار بسيط للمحاولة.",
+"لا تقارن بدايتك بموسم حصاد الآخرين.",
+"النجاح يبدأ بخطوة واحدة والمسيرة تكتمل بالإصرار.",
+"العمل الجاد يتفوق على الموهبة حينما تتكاسل الموهبة عن العمل.",
+"لا تستسلم أبدا فالقادم أجمل بكثير مما مضى.",
+"أنت أقوى مما تتخيل وأكثر ذكاء مما تعتقد.",
+"كل يوم جديد هو فرصة جديدة لإعادة كتابة قصتك.",
+"النسخة الأفضل منك تنتظر في نهاية طريق الالتزام.",
+"لا تخف من الفشل بل خف من البقاء في نفس المكان.",
+"العقبات هي مجرد اختبارات لمدى رغبتك في الوصول.",
+"ركز على الخطوة التالية وليس على الجبل بأكمله.",
+"النجاح ليس مفتاح السعادة بل السعادة هي مفتاح النجاح.",
+"ما تزرعه اليوم بعناء ستحصده غدا بفخر.",
+"استثمر في عقلك فهو أصل كل ثروة.",
+"الإيجابية لا تعني غياب المشاكل بل تعني القدرة على التعامل معها.",
+"الفرق بين المستحيل والممكن يكمن في العزيمة.",
+"اجعل من أخطائك دروسا تنير لك الطريق.",
+"لا تدع آراء الآخرين تحدد من أنت.",
+"الشغف هو الوقود الذي يدفعك للاستمرار.",
+"التميز ليس فعلا بل هو عادة يومية.",
+"الخوف من الفشل يقتل الأحلام أكثر من الفشل نفسه.",
+"ابدأ من حيث أنت واستخدم ما تملك وافعل ما تستطيع.",
+"النجاح يولد من رحم التحديات.",
+"الطريق إلى القمة يبدأ بخطوة مليئة بالثقة.",
+"لا تكن أسيرا لماضيك بل كن مهندسا لمستقبلك.",
+"كل ألم يبني فيك قوة جديدة لم تكن تعرفها.",
+"الإرادة القوية تقهر كل الصعاب.",
+"كن أنت التغيير الذي تريده في العالم.",
+"لا تنتظر الفرصة بل اصنعها بنفسك.",
+"النجاح رحلة وليس وجهة نهائية.",
+"الصبر والمثابرة هما مفتاحا كل باب مغلق.",
+"تعلم كيف ترتاح لا كيف تستسلم.",
+"الأهداف هي أحلام بمواعيد نهائية.",
+"توقف عن تمني الأشياء وابدأ في العمل من أجلها.",
+"تطوير الذات هو استثمار لا يخسر أبدا.",
+"ابحث عن الجمال في كل شيء حتى في أصعب الأوقات.",
+"كن فخورا بكل خطوة تخطوها نحو هدفك.",
+"لا تقبل بأقل مما تستحق.",
+"النجاح يحتاج إلى شجاعة للبدء وعزيمة للاستمرار.",
+"كلما زادت التحديات زادت حلاوة الانتصار.",
+"العمل بصمت يصنع ضجيج النجاح.",
+"التفكير الإيجابي يفتح أبوابا كانت تبدو مغلقة.",
+"الفشل الحقيقي هو التوقف عن المحاولة.",
+"تذكر دائما لماذا بدأت عندما تفكر في الاستسلام.",
+"التغيير يبدأ من الداخل قبل أن يظهر في الخارج.",
+"كن مصدر إلهام لنفسك قبل أن تلهم الآخرين.",
+"النجاح لا يأتي بالصدفة بل بالتخطيط والعمل.",
+"لا تضيع وقتك في الندم بل استثمره في التعلم.",
+"التركيز على الحلول يصغر حجم المشاكل.",
+"العقل الباطن يحقق ما تؤمن به بصدق.",
+"اجعل من يومك تحفة فنية.",
+"الثقة بالنفس هي أول سر من أسرار النجاح.",
+"الطموح بلا عمل كطائر بلا أجنحة.",
+"تحدى نفسك كل يوم لتكون أفضل من الأمس.",
+"لا تدع الأعذار تسرق أحلامك.",
+"النجاح يتطلب التضحية ببعض الراحة من أجل المستقبل.",
+"الحياة تمنحك ما تستحق عندما تسعى إليه بجد.",
+"كل صباح هو بداية لفرصة عظيمة.",
+"استمر في التقدم حتى وإن كانت خطواتك بطيئة.",
+"قوة العقل قادرة على تحطيم أقوى الحواجز.",
+"لا شيء يقف أمام إرادة إنسان مصمم على النجاح.",
+"اجعل من النقد البناء سلما للارتقاء.",
+"النجاح ليس حكرا على أحد بل لمن يدفع الثمن.",
+"التفاؤل هو الإيمان الذي يؤدي إلى الإنجاز.",
+"العمل الدؤوب يحول الحلم إلى حقيقة.",
+"لا تنتظر الظروف المثالية بل اصنعها.",
+"الإبداع يبدأ عندما تخرج من منطقة راحتك.",
+"تعلم من الأمس وعش لليوم وخطط للغد.",
+"كل مشكلة تحمل في طياتها بذور فرصة جديدة.",
+"النجاح هو القدرة على الانتقال من فشل إلى فشل دون فقدان الحماس.",
+"لا تخش البدء من جديد فهذه المرة ستبدأ بخبرة.",
+"القوة الحقيقية تظهر في أوقات الضعف.",
+"الالتزام هو ما يحول الوعود إلى واقع.",
+"لا تجعل الخوف يقرر مصيرك.",
+"النجاح هو محصلة مجهودات صغيرة تتكرر يوميا.",
+"الشخص الوحيد الذي يجب أن تحاول التفوق عليه هو أنت بالأمس.",
+"الشك يقتل الأحلام أكثر من الفشل.",
+"التفكير الإبداعي يفتح آفاقا لا حدود لها.",
+"لا تتوقف عن التعلم فالحياة لا تتوقف عن التعليم.",
+"الصمود في وجه العواصف يصنع بحارة ماهرين.",
+"النجاح يكمن في التفاصيل الصغيرة.",
+"اجعل أهدافك عالية ولا تتوقف حتى تصل إليها.",
+"الإيمان بالنفس هو الخطوة الأولى نحو العظمة.",
+"التحفيز الداخلي هو المحرك الأقوى للإنجاز.",
+"لا تعتمد على الحظ بل اصنع حظك بيدك.",
+"كل يوم يحمل لك فرصة لتكون نسخة أفضل.",
+"النجاح يتطلب الصبر والمثابرة والعمل الجاد.",
+"تجاوز حدودك واكتشف قدراتك الكامنة.",
+"لا تجعل الماضي يسرق حاضرك ومستقبلك.",
+"العمل بشغف يقلل من الشعور بالتعب.",
+"التحديات هي ما تجعل الحياة مثيرة للاهتمام.",
+"تغلب على مخاوفك وانطلق نحو أحلامك.",
+"النجاح لا يقاس بما تملكه بل بما تحققه.",
+"الإيجابية هي مفتاح السعادة والنجاح.",
+"لا تدع اليأس يتسلل إلى قلبك.",
+"العمل المستمر هو سر التفوق.",
+"تطوير المهارات يفتح أبواب الفرص.",
+"النجاح هو رحلة اكتشاف الذات.",
+"اجعل من حياتك قصة تستحق أن تروى."
+ ]
+},
+quran: {
+key: "cat_quran",
+icon: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+items: [
+"ومن يتوكل على الله فهو حسبه.",
+"إن مع العسر يسرا.",
+"لا تحزن إن الله معنا.",
+"والله يعصمك من الناس.",
+"وهو معكم أينما كنتم.",
+"فصبر جميل والله المستعان.",
+"إن الله وملائكته يصلون على النبي.",
+"وما توفيقي إلا بالله.",
+"واصبر وما صبرك إلا بالله.",
+"إن الله يحب المتوكلين.",
+"الله نور السماوات والأرض.",
+"فإن مع العسر يسرا.",
+"ومن يتق الله يجعل له مخرجا.",
+"ويرزقه من حيث لا يحتسب.",
+"إن الله بالغ أمره.",
+"قد جعل الله لكل شيء قدرا.",
+"سيجعل الله بعد عسر يسرا.",
+"إن الله مع الصابرين.",
+"ولا تحزن عليهم ولا تك في ضيق مما يمكرون.",
+"فالله خير حافظا وهو أرحم الراحمين.",
+"إن ربي لطيف لما يشاء.",
+"إنه هو العليم الحكيم.",
+"أليس الله بكاف عبده.",
+"قل لن يصيبنا إلا ما كتب الله لنا.",
+"هو مولانا وعلى الله فليتوكل المؤمنون.",
+"وإن يمسسك الله بضر فلا كاشف له إلا هو.",
+"وإن يردك بخير فلا راد لفضله.",
+"يصيب به من يشاء من عباده.",
+"وهو الغفور الرحيم.",
+"وننزل من القرآن ما هو شفاء ورحمة للمؤمنين.",
+"فاستجبنا له ونجيناه من الغم.",
+"وكذلك ننجي المؤمنين.",
+"رب إني مسني الضر وأنت أرحم الراحمين.",
+"لا إله إلا أنت سبحانك إني كنت من الظالمين.",
+"إني توكلت على الله ربي وربكم.",
+"ما من دابة إلا هو آخذ بناصيتها.",
+"إن ربي على صراط مستقيم.",
+"رب أوزعني أن أشكر نعمتك التي أنعمت علي.",
+"وعلى والدي وأن أعمل صالحا ترضاه.",
+"وأدخلني برحمتك في عبادك الصالحين.",
+"ربنا لا تزغ قلوبنا بعد إذ هديتنا.",
+"وهب لنا من لدنك رحمة.",
+"إنك أنت الوهاب.",
+"ربنا إننا آمنا فاغفر لنا ذنوبنا.",
+"وقنا عذاب النار.",
+"الصابرين والصادقين والقانتين والمنفقين.",
+"والمستغفرين بالأسحار.",
+"شهد الله أنه لا إله إلا هو.",
+"والملائكة وأولو العلم قائما بالقسط.",
+"لا إله إلا هو العزيز الحكيم.",
+"إن الدين عند الله الإسلام.",
+"قل إن كنتم تحبون الله فاتبعوني.",
+"يحببكم الله ويغفر لكم ذنوبكم.",
+"والله غفور رحيم.",
+"ربنا تقبل منا إنك أنت السميع العليم.",
+"وتب علينا إنك أنت التواب الرحيم.",
+"ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة.",
+"وقنا عذاب النار.",
+"ربنا لا تؤاخذنا إن نسينا أو أخطأنا.",
+"ربنا ولا تحمل علينا إصرا كما حملته على الذين من قبلنا.",
+"ربنا ولا تحملنا ما لا طاقة لنا به.",
+"واعف عنا واغفر لنا وارحمنا.",
+"أنت مولانا فانصرنا على القوم الكافرين.",
+"بل الله مولاكم وهو خير الناصرين.",
+"وما جعله الله إلا بشرى لكم.",
+"ولتطمئن قلوبكم به.",
+"وما النصر إلا من عند الله العزيز الحكيم.",
+"حسبنا الله ونعم الوكيل.",
+"فانقلبوا بنعمة من الله وفضل لم يمسسهم سوء.",
+"واتبعوا رضوان الله.",
+"والله ذو فضل عظيم.",
+"الذين قال لهم الناس إن الناس قد جمعوا لكم فاخشوهم.",
+"فزادهم إيمانا وقالوا حسبنا الله ونعم الوكيل.",
+"فآتاهم الله ثواب الدنيا وحسن ثواب الآخرة.",
+"والله يحب المحسنين.",
+"وكأين من نبي قاتل معه ربيون كثير.",
+"فما وهنوا لما أصابهم في سبيل الله.",
+"وما ضعفوا وما استكانوا.",
+"والله يحب الصابرين.",
+"وما كان قولهم إلا أن قالوا ربنا اغفر لنا ذنوبنا.",
+"وإسرافنا في أمرنا وثبت أقدامنا.",
+"وانصرنا على القوم الكافرين.",
+"فاعف عنهم واستغفر لهم وشاورهم في الأمر.",
+"فإذا عزمت فتوكل على الله.",
+"إن ينصركم الله فلا غالب لكم.",
+"وإن يخذلكم فمن ذا الذي ينصركم من بعده.",
+"وعلى الله فليتوكل المؤمنون.",
+"كل نفس ذائقة الموت.",
+"وإنما توفون أجوركم يوم القيامة.",
+"فمن زحزح عن النار وأدخل الجنة فقد فاز.",
+"وما الحياة الدنيا إلا متاع الغرور.",
+"لتبلون في أموالكم وأنفسكم.",
+"ولتسمعن من الذين أوتوا الكتاب من قبلكم.",
+"ومن الذين أشركوا أذى كثيرا.",
+"وإن تصبروا وتتقوا فإن ذلك من عزم الأمور.",
+"لا يغرنك تقلب الذين كفروا في البلاد.",
+"متاع قليل ثم مأواهم جهنم وبئس المهاد.",
+"لكن الذين اتقوا ربهم لهم جنات تجري من تحتها الأنهار.",
+"خالدين فيها نزلا من عند الله.",
+"وما عند الله خير للأبرار."
+ ]
+},
+culture: {
+key: "cat_culture",
+icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+items: [
+"الوقت كالسيف إن لم تقطعه قطعك.",
+"العقل السليم في الجسم السليم.",
+"من جد وجد ومن زرع حصد.",
+"الأرض تدور حول الشمس ومجرة درب التبانة هي موطننا.",
+"أقدم مدينة مأهولة في التاريخ هي مدينة أريحا في فلسطين.",
+"الماء يغلي عند مئة درجة مئوية ويتجمد عند الصفر.",
+"تأسست جامعة القرويين في المغرب وهي أقدم جامعة في العالم.",
+"جبل إفرست هو أعلى قمة جبلية على وجه الأرض.",
+"البحر الميت هو أخفض نقطة على يابسة الكرة الأرضية.",
+"الأسد لا يلتفت لصياح الضفادع.",
+"علم الفلك يدرس الأجرام السماوية والظواهر الكونية.",
+"من طلب العلا سهر الليالي.",
+"الكتاب خير جليس في الزمان.",
+"الحكمة ضالة المؤمن أنى وجدها فهو أحق بها.",
+"سور الصين العظيم هو أطول بناء صنعه الإنسان.",
+"الأمازون هو أكبر نهر في العالم من حيث حجم تدفق المياه.",
+"المحيط الهادئ هو أكبر محيطات الكرة الأرضية.",
+"الدماغ البشري يستهلك نحو عشرين بالمئة من طاقة الجسم.",
+"ابن سينا هو من أشهر علماء الطب في التاريخ الإسلامي.",
+"الخوارزمي هو مؤسس علم الجبر وأول من استخدم الصفر.",
+"تاج محل في الهند يعتبر من أجمل المعالم المعمارية في العالم.",
+"الطاقة لا تفنى ولا تستحدث من العدم بل تتحول من شكل لآخر.",
+"الضوء ينتقل بسرعة تقارب ثلاثمائة ألف كيلومتر في الثانية.",
+"الأكسجين يشكل حوالي إحدى وعشرين بالمئة من الغلاف الجوي.",
+"القناعة كنز لا يفنى.",
+"العلم يبني بيوتا لا عماد لها والجهل يهدم بيوت العز والشرف.",
+"قطرة الماء تثقب الحجر لا بالعنف بل بالمثابرة.",
+"الابتسامة لغة لا تحتاج إلى ترجمة.",
+"أول من اخترع الطباعة هو يوهانس غوتنبرغ.",
+"الجاذبية الأرضية هي القوة التي تبقينا على سطح الكوكب.",
+"الذهب معدن لا يصدأ ولا يتآكل بمرور الزمن.",
+"الماس هو أصلب مادة طبيعية معروفة.",
+"القلب السليم يضخ الدم آلاف المرات يوميا دون توقف.",
+"التاريخ هو معلم الأجيال ومخزن العبر.",
+"الحضارة الفرعونية تركت إرثا معماريا وثقافيا هائلا.",
+"الكندي هو أول فيلسوف عربي في الإسلام.",
+"الجاحظ من أشهر أدباء العصر العباسي.",
+"المتنبي يعتبر من أعظم شعراء العرب.",
+"البيروني قدم إسهامات عظيمة في علم الفلك والرياضيات.",
+"الفارابي لقب بالمعلم الثاني بعد أرسطو.",
+"ابن خلدون هو مؤسس علم الاجتماع الحديث.",
+"الإدريسي رسم واحدة من أدق خرائط العالم في العصور الوسطى.",
+"الرازي كان له فضل كبير في تطوير الكيمياء والطب.",
+"ابن بطوطة هو أشهر رحالة في التاريخ الإسلامي.",
+"اللسان ليس له عظام لكنه يكسر القلوب.",
+"الكرم هو أن تعطي أكثر مما تستطيع والغرور هو أن تأخذ أقل مما تحتاج.",
+"الصمت حكمة وقليل فاعله.",
+"العجلة من الشيطان والتأني من الرحمن.",
+"من حفر حفرة لأخيه وقع فيها.",
+"الطيور على أشكالها تقع.",
+"الجزائر هي أكبر دولة إفريقية من حيث المساحة.",
+"روسيا هي أكبر دولة في العالم من حيث المساحة.",
+"الفاتيكان هي أصغر دولة في العالم.",
+"نهر النيل هو أطول نهر في العالم.",
+"الصحراء الكبرى هي أكبر صحراء حارة في العالم.",
+"البطريق طائر يعيش في النصف الجنوبي من الكرة الأرضية.",
+"النحل حشرة مفيدة تنتج العسل وتلقح النباتات.",
+"الخفاش هو الثديي الوحيد القادر على الطيران الحقيقي.",
+"الحوت الأزرق هو أكبر حيوان على وجه الأرض.",
+"الدلفين حيوان بحري ذكي وودود للإنسان.",
+"الجمل يلقب بسفينة الصحراء لقدرته على تحمل العطش.",
+"الفيل يتميز بذاكرة قوية وذكاء حاد.",
+"الأسد يلقب بملك الغابة لزئيره وقوته.",
+"الفهد هو أسرع حيوان بري على وجه الأرض.",
+"الصقر طائر جارح يتميز بقوة البصر وسرعة الانقضاض.",
+"الحمامة ترمز للسلام والمحبة في كثير من الثقافات.",
+"الوردة الحمراء ترمز للحب والعاطفة.",
+"شجرة الزيتون ترمز للسلام والبركة.",
+"النخلة شجرة مباركة وثمرها التمر.",
+"التفاحة فاكهة مفيدة للصحة والوقاية من الأمراض.",
+"البرتقال غني بفيتامين سي المقوي للمناعة.",
+"العسل شفاء للناس ومصدر للطاقة.",
+"الحليب غذاء متكامل غني بالكالسيوم.",
+"الخبز هو الغذاء الأساسي لكثير من شعوب العالم.",
+"الأرز يعتبر الغذاء الرئيسي في قارة آسيا.",
+"القهوة مشروب منبه يحظى بشعبية عالمية.",
+"الشاي هو المشروب الأكثر استهلاكا بعد الماء.",
+"السكر يستخرج من قصب السكر أو بنجر السكر.",
+"الملح يعزز نكهة الطعام ويحفظه من التلف.",
+"الذهب والفضة معادن نفيسة تستخدم في الزينة والنقود.",
+"الحديد معدن أساسي في الصناعة والبناء.",
+"النحاس موصل جيد للكهرباء والحرارة.",
+"الألمنيوم معدن خفيف ومقاوم للصدأ.",
+"البلاستيك مادة صناعية متعددة الاستخدامات.",
+"الورق يخترع من لب الخشب ويستخدم في الكتابة والطباعة.",
+"الإنترنت شبكة عنكبوتية تربط العالم بأسره.",
+"الحاسوب جهاز إلكتروني يعالج البيانات بسرعة فائقة.",
+"الهاتف الذكي يجمع بين ميزات الهاتف والحاسوب.",
+"الكاميرا تلتقط الصور وتسجل اللحظات.",
+"التلفاز ينقل الصورة والصوت عبر مسافات بعيدة.",
+"السيارة وسيلة نقل برية شائعة الاستخدام.",
+"الطائرة وسيلة نقل جوية سريعة ومريحة.",
+"السفينة وسيلة نقل بحرية تحمل الركاب والبضائع.",
+"القطار وسيلة نقل برية تسير على السكك الحديدية.",
+"الدراجة وسيلة نقل صديقة للبيئة ومفيدة للصحة.",
+"الساعة آلة لقياس الوقت بدقة.",
+"البوصلة تحدد الاتجاهات الجغرافية.",
+"المجهر يكبر الأشياء الصغيرة جدا.",
+"التلسكوب يقرب الأجرام السماوية البعيدة.",
+"الميزان أداة لقياس الكتلة والوزن."
+ ]
+},
+poetry: {
+key: "cat_poetry",
+icon: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+items: [
+"وما نيل المطالب بالتمني ولكن تؤخذ الدنيا غلابا.",
+"دقات قلب المرء قائلة له إن الحياة دقائق وثواني.",
+"تجري الرياح بما لا تشتهي السفن.",
+"إذا الشعب يوما أراد الحياة فلا بد أن يستجيب القدر.",
+"السيف أصدق أنباء من الكتب في حده الحد بين الجد واللعب.",
+"الخيل والليل والبيداء تعرفني والسيف والرمح والقرطاس والقلم.",
+"ومن هاب أسباب المنايا ينلنه وإن يرق أسباب السماء بسلم.",
+"إذا غامرت في شرف مروم فلا تقنع بما دون النجوم.",
+"فطعم الموت في أمر حقير كطعم الموت في أمر عظيم.",
+"ولست أرى السعادة جمع مال ولكن التقي هو السعيد.",
+"أعلل النفس بالآمال أرقبها ما أضيق العيش لولا فسحة الأمل.",
+"ذو العقل يشقى في النعيم بعقله وأخو الجهالة في الشقاوة ينعم.",
+"لا تحسبن المجد تمرا أنت آكله لن تبلغ المجد حتى تلعق الصبرا.",
+"لكل شيء إذا ما تم نقصان فلا يغر بطيب العيش إنسان.",
+"هي الأمور كما شاهدتها دول من سره زمن ساءته أزمان.",
+"الأم مدرسة إذا أعددتها أعددت شعبا طيب الأعراق.",
+"وإذا أصيب القوم في أخلاقهم فأقم عليهم مأتما وعويلا.",
+"لا تنه عن خلق وتأتي مثله عار عليك إذا فعلت عظيم.",
+"وإنما الأمم الأخلاق ما بقيت فإن هم ذهبت أخلاقهم ذهبوا.",
+"يعطيك من طرف اللسان حلاوة ويروغ منك كما يروغ الثعلب.",
+"إن الشباب والفراغ والجدة مفسدة للمرء أي مفسدة.",
+"الرأي قبل شجاعة الشجعان هو أول وهي المحل الثاني.",
+"ولم أر في عيوب الناس شيئا كنقص القادرين على التمام.",
+"على قدر أهل العزم تأتي العزائم وتأتي على قدر الكرام المكارم.",
+"وتعظم في عين الصغير صغارها وتصغر في عين العظيم العظائم.",
+"أنا الذي نظر الأعمى إلى أدبي وأسمعت كلماتي من به صمم.",
+"ومن يك ذا فم مر مريض يجد مرا به الماء الزلالا.",
+"إذا رأيت نيوب الليث بارزة فلا تظنن أن الليث يبتسم.",
+"وما الحسن في وجه الفتى شرفا له إذا لم يكن في فعله والخلائق.",
+"نبكي على الدنيا وما من معشر جمعتهم الدنيا فلم يتفرقوا.",
+"أين القصور أبا حسن وأربابها شط المزار وعنهم انقطع الخبر.",
+"كفى بك داء أن ترى الموت شافيا وحسب المنايا أن يكن أمانيا.",
+"وما كل ما يتمنى المرء يدركه تجري الرياح بما لا تشتهي السفن.",
+"ضاقت فلما استحكمت حلقاتها فرجت وكنت أظنها لا تفرج.",
+"قم للمعلم وفه التبجيلا كاد المعلم أن يكون رسولا.",
+"نعيب زماننا والعيب فينا وما لزماننا عيب سوانا.",
+"وقد ينبت المرعى على دمن الثرى وتبقى حزازات النفوس كما هيا.",
+"ولولا المشقة ساد الناس كلهم الجود يفقر والإقدام قتال.",
+"وما المرء إلا بإخوانه كما تقبض الكف بالمعصم.",
+"ولا خير في ود امرئ متلون إذا الريح مالت مال حيث تميل.",
+"تغرد الطيور في صباح مشرق لتعزف ألحان الأمل والحياة.",
+"الليل يستر العيوب والنهار يفضح الأسرار.",
+"القلب يهفو إلى الذكريات الجميلة رغم قسوة الأيام.",
+"الدموع تغسل أحزان الروح وتطهر القلب.",
+"الابتسامة تضيء الوجه وتنشر الفرح في الأرجاء.",
+"الصمت لغة العظماء وكلام الجهلاء.",
+"الحب شعور نقي يجمع القلوب على الخير.",
+"الصداقة كنز ثمين لا يقدر بثمن.",
+"الأخوة رباط وثيق يجمع العائلة على المحبة.",
+"الوطن هو الملجأ الآمن والحضن الدافئ.",
+"الغربة مرارة قاسية لا يعرفها إلا من جربها.",
+"الشوق نار تحرق القلوب وتدمع العيون.",
+"الأمل شمعة تضيء دروب الحياة المظلمة.",
+"اليأس عدو خفي يقتل الطموح والأحلام.",
+"النجاح ثمرة العمل الجاد والمثابرة.",
+"الفشل درس مفيد يعلمنا كيف ننهض من جديد.",
+"الحياة رحلة قصيرة يجب أن نعيشها بكل لحظاتها.",
+"الموت حقيقة مؤكدة لا مفر منها.",
+"الزمن نهر جارف لا يتوقف عن الجريان.",
+"القدر سيف مسلط على رقاب العباد.",
+"الصبر مفتاح الفرج وبلسم الجروح.",
+"التسامح لغة الأقوياء وعفو الكرام.",
+"الانتقام نار تحرق صاحبها قبل عدوه.",
+"الغضب عاصفة هوجاء تدمر كل ما في طريقها.",
+"الحسد مرض خبيث يأكل الحسنات كما تأكل النار الحطب.",
+"الغرور مقبرة النجاح وبداية النهاية.",
+"التواضع صفة العظماء وتاج الكرام.",
+"الكرم شجرة طيبة تثمر المحبة والتقدير.",
+"البخل مرض نفسي يقتل الإنسانية.",
+"الصدق منجاة والكذب مهواة.",
+"الأمانة صفة الأنبياء وخلق المؤمنين.",
+"الخيانة طعنة في الظهر لا تغتفر.",
+"الوفاء عملة نادرة في زمن الخداع.",
+"الظلم ظلمات يوم القيامة وعاقبته وخيمة.",
+"العدل أساس الملك وقوام الحياة.",
+"الحرية هبة إلهية لا تقدر بثمن.",
+"العبودية ذل وهوان لا يرضاه حر.",
+"العلم نور يضيء دروب الجهل والظلام.",
+"الجهل آفة تدمر المجتمعات وتؤخر الأمم.",
+"العمل شرف وعزة وكرامة للإنسان.",
+"البطالة مقبرة الطاقات ومصنع الآفات.",
+"الشباب ربيع الحياة وأمل المستقبل.",
+"الشيخوخة وقار وحكمة وخبرة.",
+"الصحة تاج على رؤوس الأصحاء لا يراه إلا المرضى.",
+"المرض ابتلاء واختبار من الله.",
+"السعادة شعور داخلي لا يشترى بالمال.",
+"الشقاء نتيجة البعد عن الله واتباع الهوى.",
+"الدنيا دار ممر والآخرة دار مقر.",
+"الجنة حلم المؤمنين ومبتغى الصالحين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين.",
+"النار عذاب أليم ومأوى الكافرين."
+ ]
+}
+};
+// === رسائل صباحية (للبطاقة الرئيسية فقط) ===
+const MORNING_ALERTS = [
+"صباح جديد وفرصة جديدة لبداية رائعة.",
+"استيقظ وابتسم فالحياة تخبئ لك الكثير من الجمال.",
+"دع شمس الصباح تشرق في قلبك قبل أن تشرق في السماء.",
+"كل صباح هو صفحة بيضاء فاكتب فيها أجمل الكلمات.",
+"ابدأ يومك بالامتنان والشكر على نعم الله التي لا تحصى.",
+"الأمل يتجدد مع كل إشراقة شمس.",
+"صباحك مليء بالبركة والتوفيق والنجاح.",
+"لا تدع الأمس يسرق من جمال اليوم.",
+"افتح نافذتك واستنشق هواء الصباح النقي.",
+"صباح الخير لقلبك الطاهر وروحك الجميلة.",
+"اجعل من صباحك بداية لتحقيق أحلامك.",
+"النور الذي يملأ الكون هذا الصباح قادر على إضاءة طريقك.",
+"صباحك تفاؤل وأمل وسعادة لا تنتهي.",
+"توكل على الله وابدأ يومك بنشاط وحيوية.",
+"كل يوم جديد هو هدية فاستمتع بها إلى أقصى حد.",
+"صباح الإنجازات والخطوات الواثقة نحو النجاح.",
+"لا شيء يضاهي جمال البدايات الصباحية الهادئة.",
+"ابتسم في وجه الصباح وتفاءل بما هو قادم.",
+"صباح السعادة التي تنتظرك خلف أبواب السعي والعمل.",
+"دع طاقة الصباح الإيجابية تسري في عروقك.",
+"صباحك محبة وسلام وراحة بال.",
+"استقبل يومك بقلب مفتوح وعقل مستنير.",
+"الصباح هو الوقت المثالي لتجديد النوايا والهمم.",
+"صباح مشرق يحمل معه بشائر الخير والفرح.",
+"لا تنتظر السعادة بل اصنعها بيدك هذا الصباح.",
+"صباحك جميل كجمال روحك وصفاء قلبك.",
+"اجعل من كل صباح فرصة لتكون نسخة أفضل من نفسك.",
+"صباح الورد والأزهار المتفتحة والأمل المتجدد.",
+"استيقظ بكل نشاط فالعالم ينتظر إبداعك.",
+"صباح القوة والعزيمة والإصرار على بلوغ القمة.",
+"لا تدع عثرات الأمس تعيق تقدمك اليوم.",
+"صباحك معطر بذكر الله والصلاة على رسوله.",
+"ابدأ يومك بابتسامة تضيء لك الدروب المظلمة.",
+"الصباح يخبرك أن الظلام لا يدوم وأن النور قادم لا محالة.",
+"صباح الخير لكل من يبحث عن الخير في هذا العالم.",
+"اجعل نهارك مليئا بالإنجازات الصغيرة التي تصنع الفارق.",
+"صباحك رضا وتوفيق من رب العالمين.",
+"استيقظ وانطلق نحو أهدافك بكل ثقة وإيمان.",
+"الصباح هو تذكير بأن الحياة تستحق أن تعاش بحب.",
+"صباح النقاء والصفاء والقلوب المطمئنة.",
+"اجعل أول فكرة في صباحك فكرة إيجابية تدفعك للأمام.",
+"صباحك مليء بالفرص التي تنتظر من يغتنمها.",
+"لا تفقد الأمل فالصباح يحمل معه دائما بدايات جديدة.",
+"صباح العطاء والعمل الجاد والمثابرة الدائمة.",
+"استقبل أشعة الشمس وكأنها رسالة حب من السماء.",
+"صباحك هادئ ومريح وخال من الهموم والأحزان.",
+"اجعل من صباحك محطة للتزود بالطاقة الإيجابية.",
+"صباح الخير للذين يزرعون الأمل في قلوب الآخرين.",
+"استيقظ واصنع من يومك قصة نجاح تلهم الجميع.",
+"صباح البشائر الجميلة والأخبار السعيدة.",
+"لا تجعل الصباح يمر دون أن تترك فيه أثرا طيبا.",
+"صباحك مشرق بابتسامتك التي تبهج من حولك.",
+"ابدأ يومك بكلمة طيبة وفعل جميل ونية صادقة.",
+"الصباح هو الوقت الأنسب لترتيب أفكارك وتحديد أولوياتك.",
+"صباح النجاح والتفوق في كل خطوة تخطوها.",
+"استمتع بفنجان قهوتك الصباحي وانطلق بثبات.",
+"صباحك مليء بالشغف والحماس لتحقيق ما تريد.",
+"لا تقبل بأقل من يوم رائع تستحقه بجدارة.",
+"صباح الخير للقلوب التي تنبض بالحب والسلام.",
+"اجعل من الصباح بداية لرحلة جديدة نحو التميز.",
+"صباحك بركة في الوقت والجهد والرزق.",
+"استيقظ وواجه العالم بشجاعة وقوة لا تلين.",
+"الصباح يمنحك فرصة لمحو أخطاء الأمس والبدء من جديد.",
+"صباح النور والسرور والورد المنثور.",
+"اجعل يومك زاخرا بالأعمال الصالحة والخطوات النافعة.",
+"صباح الخير لكل من يسعى لتحسين حياته وحياة من حوله.",
+"استقبل الصباح بقلب شاكر ونفس راضية.",
+"صباحك مليء بالنشاط والحيوية والطاقة المتجددة.",
+"لا تدع شيئا يفسد عليك متعة هذا الصباح الجميل.",
+"صباح الأمل الذي لا يخبو والعزيمة التي لا تفتر.",
+"ابدأ يومك بممارسة الرياضة لتنشيط جسمك وعقلك.",
+"صباح الخير للذين يتحدون الصعاب ويصنعون المستحيل.",
+"اجعل من صباحك لوحة فنية ترسم عليها أجمل الأمنيات.",
+"صباحك هدوء وسكينة تريح النفس وتهدئ البال.",
+"استيقظ وتذكر أنك قادر على تحقيق العجائب.",
+"الصباح هو هدية من الله فاستثمرها في طاعته ورضاه.",
+"صباح الخير لكل روح تتنفس الأمل وتنبض بالحياة.",
+"اجعل نهارك شاهدا على إصرارك وتفانيك في العمل.",
+"صباحك مشرق بأنوار اليقين والثقة بالله.",
+"استقبل يومك بابتسامة تذيب جبال الهموم والأحزان.",
+"الصباح يدعوك لنسيان الماضي والتطلع لمستقبل أفضل.",
+"صباح السعادة التي تنبع من داخلك وتضيء عالمك.",
+"اجعل من الصباح محطة لانطلاق نحو آفاق جديدة.",
+"صباح الخير للذين يبنون أحلامهم بصمت وصبر.",
+"استيقظ واجعل من يومك تحفة معمارية من الإنجازات.",
+"صباحك مليء باللحظات السعيدة والمفاجآت السارة.",
+"لا تفوت فرصة الاستمتاع بنسيم الصباح العليل.",
+"صباح العزيمة التي تكسر حواجز المستحيل.",
+"ابدأ يومك بقرارات حاسمة وخطوات واثقة.",
+"صباح الخير لكل من يزرع الابتسامة في وجوه العابرين.",
+"اجعل نهارك زاخرا بالحب والعطاء والتسامح.",
+"صباحك مفعم بالطمأنينة والسلام الداخلي.",
+"استيقظ وتأمل في جمال خلق الله من حولك.",
+"الصباح يذكرك بأن كل نهاية هي بداية لشيء جديد.",
+"صباح الخير للقلوب الصافية التي لا تعرف الحقد.",
+"اجعل من يومك فرصة لتعلم شيء جديد ومفيد.",
+"صباحك مليء بالبركات والخيرات التي لا تنضب.",
+"استقبل الصباح بروح متفائلة ونظرة إيجابية للحياة.",
+"الصباح هو الوقت الأمثل لبناء ذكريات جميلة تدوم.",
+"صباح السعادة والنجاح والتوفيق في كل أمورك."
+];
+let state = JSON.parse(localStorage.getItem(STORE_KEY)) || {
+lang: 'ar', dark: true, glass: true, mode: 'both', duration: 10000, interval: '0', showImage: false, showHomeCards: true,
+quoteSource: 'all', schedules: [], groups: { 'favorites': [], 'myQuotes': [] },
+stats: { drops: 0, likes: 0, dhikr: 0, culture: 0, selfDev: 0, poetry: 0, days: 1 }
+};
+const QatraNative = window.Capacitor?.Plugins?.QatraNative;
+function getTranslation(key) { return (DICT[state.lang] && DICT[state.lang][key]) ? DICT[state.lang][key] : (DICT['en'][key] || key); }
+function safeOn(id, eventType, handler) { const el = document.getElementById(id); if (el) el.addEventListener(eventType, handler); }
+function applyState() {
+localStorage.setItem(STORE_KEY, JSON.stringify(state));
+document.body.classList.toggle('dark-mode', state.dark);
+document.body.classList.toggle('glass-active', state.glass);
+document.documentElement.dir = (state.lang === 'ar') ? 'rtl' : 'ltr';
+document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = getTranslation(el.getAttribute('data-i18n')); });
+const hc = document.getElementById('homeCardsContainer');
+if(hc) hc.style.display = state.showHomeCards ? 'block' : 'none';
+const c = (id, val) => { const el = document.getElementById(id); if(el) el.checked = val; };
+const s = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+c('glassToggle', state.glass); c('imageToggle', state.showImage); c('homeCardsToggle', state.showHomeCards);
+s('langSelect', state.lang); s('notifModeSetting', state.mode);
+s('dropDurationSetting', state.duration);
+document.querySelectorAll('.custom-radio-item').forEach(item => {
+if(item.dataset.value === state.quoteSource) item.classList.add('active');
+else item.classList.remove('active');
+});
+const optVals = ['0','30','60','180','720','1440'];
+const optKeys = ['stop_repeat','every_30','every_1h','every_3h','every_12h','every_24h'];
+const intSel = document.getElementById('intervalSelect');
+if(intSel) {
+intSel.innerHTML = optVals.map((v,i) => `<option value="${v}">${getTranslation(optKeys[i])}</option>`).join('');
+intSel.value = state.interval;
+}
+updateHomeCards(); updateStatsChart(); renderGarden(); renderSchedules();
+}
+safeOn('langSelect', 'change', e => { state.lang = e.target.value; applyState(); syncNativeAlarms(); });
+safeOn('imageToggle', 'change', e => { state.showImage = e.target.checked; applyState(); syncNativeAlarms(); });
+safeOn('homeCardsToggle', 'change', e => { state.showHomeCards = e.target.checked; applyState(); });
+safeOn('intervalSelect', 'change', e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); });
+window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); syncNativeAlarms(); };
+// --- استماع للقلب من القطرة في الأندرويد ---
+if (QatraNative) {
+QatraNative.addListener('quoteLiked', (info) => {
+state.stats.likes++;
+if (state.stats[info.category] !== undefined) state.stats[info.category]++;
+else if (info.category === 'quran') state.stats.dhikr++;
+else if (info.category === 'myGroups') state.stats.selfDev++;
+applyState();
+});
+}
+function updateStatsChart() {
+const drops = state.stats.likes; // استخدام التفاعل كمؤشر أساسي
+const days = state.stats.days;
+const maxD = Math.max(drops, 50);
+const c1 = document.getElementById('chartDropsCircle');
+if(c1) c1.style.strokeDashoffset = 100.5 - (100.5 * (drops/maxD));
+const c2 = document.getElementById('chartDaysCircle');
+if(c2) c2.style.strokeDashoffset = 100.5 - (100.5 * (Math.min(days,30)/30));
+const txt1 = document.getElementById('chartDropsVal'); if(txt1) txt1.innerText = drops;
+const txt2 = document.getElementById('chartDaysVal'); if(txt2) txt2.innerText = days;
+}
+function updateHomeCards() {
+const now = new Date();
+let nextDrop = getTranslation('no_reminders');
+if (state.schedules.length > 0) {
+const next = state.schedules.map(s => {
+const [h,m] = s.time.split(':');
+const d = new Date(); d.setHours(h,m,0);
+if(d < now) d.setDate(d.getDate()+1);
+return d;
+}).sort((a,b) => a-b)[0];
+const diffMins = Math.round((next - now)/60000);
+nextDrop = `بعد ${diffMins} دقيقة`;
+}
+const ndEl = document.getElementById('nextDropTimeText'); if(ndEl) ndEl.innerText = nextDrop;
+let catText = state.quoteSource === 'all' ? getTranslation('all_categories') : (state.quoteSource === 'myGroups' ? getTranslation('my_library') : getTranslation('cat_'+state.quoteSource));
+const ncatEl = document.getElementById('nextDropCategoryText'); if(ncatEl) ncatEl.innerText = `الفئة: ${catText}`;
+const tiEl = document.getElementById('todayImpactText'); if(tiEl) tiEl.innerText = `لقد تفاعلت مع ${state.stats.likes} قطرات اليوم`;
+const tipEl = document.getElementById('todayImpactProgress'); if(tipEl) tipEl.style.width = Math.min((state.stats.likes / 10)*100, 100) + '%';
+// تحديث رسالة "لحظتك الحالية" من الرسائل الصباحية المخصصة
+const cmEl = document.getElementById('currentMomentText');
+if(cmEl) cmEl.innerText = MORNING_ALERTS[Math.floor(Math.random() * MORNING_ALERTS.length)];
+}
+// --- الأيام والمواعيد والبرمجة الذكية ---
+const WEEK_DAYS = {
+ar: [{id:0,n:"أحد"},{id:1,n:"إثن"},{id:2,n:"ثلا"},{id:3,n:"أرب"},{id:4,n:"خمي"},{id:5,n:"جمع"},{id:6,n:"سبت"}],
+en: [{id:0,n:"Sun"},{id:1,n:"Mon"},{id:2,n:"Tue"},{id:3,n:"Wed"},{id:4,n:"Thu"},{id:5,n:"Fri"},{id:6,n:"Sat"}]
+};
+let currentSelectedDays = new Set([0,1,2,3,4,5,6]);
+function renderDaysGrid() {
+const dg = document.getElementById('daysGrid');
+if(dg) dg.innerHTML = (WEEK_DAYS[state.lang] || WEEK_DAYS['en']).map(d => `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.n}</div>`).join('');
+}
+window.toggleDay = (id) => { currentSelectedDays.has(id) ? currentSelectedDays.delete(id) : currentSelectedDays.add(id); renderDaysGrid(); };
+safeOn('applySmartScheduleBtn', 'click', () => {
+const count = parseInt(document.getElementById('smartDropsCount').value);
+const start = document.getElementById('smartTimeStart').value;
+const end = document.getElementById('smartTimeEnd').value;
+if(count > 0 && start && end) {
+const [sh, sm] = start.split(':').map(Number); const [eh, em] = end.split(':').map(Number);
+let startMins = sh*60 + sm; let endMins = eh*60 + em;
+if(endMins <= startMins) endMins += 24*60;
+const interval = (endMins - startMins) / count;
+state.schedules = [];
+for(let i=0; i<count; i++) {
+let tMins = startMins + Math.round(i*interval);
+let h = Math.floor((tMins%1440)/60).toString().padStart(2,'0');
+let m = (tMins%60).toString().padStart(2,'0');
+state.schedules.push({id: Math.floor(Math.random()*10000), time: `${h}:${m}`, days: [0,1,2,3,4,5,6]});
+}
+applyState(); syncNativeAlarms();
+}
+});
+safeOn('saveScheduleBtn', 'click', () => {
+const tEl = document.getElementById('customTime');
+if(!tEl) return;
+const t = tEl.value;
+if(t && currentSelectedDays.size > 0) {
+state.schedules.push({id: Math.floor(Math.random()*10000), time: t, days: Array.from(currentSelectedDays)});
+applyState(); renderSchedules(); syncNativeAlarms();
+} else { alert(getTranslation('choose_time')); }
+});
+function renderSchedules() {
+const list = document.getElementById('savedSchedulesList');
+if(list) list.innerHTML = state.schedules.map((s, i) => `<div class="modern-row" style="background:var(--bg); padding:18px; border-radius:18px; margin-bottom:12px; border:1px solid var(--border); display:flex; justify-content:space-between;"><strong style="font-size:18px;">${s.time}</strong> <button onclick="deleteSchedule(${i})" style="background:rgba(255,0,0,0.1); border:none; color:#ff4d4d; font-weight:bold; cursor:pointer; padding:8px 16px; border-radius:10px;">${getTranslation('delete')}</button></div>`).join('');
+updateHomeCards();
+}
+window.deleteSchedule = (i) => { if(QatraNative && state.schedules[i]) QatraNative.cancel({id: state.schedules[i].id}); state.schedules.splice(i,1); applyState(); syncNativeAlarms(); };
+// --- الحديقة المتعددة الأشجار ---
+function getTreeStage(score) {
+const G = [{ m: 5, e: '🌱' }, { m: 20, e: '🌿' }, { m: 50, e: '🪴' }, { m: 100, e: '🌳' }, { m: 200, e: '🌸' }];
+for(let i=0; i<G.length; i++) if(score < G[i].m) return G[i].e; return '🌲';
+}
+function renderGarden() {
+const s = state.stats;
+const tEl = (id, e) => { const x = document.getElementById(id); if(x) x.innerText = e; };
+tEl('treeEmoji_dhikr', getTreeStage(s.dhikr)); tEl('treeEmoji_culture', getTreeStage(s.culture));
+tEl('treeEmoji_selfDev', getTreeStage(s.selfDev)); tEl('treeEmoji_poetry', getTreeStage(s.poetry));
+const tot = s.dhikr + s.culture + s.selfDev + s.poetry;
+const pEl = document.getElementById('totalAwarenessProgress'); if(pEl) pEl.style.width = Math.min((tot/500)*100, 100)+'%';
+tEl('totalDaysActiveText', `تفاعلت لمدة ${s.days} أيام`);
+}
+// --- المكتبة والمجموعات (أيقونات احترافية للقلب والنسخ) ---
+window.showCategoryList = () => { document.getElementById('categorySheet').classList.add('show'); renderCategories(); }
+window.showGroupsManager = () => { document.getElementById('groupsManagerArea').style.display = 'block'; renderGroupsList(); };
+function renderCategories() {
+const container = document.getElementById('catSheetContent');
+if(!container) return;
+container.innerHTML = Object.keys(QUOTES_DB).map(key => {
+const cat = QUOTES_DB[key];
+return `<div class="glass-card action-card" onclick="openQuotesList('${key}')" style="margin-bottom:10px;">
+<div class="card-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg></div>
+<div class="card-info"><div class="card-title">${getTranslation(cat.key)}</div></div>
+<div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
+</div>`;
+}).join('');
+}
+window.openQuotesList = (id) => {
+const cat = QUOTES_DB[id];
+document.getElementById('catSheetTitle').innerText = getTranslation(cat.key);
+const content = document.getElementById('catSheetContent');
+if(content) {
+// إتاحة النسخ بدلاً من الاختيار
+content.innerHTML = cat.items.slice(0, 50).map(q => {
+return `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);">
+<div style="font-size:15px; font-weight:700;">${q}</div>
+<div style="display:flex; gap:8px;">
+<button onclick="copyQuote('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:var(--primary); cursor:pointer;">
+<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+</button>
+<button onclick="addToFavorites('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:var(--secondary); cursor:pointer;">
+<svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+</button>
+</div>
+</div>`;
+}).join('');
+}
+};
+window.copyQuote = (txt) => {
+navigator.clipboard.writeText(txt).then(() => {
+const toast = document.getElementById('copyToast');
+if(toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2000); }
+});
+};
+window.addToFavorites = (txt) => {
+if(!state.groups['favorites'].includes(txt)) {
+state.groups['favorites'].push(txt); applyState(); alert('تمت الإضافة للمفضلة');
+}
+}
+function renderGroupsList() {
+const list = document.getElementById('customGroupsList');
+if(!list) return;
+list.innerHTML = Object.keys(state.groups).filter(k=> k!=='favorites' && k!=='myQuotes').map(k => `
+<div class="action-card" style="padding:15px; border:1px solid var(--border); border-radius:16px; margin-bottom:10px;" onclick="openGroup('${k}')">
+<div class="card-info"><div class="card-title">${k}</div><div class="card-sub">${state.groups[k].length} عبارة</div></div>
+<button onclick="event.stopPropagation(); deleteGroup('${k}')" class="delete-btn">حذف</button>
+</div>
+`).join('');
+}
+safeOn('createGroupBtn', 'click', () => {
+const name = document.getElementById('newGroupNameInput').value.trim();
+if(name && !state.groups[name]) { state.groups[name] = []; document.getElementById('newGroupNameInput').value=''; applyState(); renderGroupsList(); }
+});
+window.deleteGroup = (k) => { delete state.groups[k]; applyState(); renderGroupsList(); };
+let currentOpenGroup = "";
+window.openGroup = (k) => {
+currentOpenGroup = k;
+const titleEl = document.getElementById('groupViewTitle'); if(titleEl) titleEl.innerText = (k==='favorites'?'مفضلاتي':(k==='myQuotes'?'عباراتي الخاصة':k));
+const addDiv = document.getElementById('addToGroupDiv'); if(addDiv) addDiv.style.display = (k==='favorites' ? 'none' : 'flex');
+const c = document.getElementById('groupViewContent');
+if(c) c.innerHTML = state.groups[k].map((q,i) => `<div class="my-quote-item"><div style="flex:1;">${q}</div><button onclick="removeQuoteFromGroup('${k}',${i})" class="delete-btn">حذف</button></div>`).join('');
+document.getElementById('groupViewSheet').classList.add('show');
+};
+window.removeQuoteFromGroup = (k, i) => { state.groups[k].splice(i,1); applyState(); openGroup(k); };
+window.addQuoteToCurrentGroup = () => {
+const input = document.getElementById('newGroupQuoteInput');
+if(input && input.value.trim() !== "") {
+state.groups[currentOpenGroup].push(input.value.trim());
+input.value = ""; applyState(); openGroup(currentOpenGroup);
+}
+}
+// --- القطرة السينمائية ودمج المصادر ---
+function getRandomQuote() {
+let pool = [];
+let categoryKey = state.quoteSource;
+if (state.quoteSource === 'all') {
+const keys = Object.keys(QUOTES_DB);
+categoryKey = keys[Math.floor(Math.random() * keys.length)];
+pool = QUOTES_DB[categoryKey].items;
+} else if (state.quoteSource === 'myGroups') {
+Object.keys(state.groups).forEach(k => { pool = pool.concat(state.groups[k]); });
+if(pool.length === 0) pool = ["أضف عبارات في مجموعاتك لتظهر هنا."];
+categoryKey = "myGroups";
+} else {
+pool = QUOTES_DB[state.quoteSource].items;
+}
+const quote = pool[Math.floor(Math.random() * pool.length)];
+return { quote, categoryKey };
+}
+window.fireCinematic = async () => {
+const { quote, categoryKey } = getRandomQuote();
+const qtEl = document.getElementById('dailyQuoteText'); if (qtEl) qtEl.textContent = `"${quote}"`;
+if (QatraNative) {
+state.stats.drops++; applyState();
+await QatraNative.showDrop({ quote: quote, category: categoryKey, duration: state.duration, fullScreen: true, showImage: state.showImage }).catch(e=>{});
+}
+};
+function syncNativeAlarms() {
+if(!QatraNative) return;
+QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote().quote, category: state.quoteSource, fullScreen: true, showImage: state.showImage }).catch(e=>{});
+state.schedules.forEach(s => {
+const rQuote = getRandomQuote();
+QatraNative.schedule({id: s.id, time: s.time, days: s.days, mode: state.mode, duration: state.duration, quote: rQuote.quote, category: rQuote.categoryKey, fullScreen: true, showImage: state.showImage}).catch(e=>{});
+});
+}
+// --- التأمل (المشغل العائم المتطور) ---
+let randPlayer = new Audio();
+let audioUpdateInterval;
+window.playAudio = (type, title) => {
+randPlayer.pause();
+const aMap = { 
+'rain': 'https://actions.google.com/sounds/v1/water/rain_on_roof.ogg', 
+'sea': 'https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg', 
+'forest': 'https://actions.google.com/sounds/v1/water/stream_flowing_slowly.ogg',
+'birds': 'https://actions.google.com/sounds/v1/animals/birds_singing.ogg',
+'quran1': 'https://server8.mp3quran.net/afs/001.mp3',
+'quran2': 'https://server8.mp3quran.net/afs/018.mp3',
+'quran3': 'https://server8.mp3quran.net/afs/067.mp3'
+};
+if(aMap[type]) { 
+randPlayer.src = aMap[type]; 
+randPlayer.play();
+document.getElementById('audioTitleText').innerText = title || "جاري التشغيل";
+document.getElementById('globalAudioPlayer').classList.add('show');
+document.getElementById('audioPlayPauseBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+clearInterval(audioUpdateInterval);
+audioUpdateInterval = setInterval(() => {
+if (randPlayer.duration) {
+const p = (randPlayer.currentTime / randPlayer.duration) * 100;
+document.getElementById('audioProgressFill').style.width = `${p}%`;
+}
+}, 500);
+}
+};
+window.togglePlayPause = () => {
+if (randPlayer.paused) {
+randPlayer.play();
+document.getElementById('audioPlayPauseBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+} else {
+randPlayer.pause();
+document.getElementById('audioPlayPauseBtn').innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+}
+}
+window.closeAudioPlayer = () => {
+randPlayer.pause();
+clearInterval(audioUpdateInterval);
+document.getElementById('globalAudioPlayer').classList.remove('show');
+}
+window.startSession = (mins) => {
+alert(`بدأت جلسة ${mins} دقائق. يرجى الاسترخاء وإغلاق عينيك.`);
+setTimeout(() => alert("انتهت الجلسة بنجاح."), mins * 60000);
+}
+document.addEventListener('DOMContentLoaded', () => {
+if (QatraNative) {
+QatraNative.askPermissions().catch(e => console.log(e));
+}
+document.querySelectorAll('.nav-item, .nav-home-btn, .header-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+if(!btn.dataset.view) return;
+document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+document.querySelectorAll('.nav-item, .nav-home-btn').forEach(n => n.classList.remove('active'));
+const viewEl = document.getElementById(btn.dataset.view);
+if(viewEl) viewEl.classList.add('active');
+btn.classList.add('active');
+});
+});
+let startY = 0;
+const scrollContent = document.getElementById('scrollContent');
+const ptrContainer = document.getElementById('ptrContainer');
+const ptrIcon = document.getElementById('ptrIcon');
+if(scrollContent && ptrContainer && ptrIcon) {
+scrollContent.addEventListener('touchstart', e => { if(scrollContent.scrollTop === 0) startY = e.touches[0].clientY; }, {passive:true});
+scrollContent.addEventListener('touchmove', e => {
+if (startY > 0 && scrollContent.scrollTop === 0) {
+let y = e.touches[0].clientY - startY;
+if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform = `rotate(${y*4}deg)`; }
+}
+}, {passive:true});
+scrollContent.addEventListener('touchend', e => {
+if (startY > 0 && scrollContent.scrollTop === 0) {
+let y = e.changedTouches[0].clientY - startY;
+if (y > 70) {
+ptrIcon.classList.add('spin');
+state.dark = !state.dark;
+applyState();
+setTimeout(() => { ptrContainer.style.transform = `translateY(-100%)`; ptrIcon.classList.remove('spin'); }, 600);
+} else {
+ptrContainer.style.transform = `translateY(-100%)`;
+}
+}
+startY = 0;
+}, {passive:true});
+}
+applyState(); renderDaysGrid();
+const qtEl = document.getElementById('dailyQuoteText');
+if(qtEl) qtEl.textContent = `"${getRandomQuote().quote}"`;
+setTimeout(() => { const splash = document.getElementById('splash'); if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 800); } }, 2500);
+});
