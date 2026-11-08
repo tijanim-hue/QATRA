@@ -15,22 +15,28 @@
 --shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
 --card-radius: 28px;
 }
+
 body.dark-mode {
 --bg: #0B1121; --surface: #151E32; --border: rgba(255, 255, 255, 0.03);
 --text: #F8FAFC; --text-dim: #94A3B8;
 --primary: #38BDF8; --secondary: #A78BFA;
 --shadow: 0 10px 30px -10px rgba(0,0,0,0.4);
 }
+
 body.glass-active .glass-card, body.glass-active .floating-nav, body.glass-active .topbar, body.glass-active .audio-player {
 background: rgba(15, 20, 30, 0.35) !important;
 backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
 border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: "Cairo", sans-serif; transition: background 0.5s ease, color 0.5s ease; }
+
 /* خلفية محيطية */
 .ambient { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.08), transparent 40%), radial-gradient(circle at 90% 80%, rgba(157, 0, 255, 0.08), transparent 40%); }
+
 .app-container { display: flex; flex-direction: column; width: 100%; height: 100%; max-width: 500px; margin: auto; position: relative; }
+
 /* شاشة الإقلاع السينمائية */
 #splash { position: fixed; inset: 0; background: #050811; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 .splash-drop { width: 75px; height: 75px; border-radius: 0 50% 50% 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); transform: rotate(45deg); animation: breathe 2.5s infinite ease-in-out; box-shadow: 0 15px 35px color-mix(in srgb, var(--primary) 40%, transparent); }
@@ -42,6 +48,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .splash-footer { position: absolute; bottom: 40px; text-align: center; }
 .dev-name { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.7); }
 .app-version { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+
 /* ================= الهيدر ================= */
 .header {
 display: flex !important;
@@ -59,16 +66,19 @@ transition: 0.3s;
 .header-btn svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2.2; }
 .brand { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .brand svg { width: 34px; height: 34px; fill: url(#grad); margin-bottom: 4px;}
+
 /* السحب للتحديث */
 .ptr-container { position: absolute; top: 0; left: 0; width: 100%; height: 70px; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50; transform: translateY(-100%); transition: transform 0.3s; }
 .ptr-icon { width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--primary); }
 .ptr-icon.spin { animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .ptr-text { font-size: 11px; color: var(--text-dim); font-weight: 700; margin-top: 8px; }
+
 /* منطقة المحتوى */
 .content-area { flex: 1; overflow-y: auto; padding: 10px 24px 120px; scroll-behavior: smooth; position: relative;}
 .content-area::-webkit-scrollbar { display: none; }
 .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); transition: background 0.5s, box-shadow 0.5s; }
+
 /* البطاقات التفاعلية */
 .action-card { display: flex; align-items: center; gap: 18px; cursor: pointer; transition: transform 0.2s; }
 .action-card:active { transform: scale(0.97); }
@@ -77,11 +87,92 @@ transition: 0.3s;
 .card-info { flex: 1; min-width: 0; }
 .card-title { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
 .card-sub { font-size: 13px; color: var(--text-dim); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;}
-/* القطرة المركزية */
-.hero-ring { width: 220px; height: 220px; border-radius: 50%; margin: 10px auto 35px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--surface); box-shadow: var(--shadow); border: 1px solid var(--border); cursor: pointer;}
-.hero-ring::before { content: ''; position: absolute; inset: -3px; border-radius: 50%; z-index: -1; background: linear-gradient(135deg, var(--primary), transparent, var(--secondary)); opacity: 0.5; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
-.hero-icon { width: 65px; height: 65px; fill: url(#grad); filter: drop-shadow(0 10px 15px color-mix(in srgb, var(--primary) 30%, transparent)); margin-bottom: 12px;}
-.hero-text { font-size: 18px; font-weight: 800; color: var(--text); }
+
+/* ================= الدائرة المركزية "فاجئني" ================= */
+.surprise-circle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0 40px 0;
+}
+
+.surprise-ring {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.15) 0%, rgba(11, 17, 33, 1) 80%);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.2), inset 0 0 20px rgba(139, 92, 246, 0.2);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.surprise-ring:active { transform: scale(0.92); }
+
+.surprise-ring::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: conic-gradient(transparent, rgba(167, 139, 250, 0.2), transparent 30%);
+    animation: rotateGlow 4s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotateGlow {
+    100% { transform: rotate(360deg); }
+}
+
+.surprise-ring-inner {
+    position: absolute; inset: 4px; border-radius: 50%; background: var(--bg);
+    display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1;
+}
+
+.drop-icon-box {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 5px;
+    position: relative;
+    animation: floatBox 3s ease-in-out infinite;
+}
+
+@keyframes floatBox {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.surprise-title-main {
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    z-index: 2;
+}
+
+.surprise-subtitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    z-index: 2;
+}
+
+.surprise-play-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: grid;
+    place-items: center;
+    margin-top: 15px;
+    z-index: 2;
+}
+.surprise-play-btn svg { width: 16px; height: 16px; fill: #fff; margin-left: 2px; }
+
 /* الحديقة */
 .garden-stage { text-align: center; padding: 20px; }
 .garden-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
@@ -90,6 +181,7 @@ transition: 0.3s;
 @keyframes floatObj { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 15px; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px;}
+
 /* ================= الكبسولة العائمة ================= */
 .floating-nav {
 position: absolute;
@@ -145,10 +237,12 @@ transition: 0.3s;
 }
 .nav-home-btn svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2.5;}
 .nav-home-btn:active { transform: translateY(-15px) scale(0.95); }
+
 /* النوافذ */
 .view { display: none; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .view.active { display: block; }
 @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
 /* أزرار الاختيار الاحترافية */
 .custom-radio-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
 .custom-radio-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border: 1px solid var(--border); padding: 14px 18px; border-radius: 16px; cursor: pointer; transition: all 0.2s ease; }
@@ -158,24 +252,29 @@ transition: 0.3s;
 .custom-radio-item.active .custom-radio-circle { border-color: var(--primary); }
 .custom-radio-circle::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); transform: scale(0); transition: 0.2s; }
 .custom-radio-item.active .custom-radio-circle::after { transform: scale(1); }
+
 /* أيام الأسبوع الاحترافية */
 .days-grid { display: flex; gap: 6px; margin-top: 15px; justify-content: space-between; flex-wrap: wrap;}
 .day-chip { flex: 1; padding: 10px 0; min-width:40px; text-align: center; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--text-dim); cursor: pointer; transition: 0.3s; }
 .day-chip.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border-color: transparent; box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 30%, transparent);}
+
 .btn-solid { width: 100%; padding: 18px; border: none; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-size: 16px; font-weight: 800; margin-top: 20px; cursor: pointer; box-shadow: 0 10px 25px color-mix(in srgb, var(--primary) 30%, transparent); transition: transform 0.2s;}
 .btn-solid:active { transform: scale(0.97); }
 .btn-danger { background: rgba(255,0,0,0.1); color: #ff4d4d; border: 1px solid #ff4d4d; box-shadow: none; }
+
 .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; flex-direction: column; justify-content: flex-end; backdrop-filter: blur(4px); }
 .sheet-overlay.show { display: flex; animation: fadeIn 0.3s; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .sheet-content { background: var(--surface); border-radius: 32px 32px 0 0; padding: 30px 24px; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .sheet-handle { width: 45px; height: 5px; background: var(--border); border-radius: 5px; margin: 0 auto 25px; }
+
 /* التنبيه للنسخ */
 .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 20px; font-weight: bold; z-index: 2000; transition: 0.3s; opacity: 0; }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .my-quote-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg); padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
 .delete-btn { background: rgba(255,0,0,0.1); color: #ff4d4d; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
 /* المشغل الصوتي العائم */
 .audio-player { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(150px); width: 85%; max-width: 400px; background: var(--surface); border-radius: 24px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; z-index: 90; box-shadow: 0 15px 35px rgba(0,0,0,0.2); transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; pointer-events:none; }
 .audio-player.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events:auto; }
@@ -188,6 +287,7 @@ transition: 0.3s;
 .audio-progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.1s linear; }
 .audio-close { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 5px; }
 .audio-close svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+
 /* إعدادات وتصميم الإحصائيات الجديد */
 .control-row { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
 .control-row:last-child { border-bottom: none; }
@@ -201,11 +301,22 @@ transition: 0.3s;
 .toggle input:checked + .toggle-track::before { transform: translateX(-22px); background: #fff;}
 select, input[type="text"], input[type="time"], input[type="number"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none;}
 select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="number"]:focus { border-color: var(--primary); }
+
+/* ================= شاشة الأذونات الإجبارية ================= */
+#permissionBlocker { position: fixed; inset: 0; background: #0B1121; z-index: 9998; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; }
+#permissionBlocker.show { display: flex; }
+.perm-icon-wrapper { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(167,139,250,0.2)); display: grid; place-items: center; margin-bottom: 25px; animation: pulseGlow 2s infinite alternate; }
+@keyframes pulseGlow { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56,189,248,0.4); } 100% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(56,189,248,0); } }
+.perm-icon { width: 50px; height: 50px; color: var(--primary); }
+.perm-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 15px; }
+.perm-desc { font-size: 16px; color: var(--text-dim); margin-bottom: 35px; line-height: 1.6; padding: 0 20px; }
 </style>
 </head>
 <body class="glass-active dark-mode">
 <svg width="0" height="0" style="position:absolute;">
+<defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--secondary)"/></linearGradient></defs>
 </svg>
+
 <div id="splash">
 <div class="splash-drop"></div>
 <div class="splash-title">قطرة</div>
@@ -216,6 +327,17 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 </div>
 <div id="copyToast" class="toast" data-i18n="copied">تم النسخ بنجاح</div>
+
+<!-- نافذة الأذونات الإجبارية (تظهر قبل الدخول للتطبيق) -->
+<div id="permissionBlocker">
+  <div class="perm-icon-wrapper">
+    <svg class="perm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  </div>
+  <div class="perm-title">صلاحية مطلوبة</div>
+  <div class="perm-desc">تحتاج "قطرة" إلى إذن "الظهور فوق التطبيقات" لكي تستطيع عرض العبارات الملهمة على شاشتك بفعالية وجمال.</div>
+  <button class="btn-solid" onclick="requestOverlayPermission()">منح الصلاحية الآن</button>
+</div>
+
 <!-- الإعدادات (تصميم أيقونات حديثة) -->
 <div class="sheet-overlay" id="settingsSheet">
 <div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
@@ -263,6 +385,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')" data-i18n="back">رجوع</button>
 </div>
 </div>
+<!-- نافذة عرض العبارات داخل مجموعة مخصصة -->
 <div class="sheet-overlay" id="groupViewSheet">
 <div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
 <div class="sheet-handle"></div>
@@ -292,12 +415,47 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <div class="ptr-icon" id="ptrIcon"></div>
 <div class="ptr-text" data-i18n="pull_to_switch">اسحب لتبديل المظهر</div>
 </div>
+
 <section class="view active" id="homeView">
-<div class="hero-ring" onclick="document.querySelector('[data-view=\'dropConfigView\']').click()">
-<svg class="hero-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
-<div class="hero-text" data-i18n="moment_zen">لحظة وعي</div>
-<div style="color:var(--text-dim); font-size:13px; margin-top:6px; font-weight:600;" data-i18n="click_to_program">اضغط لبرمجة قطرتك</div>
+
+<!-- ================= دائرة فاجئني (Surprise Me) - التصميم الجديد المطابق للصورة ================= -->
+<div class="surprise-circle-container">
+  <div class="surprise-ring" onclick="fireCinematic()">
+    <div class="surprise-ring-inner">
+      <!-- أيقونة صندوق مضيء مدمج بقطرة -->
+      <svg class="drop-icon-box" viewBox="0 0 100 100" fill="none">
+        <defs>
+          <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#38BDF8"/>
+            <stop offset="100%" stop-color="#1E3A8A"/>
+          </linearGradient>
+          <filter id="glowDrop" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        <!-- Box Base -->
+        <path d="M20,50 L50,65 L80,50 L80,80 L50,95 L20,80 Z" fill="url(#boxGrad)"/>
+        <!-- Box Top Open -->
+        <path d="M50,65 L20,50 L50,35 L80,50 Z" fill="#60A5FA" opacity="0.6"/>
+        <path d="M50,20 L25,35 L55,50 L80,35 Z" fill="#93C5FD" transform="rotate(-15 50 35)"/>
+        <!-- Magic Glow inside box -->
+        <circle cx="50" cy="40" r="15" fill="#FFF" filter="url(#glowDrop)" opacity="0.8"/>
+        <!-- Drop Icon -->
+        <path d="M50 75C60 75 65 68 65 60C65 50 50 40 50 40C50 40 35 50 35 60C35 68 40 75 50 75Z" fill="#38BDF8" stroke="#FFF" stroke-width="2"/>
+        <!-- Sparkles -->
+        <circle cx="30" cy="20" r="2" fill="#FFF" opacity="0.8"/>
+        <circle cx="70" cy="25" r="3" fill="#FFF" opacity="0.9"/>
+        <circle cx="45" cy="15" r="1.5" fill="#FFF" opacity="0.7"/>
+        <circle cx="80" cy="45" r="2" fill="#FFF" opacity="0.6"/>
+      </svg>
+      <div class="surprise-title-main" data-i18n="surprise_me">فاجئني</div>
+      <div class="surprise-subtitle" data-i18n="tap_for_drop">اكتشف الآن قطرة جديدة</div>
+      <div class="surprise-play-btn"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9v-18z"/></svg></div>
+    </div>
+  </div>
 </div>
+
 <div id="homeCardsContainer">
 <div class="glass-card action-card" onclick="document.querySelector('[data-view=\'dropConfigView\']').click()">
 <div class="card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
@@ -316,7 +474,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 </div>
 <div class="glass-card action-card">
-<svg class="card-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+<div class="card-icon" style="color:#F59E0B; background:color-mix(in srgb, #F59E0B 10%, transparent);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
 <div class="card-info">
 <div class="card-title" data-i18n="current_moment">لحظتك الحالية</div>
 <div class="card-sub" id="currentMomentText">...</div>
@@ -415,7 +573,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
 </div>
 <div class="action-card" style="padding:15px 20px; border-bottom:1px solid var(--border);" onclick="showGroupsManager()">
-<div class="card-icon" style="background:#F59E0B; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+<div class="card-icon" style="background:#F59E0B; color:#fff; border-radius:12px; width:40px; height:40px;"><svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></div>
 <div class="card-info"><div class="card-title" style="font-size:15px;" data-i18n="my_groups">مجموعاتي</div></div>
 <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
 </div>
@@ -502,6 +660,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
 </button>
 <button class="audio-close" onclick="closeAudioPlayer()">
+<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 </button>
 </div>
 </div>
@@ -553,6 +712,56 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 </div>
 <button class="btn-solid" onclick="document.getElementById('statsSheet').classList.remove('show')" data-i18n="close">إغلاق</button>
+</div>
+</div>
+<div class="sheet-overlay" id="settingsSheet">
+<div class="sheet-content glass-card" style="margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0;" data-i18n="app_settings">إعدادات التطبيق</h2>
+<div class="control-row">
+<span style="font-weight:700; font-size:16px;" data-i18n="glass_mode">الشفافية وتأثير الزجاج 💎</span>
+<label class="toggle"><input type="checkbox" id="glassToggle"><span class="toggle-track"></span></label>
+</div>
+<div class="control-row">
+<span style="font-weight:700; font-size:16px;" data-i18n="show_image">إظهار صورة مع العبارة 🖼️</span>
+<label class="toggle"><input type="checkbox" id="imageToggle"><span class="toggle-track"></span></label>
+</div>
+<div class="control-row">
+<span style="font-weight:700; font-size:16px;" data-i18n="show_home_cards">إظهار بطاقات الرئيسية 📱</span>
+<label class="toggle"><input type="checkbox" id="homeCardsToggle"><span class="toggle-track"></span></label>
+</div>
+<div style="margin-top:20px;">
+<label style="color:var(--text-dim); font-size:14px; font-weight:700;" data-i18n="language">لغة التطبيق:</label>
+<select id="langSelect">
+<option value="ar">العربية</option>
+<option value="en">English</option>
+<option value="fr">Français</option>
+<option value="es">Español</option>
+<option value="de">Deutsch</option>
+</select>
+</div>
+<button class="btn-solid" onclick="document.getElementById('settingsSheet').classList.remove('show')" data-i18n="save_done">تم وحفظ</button>
+</div>
+</div>
+<div class="sheet-overlay" id="categorySheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:var(--primary);" id="catSheetTitle">القسم</h2>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="catSheetContent"></div>
+<button class="btn-solid" onclick="document.getElementById('categorySheet').classList.remove('show')" data-i18n="back">رجوع</button>
+</div>
+</div>
+<!-- نافذة عرض العبارات داخل مجموعة مخصصة -->
+<div class="sheet-overlay" id="groupViewSheet">
+<div class="sheet-content glass-card" style="height:85vh; display:flex; flex-direction:column; margin-bottom:0; border-radius:32px 32px 0 0;">
+<div class="sheet-handle"></div>
+<h2 style="margin-top:0; color:var(--primary);" id="groupViewTitle">اسم المجموعة</h2>
+<div style="display:flex; gap:10px; margin-bottom:15px;" id="addToGroupDiv">
+<input type="text" id="newGroupQuoteInput" placeholder="أدخل عبارتك هنا..." style="margin:0; flex:1;">
+<button class="btn-solid" onclick="addQuoteToCurrentGroup()" style="margin:0; width:auto; padding:0 15px;" data-i18n="add">إضافة</button>
+</div>
+<div style="flex:1; overflow-y:auto; padding-right:5px; margin-top:10px;" id="groupViewContent"></div>
+<button class="btn-solid" onclick="document.getElementById('groupViewSheet').classList.remove('show')" data-i18n="back">رجوع</button>
 </div>
 </div>
 <script src="app.js"></script>
