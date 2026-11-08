@@ -73,7 +73,6 @@ class QatraPlugin : Plugin() {
         call.resolve(ret)
     }
 
-    // تم تغيير الاسم هنا من checkPermissions إلى verifyPermissions لتجنب التعارض
     @PluginMethod
     fun verifyPermissions(call: PluginCall) {
         var hasOverlay = true
