@@ -21,7 +21,8 @@ const DICT = {
     show_home_cards: "بطاقات الرئيسية", language: "لغة التطبيق:", save_done: "تم وحفظ", back: "رجوع", copied: "تم النسخ بنجاح", 
     delete: "حذف", days: "أيام", quotes_ready: "عبارة جاهزة", rain: "🌧️ المطر", sea: "🌊 البحر", forest: "🌲 الغابة", birds: "🕊️ الطيور",
     all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مجموعاتي الخاصة", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", every_3h: "كل 3 ساعات", every_12h: "كل 12 ساعة", every_24h: "كل 24 ساعة", no_reminders: "لا توجد مواعيد", source_category: "1. مصدر العبارات",
-    cat_awareness: "أسئلة وعي (جديد)", cat_family: "قطرات لأحبائي (عائلتي)", my_journal: "دفتر الأثر (تأملاتي)", family_drops: "قطرات لأحبائي"
+    cat_awareness: "أسئلة وعي (جديد)", cat_family: "قطرات لأحبائي (عائلتي)", my_journal: "دفتر الأثر (تأملاتي)", family_drops: "قطرات لأحبائي",
+    quote_of_day: "اقتباس اليوم", surprise_me: "فاجئني", tap_for_drop: "اضغط لقطرة عشوائية ملهمة"
   }
 };
 // اللغات الأخرى تعتمد على الانجليزية للتبسيط
@@ -280,7 +281,6 @@ function showDiscoverCard(direction) {
     const quote = items[currentDiscoverIndex];
     const safeQuote = quote.replace(/'/g, "\\'");
 
-    // تحريك البطاقة القديمة وإدخال الجديدة
     const oldCard = container.querySelector('.discover-quote-card');
     if (oldCard) {
         oldCard.classList.add('hidden');
@@ -303,14 +303,33 @@ function showDiscoverCard(direction) {
     `;
     
     container.appendChild(newCard);
-    
-    // تفعيل الحركة
-    setTimeout(() => {
-        newCard.classList.remove('incoming');
-    }, 50);
+    setTimeout(() => { newCard.classList.remove('incoming'); }, 50);
 }
 
-// --- بقية مكتبة المجموعات ---
+// === اقتباس اليوم المنبثق ===
+window.openQuoteOfTheDay = () => {
+    const { quote } = getRandomQuote();
+    document.getElementById('qotdModalText').innerText = quote;
+    
+    // زر الإعجاب في النافذة يضيف العبارة للمفضلة ويتفاعل
+    const likeBtn = document.getElementById('qotdLikeBtn');
+    likeBtn.style.color = '#fff'; 
+    likeBtn.style.background = 'rgba(255,255,255,0.2)';
+    likeBtn.onclick = () => {
+        addToFavorites(quote);
+        likeBtn.style.color = '#FF3B30';
+        likeBtn.style.background = 'rgba(255,59,48,0.2)';
+    };
+
+    document.getElementById('qotdModal').classList.add('show');
+}
+window.closeQotdModal = () => { document.getElementById('qotdModal').classList.remove('show'); }
+window.copyQotd = () => {
+    const quote = document.getElementById('qotdModalText').innerText;
+    copyQuote(quote);
+    closeQotdModal();
+}
+
 window.copyQuote = (txt) => {
   navigator.clipboard.writeText(txt).then(() => {
     const toast = document.getElementById('copyToast');
@@ -353,7 +372,7 @@ window.openGroup = (k) => {
         <div style="flex:1;">${q}</div>
         <div style="display:flex; gap:8px;">
           <button onclick="shareQuotePrompt('${q.replace(/'/g, "\\'")}')" style="background:transparent; border:none; color:#F59E0B; cursor:pointer;">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
           </button>
           <button onclick="removeQuoteFromGroup('${k}',${i})" class="delete-btn">حذف</button>
         </div>
@@ -504,7 +523,6 @@ window.shareAsImage = async () => {
         try {
             const file = new File([blob], 'qatra_drop.png', { type: 'image/png' });
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                // فتح نافذة المشاركة الأصلية للأندرويد
                 await navigator.share({
                     title: 'قطرة | QATRA',
                     text: 'تأمل هذه القطرة 💧',
@@ -539,17 +557,22 @@ function getRandomQuote() {
 }
 
 window.fireCinematic = async () => {
-  const { quote, categoryKey } = getRandomQuote();
-  const qtEl = document.getElementById('dailyQuoteText'); if (qtEl) qtEl.textContent = `"${quote}"`;
+  // عند النقر على الدائرة الفاخرة، القطرة ستكون عشوائية تماماً من أي قسم
+  const keys = Object.keys(QUOTES_DB);
+  const randomCategoryKey = keys[Math.floor(Math.random() * keys.length)];
+  const pool = QUOTES_DB[randomCategoryKey].items;
+  const randomQuote = pool[Math.floor(Math.random() * pool.length)];
   
-  if (categoryKey === 'cat_awareness' && !QatraNative) {
-      openAnswerSheet(quote);
+  const qtEl = document.getElementById('dailyQuoteText'); if (qtEl) qtEl.textContent = `"${randomQuote}"`;
+  
+  if (randomCategoryKey === 'cat_awareness' && !QatraNative) {
+      openAnswerSheet(randomQuote);
       return;
   }
 
   if (QatraNative) {
     state.stats.drops++; applyState();
-    await QatraNative.showDrop({ quote: quote, category: categoryKey, duration: state.duration, fullScreen: true, showImage: state.showImage }).catch(e=>{});
+    await QatraNative.showDrop({ quote: randomQuote, category: randomCategoryKey, duration: state.duration, fullScreen: true, showImage: state.showImage }).catch(e=>{});
   }
 };
 
@@ -617,6 +640,7 @@ window.startSession = (mins) => {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  
   if (QatraNative) { QatraNative.askPermissions().catch(e => console.log(e)); }
   
   document.querySelectorAll('.nav-item, .nav-home-btn, .header-btn').forEach(btn => {
@@ -660,8 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   applyState(); renderDaysGrid();
-  const qtEl = document.getElementById('dailyQuoteText');
-  if(qtEl) qtEl.textContent = `"${getRandomQuote().quote}"`;
+  
+  // توليد اقتباس عشوائي خفي للزر
+  const { quote } = getRandomQuote();
+  const qtEl = document.getElementById('dailyQuoteTextPreview');
+  if(qtEl) qtEl.textContent = `"${quote.substring(0, 30)}..."`;
 
   setTimeout(() => { const splash = document.getElementById('splash'); if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 800); } }, 2500);
 });
