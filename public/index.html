@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#F4F7FB">
+<meta name="theme-color" content="#0B1121">
 <title data-i18n="app_title">قطرة | QATRA</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -77,11 +77,13 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .card-title { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
 .card-sub { font-size: 13px; color: var(--text-dim); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;}
 
-/* القطرة المركزية */
-.hero-ring { width: 220px; height: 220px; border-radius: 50%; margin: 10px auto 35px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--surface); box-shadow: var(--shadow); border: 1px solid var(--border); cursor: pointer;}
-.hero-ring::before { content: ''; position: absolute; inset: -3px; border-radius: 50%; z-index: -1; background: linear-gradient(135deg, var(--primary), transparent, var(--secondary)); opacity: 0.5; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
-.hero-icon { width: 65px; height: 65px; fill: url(#grad); filter: drop-shadow(0 10px 15px color-mix(in srgb, var(--primary) 30%, transparent)); margin-bottom: 12px;}
-.hero-text { font-size: 18px; font-weight: 800; color: var(--text); }
+/* ================= دائرة فاجئني (Surprise Me) ================= */
+.hero-ring { width: 240px; height: 240px; border-radius: 50%; margin: 20px auto 40px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; background: color-mix(in srgb, var(--bg) 50%, transparent); box-shadow: 0 15px 40px rgba(0,0,0,0.2), inset 0 0 20px rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; }
+.hero-ring:active { transform: scale(0.95); }
+.hero-icon { width: 70px; height: 70px; fill: url(#grad); filter: drop-shadow(0 10px 20px color-mix(in srgb, var(--primary) 50%, transparent)); margin-bottom: 15px; animation: pulseGlow 2s infinite alternate;}
+@keyframes pulseGlow { from { filter: drop-shadow(0 5px 10px color-mix(in srgb, var(--primary) 30%, transparent)); } to { filter: drop-shadow(0 15px 30px color-mix(in srgb, var(--primary) 70%, transparent)); } }
+.hero-text { font-size: 22px; font-weight: 900; color: var(--text); letter-spacing: 0.5px; }
+.hero-sub { color: var(--text-dim); font-size: 13px; margin-top: 6px; font-weight: 600; }
 
 /* الكبسولة العائمة */
 .floating-nav { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 420px; display: flex; flex-direction: row; justify-content: space-evenly; align-items: center; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 40px; z-index: 100; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); transition: background 0.5s; }
@@ -177,6 +179,19 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 .discover-icon-btn { background: transparent; border: none; padding: 10px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .discover-quote-text { font-size: 22px; font-weight: 800; line-height: 1.6; color: var(--text); }
 .discover-quote-mark { font-size: 80px; color: color-mix(in srgb, var(--primary) 10%, transparent); position: absolute; bottom: -10px; right: 20px; font-family: sans-serif; line-height: 1; pointer-events: none; }
+
+/* ================= نافذة اقتباس اليوم ================= */
+.qotd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
+.qotd-overlay.show { display: flex; opacity: 1; }
+.qotd-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 30px; padding: 40px 30px; width: 85%; max-width: 400px; text-align: center; transform: scale(0.9); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+.qotd-overlay.show .qotd-card { transform: scale(1); }
+.qotd-text { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.6; margin-bottom: 30px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+.qotd-actions { display: flex; justify-content: center; gap: 20px; }
+.qotd-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: #fff; width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; transition: 0.2s; }
+.qotd-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.3); }
+.qotd-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
+.qotd-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; padding: 5px; }
+.qotd-close svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
 </style>
 </head>
 <body class="glass-active dark-mode">
@@ -196,6 +211,24 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 
 <div id="copyToast" class="toast" data-i18n="copied">تم النسخ بنجاح</div>
 <canvas id="shareCanvas" style="display:none;"></canvas>
+
+<!-- ================= نافذة اقتباس اليوم (المنبثقة الزجاجية) ================= -->
+<div class="qotd-overlay" id="qotdModal">
+  <div class="qotd-card">
+    <button class="qotd-close" onclick="closeQotdModal()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+    <div class="qotd-text" id="qotdModalText">...</div>
+    <div class="qotd-actions">
+      <button class="qotd-btn" id="qotdLikeBtn" onclick="likeQotd()">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+      </button>
+      <button class="qotd-btn" onclick="copyQotd()">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ================= الصفحة الرئيسية ================= -->
 <div class="app-container">
@@ -218,10 +251,11 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 
 <section class="view active" id="homeView">
-<div class="hero-ring" onclick="document.querySelector('[data-view=\'dropConfigView\']').click()">
+<!-- دائرة "فاجئني" الفاخرة (القطرة العشوائية السينمائية) -->
+<div class="hero-ring" onclick="fireCinematic()">
 <svg class="hero-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
-<div class="hero-text" data-i18n="moment_zen">لحظة وعي</div>
-<div style="color:var(--text-dim); font-size:13px; margin-top:6px; font-weight:600;" data-i18n="click_to_program">اضغط لبرمجة قطرتك</div>
+<div class="hero-text" data-i18n="surprise_me">فاجئني</div>
+<div class="hero-sub" data-i18n="tap_for_drop">اضغط لقطرة عشوائية ملهمة</div>
 </div>
 
 <div id="homeCardsContainer">
@@ -252,11 +286,11 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
   </div>
 </div>
 
-<div class="glass-card action-card" onclick="fireCinematic()" style="margin-top:20px;">
+<div class="glass-card action-card" onclick="openQuoteOfTheDay()" style="margin-top:20px;">
 <div class="card-icon" style="color:var(--secondary); background:color-mix(in srgb, var(--secondary) 10%, transparent);"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
 <div class="card-info">
-<div class="card-title" data-i18n="quote_of_day">معاينة القطرة الآن</div>
-<div class="card-sub" id="dailyQuoteText">...</div>
+<div class="card-title" data-i18n="quote_of_day">اقتباس اليوم</div>
+<div class="card-sub" id="dailyQuoteTextPreview">...</div>
 </div>
 <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
 </div>
@@ -313,7 +347,6 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </select>
 </div>
 
-<!-- البرمجة الذكية -->
 <div class="glass-card">
 <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="smart_schedule">3. البرمجة الذكية (توزيع تلقائي)</strong>
 <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
@@ -330,7 +363,6 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <button class="btn-solid" id="applySmartScheduleBtn" data-i18n="apply_smart">تطبيق البرمجة الذكية</button>
 </div>
 
-<!-- الجدولة اليدوية -->
 <div class="glass-card">
 <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="manual_schedule">الجدولة اليدوية (تكرار مستمر)</strong>
 <select id="intervalSelect"></select>
@@ -453,7 +485,7 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </section>
 </div>
 
-<!-- ================= المشغل الصوتي العائم ================= -->
+<!-- ================= المشغل الصوتي العائم (سكينة) ================= -->
 <div class="audio-player" id="globalAudioPlayer">
   <div class="audio-info">
     <div class="audio-title" id="audioTitleText">جاري الاستماع...</div>
