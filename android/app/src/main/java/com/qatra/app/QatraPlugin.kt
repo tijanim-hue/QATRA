@@ -77,17 +77,6 @@ class QatraPlugin : Plugin() {
     }
 
     @PluginMethod
-    fun checkPermissions(call: PluginCall) {
-        var hasOverlay = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
-            hasOverlay = false
-        }
-        val ret = JSObject()
-        ret.put("hasOverlay", hasOverlay)
-        call.resolve(ret)
-    }
-
-    @PluginMethod
     fun scheduleInterval(call: PluginCall) {
         val intervalMinutes = call.getInt("intervalMinutes") ?: 0
         val mode = call.getString("mode") ?: "both"

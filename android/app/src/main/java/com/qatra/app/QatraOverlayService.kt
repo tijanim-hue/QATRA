@@ -30,9 +30,9 @@ class QatraOverlayService : Service() {
     private var overlayContainer: FrameLayout? = null
     private var fallPlayer: MediaPlayer? = null
     private var popPlayer: MediaPlayer? = null
-    private var quotePlayer: MediaPlayer? = null // مشغل الصوت للقطرة
+    private var quoteAudioPlayer: MediaPlayer? = null // مشغل الصوت للقطرة
     private var isLiked = false
-    private var isPlaying = false
+    private var isAudioPlaying = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -118,7 +118,7 @@ class QatraOverlayService : Service() {
         val quoteText = TextView(this).apply {
             text = quote; setTextColor(Color.WHITE); textSize = 24f; gravity = Gravity.CENTER
             setShadowLayer(15f, 0f, 0f, if(showImage) Color.BLACK else Color.parseColor("#00d2ff"))
-            setTypeface(null, Typeface.BOLD); setPadding(40, 80, 40, 80) // مساحة إضافية للزر
+            setTypeface(null, Typeface.BOLD); setPadding(40, 80, 40, 80) // تم تكبير الـ padding لاحتواء الأزرار الإضافية
         }
         cardView.addView(quoteText, FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
         val cardParams = FrameLayout.LayoutParams((resources.displayMetrics.widthPixels * 0.85).toInt(), FrameLayout.LayoutParams.WRAP_CONTENT).apply { 
@@ -159,7 +159,7 @@ class QatraOverlayService : Service() {
             }
         }
         val likeParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
-            gravity = Gravity.CENTER; setMargins(0, 450, 0, 0)
+            gravity = Gravity.CENTER; setMargins(0, 450, 0, 0) // أسفل البطاقة
         }
 
         // زر "أجب الآن" (لأسئلة الوعي فقط)
@@ -199,7 +199,7 @@ class QatraOverlayService : Service() {
             }
         }
 
-        // زر تشغيل الصوت (المرحلة الثالثة) - يظهر فقط للقرآن والأذكار كمثال، ويمكن تفعيله للكل
+        // زر تشغيل الصوت (يظهر إذا كانت القطرة قرآن أو أذكار كمثال - المرحلة الثالثة)
         var audioButton: TextView? = null
         var audioParams: FrameLayout.LayoutParams? = null
         
@@ -212,34 +212,34 @@ class QatraOverlayService : Service() {
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     cornerRadius = 40f
-                    setColor(Color.parseColor("#10B981"))
+                    setColor(Color.parseColor("#10B981")) // لون أخضر مريح
                 }
                 setPadding(40, 15, 40, 15)
                 elevation = 60f
                 alpha = 0f
                 
                 setOnClickListener {
-                    if (!isPlaying) {
-                        isPlaying = true
+                    if (!isAudioPlaying) {
+                        isAudioPlaying = true
                         text = "⏸️ إيقاف"
                         try {
-                            // استخدمنا صوت مطر كمثال افتراضي للقطرة الصوتية، يمكن تغييره لآية قرآنية لاحقاً
-                            val audioResId = resources.getIdentifier("drop_fall_sound", "raw", packageName) 
-                            if (audioResId != 0) { 
-                                quotePlayer = MediaPlayer.create(this@QatraOverlayService, audioResId)
-                                quotePlayer?.isLooping = true
-                                quotePlayer?.start() 
+                            // سنستخدم صوت افتراضي للاختبار (يمكن ربطه بمسارات أخرى لاحقاً)
+                            val audioResId = resources.getIdentifier("drop_fall_sound", "raw", packageName)
+                            if (audioResId != 0) {
+                                quoteAudioPlayer = MediaPlayer.create(this@QatraOverlayService, audioResId)
+                                quoteAudioPlayer?.isLooping = true
+                                quoteAudioPlayer?.start()
                             }
                         } catch (e: Exception) {}
                     } else {
-                        isPlaying = false
+                        isAudioPlaying = false
                         text = "▶️ استمع"
-                        quotePlayer?.pause()
+                        quoteAudioPlayer?.pause()
                     }
                 }
             }
             audioParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
-                gravity = Gravity.CENTER; setMargins(0, -350, 0, 0) // أعلى البطاقة قليلاً
+                gravity = Gravity.CENTER; setMargins(0, -350, 0, 0) // يظهر أعلى البطاقة قليلاً
             }
         }
 
@@ -248,7 +248,7 @@ class QatraOverlayService : Service() {
         overlayContainer?.addView(cardView, cardParams)
         overlayContainer?.addView(likeButton, likeParams) 
         if (actionButton != null) overlayContainer?.addView(actionButton, actionParams)
-        if (audioButton != null) overlayContainer?.addView(audioButton, audioParams)
+        if (audioButton != null) overlayContainer?.addView(audioButton, audioParams) // إضافة زر الصوت للقطرة
         
         params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
         params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -314,7 +314,7 @@ class QatraOverlayService : Service() {
         super.onDestroy()
         fallPlayer?.release()
         popPlayer?.release()
-        quotePlayer?.release() // إيقاف الصوت عند إغلاق القطرة
+        quoteAudioPlayer?.release() // إيقاف الصوت عند إغلاق القطرة تلقائياً
         if (overlayContainer != null) { windowManager?.removeView(overlayContainer); overlayContainer = null }
     }
 }
