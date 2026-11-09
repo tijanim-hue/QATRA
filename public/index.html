@@ -21,7 +21,7 @@ body.dark-mode {
 --primary: #38BDF8; --secondary: #A78BFA;
 --shadow: 0 10px 40px -10px rgba(0,0,0,0.6);
 }
-body.glass-active .glass-card, body.glass-active .floating-nav, body.glass-active .sheet-content {
+body.glass-active .glass-card, body.glass-active .floating-nav, body.glass-active .sheet-content, body.glass-active .modal-content {
 background: rgba(15, 20, 30, 0.35) !important;
 backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
 border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -30,7 +30,7 @@ border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0,
 body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: "Cairo", sans-serif; transition: background 0.6s ease, color 0.6s ease; }
 .app-container { display: flex; flex-direction: column; width: 100%; height: 100%; max-width: 500px; margin: auto; position: relative; }
 
-/* شاشة الأذونات الإجبارية */
+/* الأذونات الإجبارية */
 #permissionBlocker { position: fixed; inset: 0; background: rgba(11, 17, 33, 0.98); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; backdrop-filter: blur(15px); }
 .perm-icon { width: 80px; height: 80px; background: color-mix(in srgb, var(--primary) 20%, transparent); color: var(--primary); border-radius: 25px; display: grid; place-items: center; margin-bottom: 20px; }
 .perm-icon svg { width: 40px; height: 40px; stroke: currentColor; fill: none; stroke-width: 2; }
@@ -43,7 +43,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .header-btn svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .brand svg { width: 34px; height: 34px; fill: var(--primary); margin-bottom: 4px;}
 
-/* المحتوى والبطاقات */
+/* المحتوى */
 .content-area { flex: 1; overflow-y: auto; padding: 10px 24px 120px; scroll-behavior: smooth; position: relative;}
 .content-area::-webkit-scrollbar { display: none; }
 .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
@@ -63,14 +63,15 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .hero-title-main { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 4px; }
 .hero-subtitle { font-size: 12px; font-weight: 600; color: var(--text-dim); }
 
-/* المكتبة وبطاقات السحب الفيزيائي (تظهر بطاقة واحدة تلو الأخرى) */
+/* شريط أقسام المكتبة */
 .chips-row { display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; scrollbar-width: none; margin-bottom: 15px; }
 .chips-row::-webkit-scrollbar { display: none; }
 .chip-btn { padding: 10px 20px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); color: var(--text-dim); font-weight: 700; white-space: nowrap; cursor: pointer; transition: 0.3s; }
 .chip-btn.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border-color: transparent; }
 
+/* بطاقات السحب الفيزيائي */
 .swipe-container { position: relative; width: 100%; height: 320px; perspective: 1000px; display: flex; justify-content: center; align-items: center; margin-top: 10px;}
-.swipe-card { position: absolute; width: 95%; height: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow); padding: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: grab; user-select: none; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.swipe-card { position: absolute; width: 95%; height: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow); padding: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: grab; user-select: none; }
 .swipe-card.dragging { cursor: grabbing; transition: none; }
 .swipe-quote { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1.6; }
 
@@ -82,7 +83,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .nav-home-btn { flex: none; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: #fff; border: 4px solid var(--bg); box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 40%, transparent); transform: translateY(-20px); cursor: pointer; }
 .nav-home-btn svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2.5;}
 
-/* النوافذ المنبثقة والخلفية المربعة الزجاجية للقطرة المائية ذات تأثير blur */
+/* النوافذ السفلية (Sheets) */
 .view { display: none; animation: slideUpFade 0.4s ease; }
 .view.active { display: block; }
 @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -91,16 +92,28 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .sheet-content { background: var(--surface); border-radius: 32px 32px 0 0; padding: 30px 24px; max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); position: relative; transition: transform 0.2s ease; margin-bottom:0; }
 .sheet-handle { width: 50px; height: 6px; background: var(--border); border-radius: 10px; margin: -10px auto 25px; cursor: grab; }
 
+/* نافذة المنتصف المستقلة (Modal) - مخصصة لاقتباس اليوم */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
+.modal-overlay.show { display: flex; animation: fadeInModal 0.3s ease; }
+@keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+.modal-content { background: var(--surface); border-radius: 28px; padding: 35px 24px; width: 85%; max-width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); text-align: center; position: relative; animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); border: 2px solid var(--primary); }
+@keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
 /* خلفية مربعة زجاجية ذات حواف دائرية وتأثير blur للقطرة المائية */
 .water-drop-glass-box {
-    background: rgba(15, 20, 30, 0.65) !important;
-    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 24px;
-    padding: 25px;
+    background: rgba(15, 20, 30, 0.45) !important;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 24px; /* حواف دائرية */
+    padding: 30px; 
     box-shadow: 0 15px 35px rgba(0,0,0,0.5);
     color: #F8FAFC;
     text-align: center;
+    aspect-ratio: 1 / 1; /* يضمن أن يكون الشكل مربعاً تماماً */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 select, input[type="text"], input[type="time"], input[type="number"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; appearance: none;}
@@ -119,7 +132,7 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 </div>
 <div id="copyToast" class="toast" data-i18n="copied">تم النسخ بنجاح</div>
 
-<!-- الإعدادات -->
+<!-- الإعدادات (Sheet سفلية) -->
 <div class="sheet-overlay" id="settingsSheet">
 <div class="sheet-content glass-card">
 <div class="sheet-handle"></div>
@@ -139,7 +152,7 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 </div>
 </div>
 
-<!-- النافذة العائمة لـ (قطرتك القادمة) -->
+<!-- قطرتك القادمة (Sheet سفلية) -->
 <div class="sheet-overlay" id="nextDropSheet">
 <div class="sheet-content glass-card">
 <div class="sheet-handle"></div>
@@ -151,26 +164,25 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 </div>
 </div>
 
-<!-- النافذة العائمة لـ (اقتباس اليوم) -->
-<div class="sheet-overlay" id="quoteOfDaySheet">
-<div class="sheet-content glass-card" style="border: 2px solid var(--primary); text-align:center;">
-<div class="sheet-handle"></div>
-<h2 style="margin-top:0; color:var(--primary);" data-i18n="quote_of_day">اقتباس اليوم</h2>
-<div style="font-size:20px; font-weight:800; margin: 25px 0; line-height:1.6;" id="qodTextModal">...</div>
-<div style="display:flex; justify-content:center; gap:20px;">
-    <button id="qodLikeBtn" style="background:transparent; border:none; cursor:pointer; color:var(--text-dim);"><svg viewBox="0 0 24 24" width="30" height="30" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
-    <button id="qodCopyBtn" style="background:transparent; border:none; cursor:pointer; color:var(--text-dim);"><svg viewBox="0 0 24 24" width="30" height="30" stroke="currentColor" fill="none" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
-</div>
-</div>
-</div>
-
-<!-- الإحصائيات -->
+<!-- الإحصائيات (Sheet سفلية) -->
 <div class="sheet-overlay" id="statsSheet">
 <div class="sheet-content glass-card">
 <div class="sheet-handle"></div>
 <h2 style="margin-top:0;" data-i18n="your_progress">نشاطك وتقدمك 📈</h2>
 <div style="display:flex; justify-content:space-around; align-items:center; padding: 20px 0;">
 <div style="position:relative; width:100px; height:100px;"><svg viewBox="0 0 36 36" style="width:100%; height:100%; transform: rotate(-90deg);"><circle cx="18" cy="18" r="16" fill="none" stroke="var(--border)" stroke-width="3"></circle><circle id="chartDropsCircle" cx="18" cy="18" r="16" fill="none" stroke="var(--primary)" stroke-width="3" stroke-dasharray="100.5" stroke-dashoffset="100.5"></circle></svg><div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;"><span style="font-size:24px; font-weight:900;" id="chartDropsVal">0</span><span style="font-size:11px;" data-i18n="drops">قطرة</span></div></div>
+</div>
+</div>
+</div>
+
+<!-- نافذة عائمة مستقلة (Modal) - اقتباس اليوم -->
+<div class="modal-overlay" id="quoteOfDaySheet">
+<div class="modal-content glass-card">
+<h2 style="margin-top:0; color:var(--primary);" data-i18n="quote_of_day">اقتباس اليوم</h2>
+<div style="font-size:22px; font-weight:800; margin: 30px 0; line-height:1.6;" id="qodTextModal">...</div>
+<div style="display:flex; justify-content:center; gap:30px;">
+    <button id="qodLikeBtn" style="background:transparent; border:none; cursor:pointer; color:var(--text-dim); transition: 0.3s;"><svg viewBox="0 0 24 24" width="34" height="34" stroke="currentColor" fill="none" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
+    <button id="qodCopyBtn" style="background:transparent; border:none; cursor:pointer; color:var(--text-dim); transition: 0.3s;"><svg viewBox="0 0 24 24" width="34" height="34" stroke="currentColor" fill="none" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
 </div>
 </div>
 </div>
@@ -210,7 +222,6 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 </div>
 </section>
 
-<!-- قطرتي والمواعيد -->
 <section class="view" id="dropConfigView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="drop_settings">إعدادات قطرتي</h2>
 <div class="glass-card">
@@ -223,6 +234,16 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 <div class="custom-radio-item" data-value="selfDev" onclick="setQuoteSource('selfDev')"><span data-i18n="cat_selfDev">تطوير الذات</span><div class="custom-radio-circle"></div></div>
 <div class="custom-radio-item" data-value="myQuotes" onclick="setQuoteSource('myQuotes')"><span data-i18n="my_custom_quotes">عباراتي الخاصة</span><div class="custom-radio-circle"></div></div>
 </div>
+</div>
+
+<div class="glass-card">
+<strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="smart_schedule">البرمجة الذكية</strong>
+<div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+<span style="font-size:14px; font-weight:600;" data-i18n="i_want">أريد</span>
+<input type="number" id="smartDropsCount" min="1" max="20" value="5" style="width:80px; margin:0; text-align:center;">
+<span style="font-size:14px; font-weight:600;" data-i18n="drops_daily">قطرات يومياً</span>
+</div>
+<button class="btn-solid" id="applySmartScheduleBtn" data-i18n="apply_smart">تطبيق البرمجة الذكية</button>
 </div>
 
 <div class="glass-card">
@@ -241,7 +262,7 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 </div>
 </section>
 
-<!-- المكتبة واكتشف (السحب الفيزيائي للبطاقات المنفصلة) -->
+<!-- المكتبة واكتشف (البطاقات تعرض واحدة تلو الأخرى) -->
 <section class="view" id="libraryView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="personal_library">المكتبة</h2>
 <div class="chips-row" id="libraryCatChips"></div>
@@ -253,7 +274,6 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 </div>
 </section>
 
-<!-- سكينة -->
 <section class="view" id="meditationView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="sakeena">سكينة</h2>
 <div class="glass-card" style="padding:15px; margin-bottom:15px;">
@@ -264,7 +284,6 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 </div>
 </section>
 
-<!-- حديقتي -->
 <section class="view" id="gardenView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="your_garden">حديقتك</h2>
 <div class="glass-card garden-stage">
