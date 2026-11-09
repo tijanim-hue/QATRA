@@ -1,11 +1,11 @@
 "use strict";
-const STORE_KEY = "qatra_worldclass_final";
+const STORE_KEY = "qatra_worldclass_final_2";
 
 const DICT = {
 ar: {
 app_title: "قطرة | QATRA", moment_zen: "فاجئني", click_to_program: "بقطرة سينمائية",
 next_drop: "قطرتك القادمة", today_impact: "أثر اليوم", drop_settings: "إعدادات قطرتي",
-display_method: "طريقة العرض", mode_both: "تنبيه + قطرة مائية", mode_floating: "قطرة مائية فقط",
+display_method: "طريقة العرض", mode_both: "تنبيه + قطرة مائية (شاشة وقفل)", mode_floating: "قطرة مائية فقط",
 dur_5: "5 ثوانٍ", dur_10: "10 ثوانٍ", dur_15: "15 ثانية",
 smart_schedule: "البرمجة الذكية", i_want: "أريد", drops_daily: "قطرات يومياً", from: "من", to: "إلى", apply_smart: "تطبيق البرمجة الذكية",
 manual_schedule: "الجدولة اليدوية", custom_schedule: "تحديد ساعة الموعد:", save_schedule: "حفظ الموعد",
@@ -44,9 +44,7 @@ try {
 const QatraNative = window.Capacitor?.Plugins?.QatraNative;
 
 function getTranslation(key) { 
-    try {
-        return (DICT[state.lang] && DICT[state.lang][key]) ? DICT[state.lang][key] : (DICT['ar'][key] || key); 
-    } catch(e) { return key; }
+    try { return (DICT[state.lang] && DICT[state.lang][key]) ? DICT[state.lang][key] : (DICT['ar'][key] || key); } catch(e) { return key; }
 }
 
 function applyState() {
@@ -62,10 +60,20 @@ function applyState() {
         
         const hc = document.getElementById('homeCardsContainer');
         if(hc) hc.style.display = state.showHomeCards ? 'block' : 'none';
+
+        // ربط القائمة المنسدلة لطريقة العرض بالـ state
+        const modeSel = document.getElementById('notifModeSetting');
+        if(modeSel) modeSel.value = state.mode || 'both';
+        
+        // تمييز مصدر العبارات النشط
+        document.querySelectorAll('.source-item').forEach(item => {
+            if(item.dataset.value === state.quoteSource) item.classList.add('active');
+            else item.classList.remove('active');
+        });
         
         renderGarden();
         updateNextDropUI();
-        renderScheduledList(); // عرض المواعيد المحفوظة
+        renderScheduledList();
     } catch(e) {}
 }
 
@@ -80,7 +88,7 @@ function renderGarden() {
 }
 
 // -------------------------------------------------------------
-// [الطلب 1] المكتبة: عرض وتمرير البطاقات واحدة تلو الأخرى حصراً
+// [المكتبة] منع تداخل البطاقات وإظهارها تباعاً
 // -------------------------------------------------------------
 let swipeQuotes = [];
 let currentQuoteIndex = 0;
@@ -104,13 +112,14 @@ function renderSingleSwipeCard() {
     if (!container) return;
     
     if (currentQuoteIndex >= swipeQuotes.length) {
-        container.innerHTML = `<div style="color:var(--text-dim); padding:20px;">لقد اكتشفت جميع العبارات لهذا اليوم.</div>`;
+        container.innerHTML = `<div style="color:var(--text-dim); padding:20px;">لقد اكتشفت جميع العبارات.</div>`;
         return;
     }
 
     const quote = swipeQuotes[currentQuoteIndex];
     const card = document.createElement('div');
     card.className = 'swipe-card';
+    card.style.transform = `scale(1) translateY(0)`;
     card.innerHTML = `<div class="swipe-quote">${quote}</div>`;
     container.appendChild(card);
 
@@ -140,7 +149,6 @@ function renderSingleSwipeCard() {
             card.style.transform = `translateX(${direction * 400}px) rotate(${direction * 25}deg)`;
             card.style.opacity = 0;
             
-            // لا نظهر البطاقة الموالية إلا بعد أن تختفي الحالية تماماً
             setTimeout(() => {
                 card.remove();
                 currentQuoteIndex++;
@@ -176,7 +184,7 @@ function getRandomQuote() {
 }
 
 // -------------------------------------------------------------
-// [الطلب 3] القطرة المائية: استخدام الخلفية الزجاجية المربعة
+// [القطرة المائية] تمرير إعدادات العرض والخلفية الزجاجية
 // -------------------------------------------------------------
 window.fireCinematic = async () => {
     try {
@@ -185,19 +193,13 @@ window.fireCinematic = async () => {
         applyState();
         if (QatraNative) {
             await QatraNative.showDrop({ 
-                quote: qData.quote, 
-                category: qData.category, 
-                duration: state.duration, 
-                showImage: state.showImage,
-                containerClass: "water-drop-glass-box" // إجبار القطرة على استخدام التصميم المربع والـ Blur
+                quote: qData.quote, category: qData.category, duration: state.duration, showImage: state.showImage,
+                containerClass: "water-drop-glass-box", mode: state.mode, showOnLockScreen: true
             }).catch(()=>{});
         }
     } catch(e) {}
 };
 
-// -------------------------------------------------------------
-// [الطلب 4] اقتباس اليوم: نافذة عائمة مستقلة (تم نقلها بالكامل للـ Modal)
-// -------------------------------------------------------------
 window.openQuoteOfDay = () => {
     try {
         const qData = getRandomQuote();
@@ -248,8 +250,88 @@ function updateNextDropUI() {
 
 function syncNativeAlarms() {
     if(!QatraNative) return;
-    QatraNative.scheduleInterval({ intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote().quote, category: state.quoteSource, fullScreen: true, showImage: state.showImage, containerClass: "water-drop-glass-box" }).catch(()=>{});
+    // تطبيق طريقة العرض على جميع المواعيد
+    QatraNative.scheduleInterval({ 
+        intervalMinutes: parseInt(state.interval), mode: state.mode, duration: state.duration, quote: getRandomQuote().quote, category: state.quoteSource, fullScreen: true, showImage: state.showImage, 
+        containerClass: "water-drop-glass-box", showOnLockScreen: true
+    }).catch(()=>{});
 }
+
+// -------------------------------------------------------------
+// [البرمجة الذكية] تنفيذ التوزيع وتطبيق الخيارات
+// -------------------------------------------------------------
+document.getElementById('applySmartScheduleBtn')?.addEventListener('click', () => {
+    try {
+        const count = parseInt(document.getElementById('smartDropsCount').value) || 5;
+        if (count > 0) {
+            // توزيع تلقائي خلال اليوم
+            let sMins = 8 * 60; // 08:00 AM
+            let eMins = 22 * 60; // 10:00 PM
+            const intv = (eMins - sMins) / count;
+            state.schedules = [];
+            for(let i=0; i<count; i++) {
+                let t = sMins + Math.round(i*intv);
+                let h = Math.floor((t%1440)/60).toString().padStart(2,'0');
+                let m = (t%60).toString().padStart(2,'0');
+                state.schedules.push({ id: Date.now() + i, time: `${h}:${m}`, days: [0,1,2,3,4,5,6] });
+            }
+            applyState();
+            syncNativeAlarms();
+            const tToast = document.getElementById('copyToast');
+            if(tToast) { tToast.innerText = "تم تطبيق البرمجة الذكية بنجاح!"; tToast.classList.add('show'); setTimeout(()=>tToast.classList.remove('show'), 2500); }
+        }
+    } catch(e) {}
+});
+
+// -------------------------------------------------------------
+// [الجدولة اليدوية] حفظ وعرض قائمة المواعيد
+// -------------------------------------------------------------
+function renderScheduledList() {
+    const listEl = document.getElementById('scheduledTimesList');
+    if (!listEl) return;
+    if (!state.schedules || state.schedules.length === 0) {
+        listEl.innerHTML = ``;
+        return;
+    }
+    listEl.innerHTML = state.schedules.map((s) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); border:1px solid var(--border); padding:14px 18px; border-radius:16px; font-size:14px; font-weight:700;">
+            <span style="color:var(--text-dim);">⏰ تم تفعيل موعد الساعة: <b style="color:var(--text);">${s.time}</b></span>
+            <button onclick="removeSchedule(${s.id})" style="background:none; border:none; color:#FF3B30; cursor:pointer; font-weight:bold;">إلغاء</button>
+        </div>
+    `).join('');
+}
+
+window.removeSchedule = (id) => {
+    state.schedules = state.schedules.filter(s => s.id !== id);
+    applyState();
+};
+
+document.getElementById('saveScheduleBtn')?.addEventListener('click', () => {
+    try {
+        const tVal = document.getElementById('customTime').value;
+        const intVal = document.getElementById('intervalSelect').value;
+        if (tVal) {
+            if (!state.schedules) state.schedules = [];
+            state.schedules.push({ id: Date.now(), time: tVal, days: [0,1,2,3,4,5,6] });
+        }
+        state.interval = intVal;
+        applyState();
+        syncNativeAlarms();
+        
+        const t = document.getElementById('copyToast'); 
+        if(t) { 
+            t.innerText = "تم حفظ الموعد وتأكيد التنفيذ!";
+            t.classList.add('show'); 
+            setTimeout(()=>t.classList.remove('show'), 2500); 
+        }
+    } catch(e) {}
+});
+
+document.getElementById('notifModeSetting')?.addEventListener('change', e => {
+    state.mode = e.target.value;
+    applyState();
+    syncNativeAlarms();
+});
 
 const libCats = [
     {id: 'dhikr', i18n: 'cat_dhikr'}, {id: 'quran', i18n: 'cat_quran'},
@@ -295,48 +377,14 @@ window.addMyQuote = () => {
     } catch(e) {}
 };
 
-// -------------------------------------------------------------
-// [الطلب 2] تفعيل المواعيد وعرضها الفوري في القائمة
-// -------------------------------------------------------------
-function renderScheduledList() {
-    const listEl = document.getElementById('scheduledTimesList');
-    if (!listEl) return;
-    if (!state.schedules || state.schedules.length === 0) {
-        listEl.innerHTML = `<span style="font-size:13px; color:var(--text-dim); text-align:center;">لا توجد مواعيد محفوظة حالياً</span>`;
-        return;
-    }
-    listEl.innerHTML = state.schedules.map((s, idx) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); border:1px solid var(--border); padding:12px 15px; border-radius:16px; font-size:14px; font-weight:700; color:var(--primary);">
-            <span>⏰ تم تفعيل موعد الساعة: <b style="color:var(--text);">${s.time}</b></span>
-            <button onclick="removeSchedule(${s.id})" style="background:none; border:none; color:#FF3B30; cursor:pointer; font-weight:bold;">إلغاء</button>
-        </div>
-    `).join('');
-}
-
-window.removeSchedule = (id) => {
-    state.schedules = state.schedules.filter(s => s.id !== id);
-    applyState();
-};
-
-document.getElementById('saveScheduleBtn')?.addEventListener('click', () => {
-    try {
-        const tVal = document.getElementById('customTime').value;
-        const intVal = document.getElementById('intervalSelect').value;
-        if (tVal) {
-            if (!state.schedules) state.schedules = [];
-            state.schedules.push({ id: Date.now(), time: tVal, days: [0,1,2,3,4,5,6] });
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const splash = document.getElementById('splash');
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => splash.remove(), 500);
         }
-        state.interval = intVal;
-        applyState(); // تطبيق الحالة سيقوم برسم القائمة تلقائياً
-        syncNativeAlarms();
-        
-        const t = document.getElementById('copyToast'); 
-        if(t) { 
-            t.innerText = "تم حفظ وتفعيل الموعد بنجاح!";
-            t.classList.add('show'); 
-            setTimeout(()=>t.classList.remove('show'), 2500); 
-        }
-    } catch(e) {}
+    }, 1200);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -380,18 +428,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // -------------------------------------------------------------
-        // [الطلب 5] إغلاق جميع النوافذ بالضغط خارجها
-        // -------------------------------------------------------------
+        // إغلاق جميع النوافذ بالضغط خارجها + السحب
         document.querySelectorAll('.sheet-overlay, .modal-overlay').forEach(overlay => {
-            // إغلاق عند النقر في المساحة الفارغة
             overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) {
-                    overlay.classList.remove('show');
-                }
+                if (e.target === overlay) overlay.classList.remove('show');
             });
             
-            // إضافة دعم السحب بالخط للإغلاق (للشيتات فقط)
             const handle = overlay.querySelector('.sheet-handle');
             const content = overlay.querySelector('.sheet-content');
             if (handle && content) {
