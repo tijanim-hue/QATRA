@@ -1,5 +1,5 @@
 "use strict";
-const STORE_KEY = "qatra_worldclass_v10";
+const STORE_KEY = "qatra_worldclass_v11";
 
 const DICT = {
 ar: {
@@ -253,30 +253,27 @@ window.addEventListener('load', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
+        // تشغيل نظام الترجمة فوراً لملء العبارات وكلمات الأذونات
         applyState();
 
         const permBlocker = document.getElementById('permissionBlocker');
         
-        // التحقق مما إذا تم منح الأذونات مسبقاً
         if (!localStorage.getItem('perms_granted')) {
             if(permBlocker) permBlocker.style.display = 'flex';
         } else {
             if(permBlocker) permBlocker.style.display = 'none';
         }
 
-        // عند الضغط على زر منح الصلاحيات
         document.getElementById('grantPermsBtn')?.addEventListener('click', () => {
             if(QatraNative) {
                 QatraNative.askPermissions().then(() => { 
                     localStorage.setItem('perms_granted', 'true'); 
                     if(permBlocker) permBlocker.style.display = 'none'; 
                 }).catch(() => {
-                    // حتى لو حدث استثناء من الأندرويد، نسمح بالتخطّي لكي لا يعلق المستخدم
                     localStorage.setItem('perms_granted', 'true');
                     if(permBlocker) permBlocker.style.display = 'none';
                 });
             } else {
-                // وضع المتصفح أو في حال عدم توفر البلوجن
                 localStorage.setItem('perms_granted', 'true');
                 if(permBlocker) permBlocker.style.display = 'none';
             }
@@ -300,7 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderLibraryCategories(); 
         });
 
-        // السحب للإغلاق النوافذ
         document.querySelectorAll('.sheet-overlay').forEach(sheet => {
             const handle = sheet.querySelector('.sheet-handle');
             const content = sheet.querySelector('.sheet-content');
