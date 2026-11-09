@@ -635,16 +635,7 @@ safeOn('homeCardsToggle', 'change', e => { state.showHomeCards = e.target.checke
 safeOn('intervalSelect', 'change', e => { state.interval = e.target.value; applyState(); syncNativeAlarms(); });
 window.setQuoteSource = (source) => { state.quoteSource = source; applyState(); syncNativeAlarms(); };
 
-// --- استماع للقلب من القطرة في الأندرويد ---
-if (QatraNative) {
-QatraNative.addListener('quoteLiked', (info) => {
-state.stats.likes++;
-if (state.stats[info.category] !== undefined) state.stats[info.category];
-else if (info.category === 'quran') state.stats.dhikr;
-else if (info.category === 'myGroups') state.stats.selfDev++;
-applyState();
-});
-}
+// Likes are reconciled from the native ledger in home-windows.js.
 
 function updateStatsChart() {
 const drops = state.stats.likes; // استخدام التفاعل كمؤشر أساسي

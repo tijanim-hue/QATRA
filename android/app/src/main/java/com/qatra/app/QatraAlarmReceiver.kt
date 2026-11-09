@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 
 class QatraAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        QatraHomeStore.delivered(context, intent.getIntExtra("id", -1))
         val quote = intent.getStringExtra("quote") ?: "حان وقت التأمل"
         val category = intent.getStringExtra("category") ?: "dhikr"
         val showImage = intent.getBooleanExtra("showImage", false)

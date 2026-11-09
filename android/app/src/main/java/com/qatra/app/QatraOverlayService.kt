@@ -45,6 +45,8 @@ return START_NOT_STICKY
 
 private fun playCinematicAnimation(quote: String, category: String, showImage: Boolean, displayDuration: Long, surprise: Boolean) {
 if (overlayContainer != null) return
+isLiked = false
+val likeOccurrenceId = java.util.UUID.randomUUID().toString()
 windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 val screenHeight = resources.displayMetrics.heightPixels.toFloat()
 val bottomLandingY = if (surprise) screenHeight / 2f - 50f else screenHeight - 200f
@@ -132,6 +134,7 @@ setPadding(35, 20, 35, 20)
 elevation = 60f
 setOnClickListener {
 if (!isLiked) {
+if (!QatraHomeStore.like(this@QatraOverlayService, likeOccurrenceId, category)) return@setOnClickListener
 isLiked = true
 text = "♥"
 setTextColor(Color.parseColor("#FF3B30"))
@@ -141,7 +144,7 @@ setColor(Color.parseColor("#33FF3B30"))
 setStroke(2, Color.parseColor("#FF3B30"))
 }
 setShadowLayer(30f, 0f, 0f, Color.parseColor("#FF3B30"))
-val intent = Intent("com.qatra.app.QUOTE_LIKED")
+val intent = Intent("com.qatra.app.QUOTE_LIKED").setPackage(packageName)
 intent.putExtra("category", category)
 sendBroadcast(intent)
 val pScaleX = ObjectAnimator.ofFloat(this, "scaleX", 1f, 1.5f, 1f).setDuration(400)

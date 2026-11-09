@@ -77,14 +77,17 @@ val category = call.getString("category") ?: "dhikr"
 val showImage = call.getBoolean("showImage") ?: false
 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 val intent = Intent(context, QatraAlarmReceiver::class.java).apply {
-putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote); putExtra("category", category); putExtra("showImage", showImage)
+putExtra("id", 99999); putExtra("mode", mode); putExtra("duration", duration); putExtra("quote", quote); putExtra("category", category); putExtra("showImage", showImage)
 }
 val pendingIntent = PendingIntent.getBroadcast(context, 99999, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 if (intervalMinutes > 0) {
 val intervalMillis = intervalMinutes * 60 * 1000L
-alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + intervalMillis, intervalMillis, pendingIntent)
+val firstAt = System.currentTimeMillis() + intervalMillis
+alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, firstAt, intervalMillis, pendingIntent)
+QatraHomeStore.remember(context, 99999, firstAt, intervalMillis, quote, category, mode, duration, showImage)
 } else {
 alarmManager.cancel(pendingIntent)
+QatraHomeStore.remove(context, 99999)
 }
 call.resolve()
 }
@@ -116,6 +119,7 @@ alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInM
 } catch (e: Exception) {
 alarmManager.setWindow(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, 1000605, pendingIntent)
 }
+QatraHomeStore.remember(context, id, calendar.timeInMillis, 0L, quote, category, mode, duration, showImage)
 call.resolve()
 }
 
@@ -126,6 +130,7 @@ val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManag
 val intent = Intent(context, QatraAlarmReceiver::class.java)
 val pendingIntent = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 alarmManager.cancel(pendingIntent)
+QatraHomeStore.remove(context, id)
 call.resolve()
 }
 
@@ -141,5 +146,22 @@ putExtra("surprise", surprise); putExtra("quote", quote); putExtra("duration", d
 }
 context.startService(serviceIntent)
 call.resolve()
+}
+
+@PluginMethod
+fun getHomeData(call: PluginCall) {
+try { call.resolve(JSObject(QatraHomeStore.snapshot(context).toString())) }
+catch (e: Exception) { call.reject("Unable to read home data", e) }
+}
+
+@PluginMethod
+fun reconcileHomeAlarms(call: PluginCall) {
+try {
+val values = call.getArray("ids")
+val ids = mutableSetOf<Int>()
+if (values != null) for (i in 0 until values.length()) ids.add(values.getInt(i))
+QatraHomeStore.prune(context, ids)
+call.resolve()
+} catch (e: Exception) { call.reject("Unable to reconcile alarms", e) }
 }
 }
