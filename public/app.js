@@ -1,5 +1,5 @@
 "use strict";
-const STORE_KEY = "qatra_worldclass_v12";
+const STORE_KEY = "qatra_worldclass_v13";
 
 const DICT = {
 ar: {
@@ -19,7 +19,7 @@ all_categories: "عشوائي", cat_dhikr: "أذكار وأدعية", cat_selfDe
 perm_title: "مرحباً بك في قطرة", 
 perm_desc: "لكي تتمكن القطرة من الطفو على شاشتك وتنبيهك، نحتاج لمنح بعض الأذونات الأساسية للنظام.", 
 perm_grant: "منح الصلاحيات والبدء",
-quote_of_day: "اقتباس اليوم", drops: "قطرة"
+quote_of_day: "اقتباس اليوم", drops: "قطرة", your_progress: "نشاطك وتقدمك"
 },
 en: {
 app_title: "Qatra | Drop", moment_zen: "Surprise Me", click_to_program: "Cinematic Drop",
@@ -38,7 +38,7 @@ all_categories: "Random", cat_dhikr: "Dhikr", cat_selfDev: "Self Dev", cat_quran
 perm_title: "Welcome to QATRA", 
 perm_desc: "To allow Drops to float on your screen, we need system permissions.", 
 perm_grant: "Grant Permissions & Start", 
-quote_of_day: "Quote of the Day", drops: "Drops"
+quote_of_day: "Quote of the Day", drops: "Drops", your_progress: "Your Progress"
 },
 fr: {
 app_title: "Qatra", moment_zen: "Surprends-moi", click_to_program: "Goutte Cinématique",
@@ -57,7 +57,7 @@ all_categories: "Aléatoire", cat_dhikr: "Dhikr", cat_selfDev: "Dév Personnel",
 perm_title: "Bienvenue dans Qatra", 
 perm_desc: "Pour autoriser les gouttes à flotter sur votre écran, nous avons besoin de permissions.", 
 perm_grant: "Accorder les permissions", 
-quote_of_day: "Citation du Jour", drops: "Gouttes"
+quote_of_day: "Citation du Jour", drops: "Gouttes", your_progress: "Votre Progrès"
 }
 };
 
@@ -250,8 +250,6 @@ function updateNextDropUI() {
     try {
         const ndText = document.getElementById('nextDropTimeText');
         if(ndText) ndText.innerText = getTranslation('no_reminders');
-        const qCard = document.getElementById('dailyQuoteTextCard');
-        if(qCard) qCard.innerText = QUOTES_DB.selfDev[0];
     } catch(e) {}
 }
 
@@ -303,7 +301,7 @@ window.addMyQuote = () => {
     } catch(e) {}
 };
 
-// إعدادات المواعيد وتفعيلها عند الضغط على حفظ
+// حفظ وتفعيل المواعيد اليدوية
 document.getElementById('saveScheduleBtn')?.addEventListener('click', () => {
     try {
         const tVal = document.getElementById('customTime').value;
@@ -401,7 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // تشغيل واجهة السحب للمكتبة عند الإقلاع
         initDiscoverSwipe();
 
     } catch(e) {}
