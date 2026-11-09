@@ -5,6 +5,7 @@ const STORE_KEY = "qatra_worldclass_v6";
 // === قاموس الترجمة ===
 const DICT = {
 ar: {
+surprise_title: "فاجئني", surprise_description: "اكتشف الآن قطرة جديدة",
 app_title: "قطرة | QATRA", pull_to_switch: "اسحب لتبديل المظهر", moment_zen: "لحظة وعي", click_to_program: "اضغط لبرمجة قطرتك",
 next_drop: "قطرتك القادمة", today_impact: "أثر اليوم", current_moment: "لحظتك الحالية", drop_settings: "إعدادات قطرتي",
 display_method: "طريقة العرض وتفضيلاتك", mode_both: "تنبيه النظام + قطرة مائية (معاً)", mode_floating: "القطرة المائية فقط",
@@ -23,6 +24,7 @@ delete: "حذف", days: "أيام", quotes_ready: "عبارة جاهزة", rain:
 all_categories: "عشوائي (من كل الأقسام)", cat_dhikr: "أذكار وأدعية", cat_selfDev: "تطوير الذات", cat_quran: "آيات قرآنية", cat_culture: "ثقافة عامة وحكم", cat_poetry: "أبيات شعرية", my_library: "مجموعاتي الخاصة", stop_repeat: "إيقاف التكرار التلقائي", every_30: "كل 30 دقيقة", every_1h: "كل 1 ساعة", every_3h: "كل 3 ساعات", every_12h: "كل 12 ساعة", every_24h: "كل 24 ساعة", no_reminders: "لا توجد مواعيد", source_category: "1. مصدر العبارات"
 },
 en: {
+surprise_title: "Surprise Me", surprise_description: "Discover a new drop",
 app_title: "Qatra | Drop", pull_to_switch: "Pull to switch theme", moment_zen: "Moment of Zen", click_to_program: "Tap to config",
 next_drop: "Next Drop", today_impact: "Today's Impact", current_moment: "Current Moment", drop_settings: "My Drop Settings",
 display_method: "Display Mode", mode_both: "Notification + Drop", mode_floating: "Drop Only", mode_notification: "Notification Only",
@@ -318,12 +320,38 @@ const quote = pool[Math.floor(Math.random() * pool.length)];
 return { quote, categoryKey };
 }
 
+let surpriseBusy = false;
 window.fireCinematic = async () => {
-const { quote, categoryKey } = getRandomQuote();
-const qtEl = document.getElementById('dailyQuoteText'); if (qtEl) qtEl.textContent = `"${quote}"`;
-if (QatraNative) {
-state.stats.drops++; applyState();
-await QatraNative.showDrop({ quote: quote, category: categoryKey, duration: state.duration, fullScreen: true, showImage: state.showImage }).catch(e=>{});
+if (surpriseBusy) return;
+const button = document.getElementById('surpriseButton');
+if (!QatraNative || typeof QatraNative.showDrop !== 'function') {
+alert(state.lang === 'ar' ? 'تعذر الاتصال بخدمة القطرة. أغلق التطبيق وافتحه ثم حاول مجددًا.' : 'Drop service is unavailable. Please reopen the app.');
+return;
+}
+const available = Object.keys(QUOTES_DB).map(categoryKey => ({
+categoryKey,
+items: QUOTES_DB[categoryKey].items.filter(q => typeof q === 'string' && q.trim() && !/^(دعاء رقم|فكرة تطوير ذات رقم|آية رقم|حكمة رقم|بيت شعر رقم)\s*\d+\s*$/.test(q))
+})).filter(category => category.items.length);
+if (!available.length) return;
+const category = available[Math.floor(Math.random() * available.length)];
+const quote = category.items[Math.floor(Math.random() * category.items.length)];
+const duration = Math.max(5000, Math.min(15000, Number(state.duration) || 10000));
+surpriseBusy = true;
+if (button) { button.disabled = true; button.setAttribute('aria-busy','true'); button.classList.add('is-opening'); }
+try {
+await new Promise(resolve => setTimeout(resolve, 650));
+await QatraNative.showDrop({quote, category: category.categoryKey, duration, fullScreen:true, showImage:state.showImage, surprise:true});
+const qtEl = document.getElementById('dailyQuoteText');
+if (qtEl) qtEl.textContent = `"${quote}"`;
+state.stats.drops++;
+applyState();
+await new Promise(resolve => setTimeout(resolve, duration + 1000));
+} catch (error) {
+console.error('QATRA surprise failed',error);
+alert(state.lang === 'ar' ? 'لم تظهر القطرة. تحقق من إذن الظهور فوق التطبيقات ثم حاول مجددًا.' : 'Unable to show the drop. Check overlay permission and try again.');
+} finally {
+surpriseBusy = false;
+if (button) { button.disabled = false; button.setAttribute('aria-busy','false'); button.classList.remove('is-opening'); }
 }
 };
 

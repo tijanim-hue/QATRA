@@ -135,8 +135,9 @@ val quote = call.getString("quote") ?: "سبحان الله"
 val category = call.getString("category") ?: "dhikr"
 val duration = call.getInt("duration") ?: 10000
 val showImage = call.getBoolean("showImage") ?: false
+val surprise = call.getBoolean("surprise") ?: false
 val serviceIntent = Intent(context, QatraOverlayService::class.java).apply {
-putExtra("quote", quote); putExtra("duration", duration); putExtra("category", category); putExtra("showImage", showImage)
+putExtra("surprise", surprise); putExtra("quote", quote); putExtra("duration", duration); putExtra("category", category); putExtra("showImage", showImage)
 }
 context.startService(serviceIntent)
 call.resolve()

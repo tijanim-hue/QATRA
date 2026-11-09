@@ -38,15 +38,18 @@ val quote = intent?.getStringExtra("quote") ?: "الحمد لله"
 val category = intent?.getStringExtra("category") ?: "dhikr"
 val showImage = intent?.getBooleanExtra("showImage", false) ?: false
 val duration = intent?.getIntExtra("duration", 10000) ?: 10000
-playCinematicAnimation(quote, category, showImage, duration.toLong())
+val surprise = intent?.getBooleanExtra("surprise", false) ?: false
+playCinematicAnimation(quote, category, showImage, duration.toLong(), surprise)
 return START_NOT_STICKY
 }
 
-private fun playCinematicAnimation(quote: String, category: String, showImage: Boolean, displayDuration: Long) {
+private fun playCinematicAnimation(quote: String, category: String, showImage: Boolean, displayDuration: Long, surprise: Boolean) {
 if (overlayContainer != null) return
 windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 val screenHeight = resources.displayMetrics.heightPixels.toFloat()
-val bottomLandingY = screenHeight - 200f
+val bottomLandingY = if (surprise) screenHeight / 2f - 50f else screenHeight - 200f
+val revealStartY = if (surprise) 0f else bottomLandingY / 2f
+val revealScale = if (surprise) 0.08f else 0.5f
 overlayContainer = FrameLayout(this).apply { setBackgroundColor(Color.TRANSPARENT) }
 val layoutFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
@@ -72,7 +75,7 @@ val dropParams = FrameLayout.LayoutParams(dropSize, dropSize).apply { gravity = 
 val ripple = View(this).apply {
 background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(Color.parseColor("#8000d2ff")) }
 alpha = 0f
-translationY = bottomLandingY - (screenHeight / 2f) + 100f
+translationY = if (surprise) 0f else bottomLandingY - (screenHeight / 2f) + 100f
 }
 val rippleParams = FrameLayout.LayoutParams(100, 40).apply { gravity = Gravity.CENTER }
 val cardView = FrameLayout(this).apply {
@@ -178,18 +181,18 @@ val rScaleY = ObjectAnimator.ofFloat(ripple, "scaleY", 1f, 15f).setDuration(800)
 val rFade = ObjectAnimator.ofFloat(ripple, "alpha", 1f, 0f).setDuration(800)
 AnimatorSet().apply { playTogether(rScaleX, rScaleY, rFade); start() }
 // صعود البطاقة
-cardView.translationY = bottomLandingY / 2f
-cardView.scaleX = 0.5f; cardView.scaleY = 0.5f
-val tRise = ObjectAnimator.ofFloat(cardView, "translationY", bottomLandingY / 2f, 0f).setDuration(2500)
+cardView.translationY = revealStartY
+cardView.scaleX = revealScale; cardView.scaleY = revealScale
+val tRise = ObjectAnimator.ofFloat(cardView, "translationY", revealStartY, 0f).setDuration(2500)
 tRise.interpolator = DecelerateInterpolator(1.5f)
-val tGrowX = ObjectAnimator.ofFloat(cardView, "scaleX", 0.5f, 1f).setDuration(2500)
-val tGrowY = ObjectAnimator.ofFloat(cardView, "scaleY", 0.5f, 1f).setDuration(2500)
+val tGrowX = ObjectAnimator.ofFloat(cardView, "scaleX", revealScale, 1f).setDuration(2500)
+val tGrowY = ObjectAnimator.ofFloat(cardView, "scaleY", revealScale, 1f).setDuration(2500)
 val tFade = ObjectAnimator.ofFloat(cardView, "alpha", 0f, 1f).setDuration(1500)
 val pulseFade = ObjectAnimator.ofFloat(cardView, "alpha", 1f, 0.4f, 1f).apply { duration = 1200; startDelay = 2500 }
 // صعود القلب فوق البطاقة
 val heartTargetY = -450f // فوق العبارة
-likeButton.translationY = bottomLandingY / 2f
-val hRise = ObjectAnimator.ofFloat(likeButton, "translationY", bottomLandingY / 2f, heartTargetY).setDuration(2500)
+likeButton.translationY = revealStartY
+val hRise = ObjectAnimator.ofFloat(likeButton, "translationY", revealStartY, heartTargetY).setDuration(2500)
 hRise.interpolator = DecelerateInterpolator(1.5f)
 val hFade = ObjectAnimator.ofFloat(likeButton, "alpha", 0f, 1f).apply { duration = 1500; startDelay = 1000 }
 AnimatorSet().apply { playTogether(tRise, tGrowX, tGrowY, tFade, pulseFade, hRise, hFade); start() }

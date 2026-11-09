@@ -225,6 +225,32 @@ transition: 0.3s;
 .toggle input:checked + .toggle-track::before { transform: translateX(-22px); background: #fff;}
 select, input[type="text"], input[type="time"], input[type="number"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none;}
 select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="number"]:focus { border-color: var(--primary); }
+
+/* QATRA surprise: scoped additions; existing views remain unchanged. */
+.header { box-sizing:border-box; display:grid !important; grid-template-columns:44px minmax(0,1fr) 44px; gap:12px; padding:20px 20px 12px; width:100%; min-width:0; }
+.header > .header-btn { box-sizing:border-box; width:44px; height:44px; padding:10px; justify-self:center; }
+.header > .brand { min-width:0; justify-self:center; }
+.header .qatra-settings { border:1px solid rgba(139,148,238,.28); border-radius:15px; background:linear-gradient(145deg,rgba(56,189,248,.10),rgba(139,92,246,.16)); box-shadow:inset 0 1px 0 rgba(255,255,255,.12); }
+.header .qatra-settings svg { width:24px; height:24px; stroke:var(--primary); stroke-width:1.7; }
+.qatra-surprise,.qatra-surprise * { box-sizing:border-box; }
+.qatra-surprise { --surprise-size: min(100%,320px); position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; width:var(--surprise-size); aspect-ratio:1; height:auto; margin:10px auto 28px; padding:15px 18px 22px; border:1px solid rgba(132,120,255,.65); border-radius:50%; overflow:hidden; isolation:isolate; cursor:pointer; font-family:inherit; color:#fff; background:radial-gradient(ellipse at 50% 30%,rgba(61,64,142,.3),transparent 63%),radial-gradient(ellipse at 50% 100%,rgba(141,53,230,.26),transparent 58%),#080f2b; box-shadow:inset 0 0 24px rgba(91,90,250,.22),0 14px 34px rgba(10,14,48,.22); -webkit-tap-highlight-color:transparent; }
+.surprise-orbit { position:absolute; inset:1px; border-radius:50%; border-top:2px solid #7599ff; border-inline-start:2px solid #d787fa; border-bottom:2px solid #a457dc; opacity:.8; pointer-events:none; box-shadow:inset 0 0 13px rgba(136,103,255,.18); }
+.surprise-art { display:block; flex:none; width:63%; height:auto; margin-top:-12px; overflow:visible; }
+.surprise-title { display:block; font-size:clamp(29px,8vw,40px); font-weight:900; line-height:1.3; margin-top:-2px; text-shadow:0 2px 14px rgba(171,158,255,.3); }
+.surprise-description { font-size:clamp(11px,3.5vw,15px); font-weight:600; color:#bec9ed; margin-top:4px; line-height:1.8; }
+.surprise-play { display:grid; place-items:center; width:66px; height:39px; border-radius:24px; margin-top:12px; border:1px solid #8e9cff; background:linear-gradient(140deg,#3269d9,#4846ac 65%,#9e65dd); box-shadow:inset 0 2px 4px rgba(255,255,255,.23),0 0 16px rgba(93,100,255,.32); }
+.surprise-play svg { width:23px; height:23px; fill:white; }
+.qatra-surprise:focus-visible { outline:3px solid #91e7ff; outline-offset:5px; }
+.qatra-surprise:active { transform:scale(.985); }
+.qatra-surprise:disabled { cursor:wait; }
+.surprise-lid { transform-box:fill-box; transform-origin:center; transition:transform .6s cubic-bezier(.2,.8,.2,1); }
+.surprise-glow { transform-box:fill-box; transform-origin:center; transition:transform .65s,opacity .65s; }
+.qatra-surprise.is-opening .surprise-lid { transform:translateY(-16px) rotate(-9deg); }
+.qatra-surprise.is-opening .surprise-glow { transform:scale(1.5); opacity:1; }
+.qatra-surprise.is-opening .surprise-rays { animation:qatra-rays .65s ease-out both; }
+@keyframes qatra-rays { 0% {opacity:.2} 65% {opacity:1} 100% {opacity:.5} }
+@media (prefers-reduced-motion:reduce) { .surprise-lid,.surprise-glow {transition:none} .qatra-surprise.is-opening .surprise-rays {animation:none} }
+
 </style>
 </head>
 <body class="glass-active dark-mode">
@@ -314,8 +340,8 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 <div class="brand">
 <svg viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
 </div>
-<button class="header-btn" onclick="document.getElementById('settingsSheet').classList.add('show')">
-<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+<button class="header-btn qatra-settings" type="button" aria-label="إعدادات التطبيق" onclick="document.getElementById('settingsSheet').classList.add('show')">
+<svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h5m5 0h6M4 17h10m5 0h1"/><circle cx="11.5" cy="7" r="2.5"/><circle cx="16.5" cy="17" r="2.5"/><path d="M3 12h18" opacity=".35"/></svg>
 </button>
 </header>
 
@@ -326,11 +352,31 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 </div>
 
 <section class="view active" id="homeView">
-<div class="hero-ring" onclick="document.querySelector('[data-view='dropConfigView']').click()">
-<svg class="hero-icon" viewBox="0 0 24 24"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"/></svg>
-<div class="hero-text" data-i18n="moment_zen">لحظة وعي</div>
-<div style="color:var(--text-dim); font-size:13px; margin-top:6px; font-weight:600;" data-i18n="click_to_program">اضغط لبرمجة قطرتك</div>
-</div>
+<button type="button" class="qatra-surprise" id="surpriseButton" onclick="fireCinematic()" aria-label="فاجئني بقطرة جديدة" aria-busy="false">
+<span class="surprise-orbit" aria-hidden="true"></span>
+<svg class="surprise-art" viewBox="0 0 260 190" aria-hidden="true" focusable="false">
+<defs>
+<linearGradient id="qs-front" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9668ff"/><stop offset=".48" stop-color="#354ad9"/><stop offset="1" stop-color="#182678"/></linearGradient>
+<linearGradient id="qs-side"><stop stop-color="#334ad6"/><stop offset="1" stop-color="#172667"/></linearGradient>
+<linearGradient id="qs-lid" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#39dbff"/><stop offset=".45" stop-color="#8766ff"/><stop offset="1" stop-color="#2c3ba6"/></linearGradient>
+<radialGradient id="qs-glow"><stop stop-color="#fff8d2" stop-opacity="1"/><stop offset=".35" stop-color="#ffd78f" stop-opacity=".8"/><stop offset="1" stop-color="#ffa544" stop-opacity="0"/></radialGradient>
+<linearGradient id="qs-water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b7ffff"/><stop offset=".55" stop-color="#46d6ff"/><stop offset="1" stop-color="#6d7eff"/></linearGradient>
+</defs>
+<ellipse cx="130" cy="170" rx="78" ry="13" fill="#7364ff" opacity=".22"/>
+<ellipse class="surprise-glow" cx="130" cy="98" rx="91" ry="69" fill="url(#qs-glow)"/>
+<g class="surprise-rays" stroke="#ffe5af" stroke-linecap="round"><path d="M111 104L99 60M132 102V44M151 103L170 62" opacity=".7"/><path d="M78 75v8m-4-4h8M181 45v8m-4-4h8M199 95v6m-3-3h6"/></g>
+<path d="M64 105L113 88L190 105L140 126Z" fill="#ffe8bd" stroke="#fff2d2"/>
+<path d="M64 105L140 119V174L66 158Z" fill="url(#qs-front)" stroke="#9285ff" stroke-opacity=".65"/>
+<path d="M140 119L190 105L188 158L140 174Z" fill="url(#qs-side)" stroke="#5c83ff" stroke-opacity=".6"/>
+<path d="M90 110V163M163 113V166" stroke="#b28bff" stroke-width="3" opacity=".35"/>
+<path d="M107 125C105 132 95 139 95 146A12 12 0 0 0 119 146C119 139 110 132 107 125Z" fill="url(#qs-water)" stroke="#b4f9ff" stroke-width="1.5"/>
+<g class="surprise-lid"><path d="M116 27L145 16L205 57L177 70Z" fill="url(#qs-lid)" stroke="#8addff"/><path d="M116 27L177 70V83L112 40Z" fill="#5358d8" stroke="#ad8aff"/><path d="M177 70L205 57L202 69L177 83Z" fill="#243a99"/><path d="M137 25L191 65" stroke="#c6aeff" stroke-width="11" opacity=".65"/></g>
+<g fill="#ffe4b3"><circle cx="84" cy="52" r="1.8"/><circle cx="61" cy="91" r="1.4"/><circle cx="164" cy="30" r="1.2"/><circle cx="197" cy="119" r="1.6"/></g>
+</svg>
+<span class="surprise-title" data-i18n="surprise_title">فاجئني</span>
+<span class="surprise-description" data-i18n="surprise_description">اكتشف الآن قطرة جديدة</span>
+<span class="surprise-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5v14l11-7z"/></svg></span>
+</button>
 
 <div id="homeCardsContainer">
 <div class="glass-card action-card" onclick="document.querySelector('[data-view='dropConfigView']').click()">
