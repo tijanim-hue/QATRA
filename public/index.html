@@ -30,20 +30,17 @@ border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0,
 body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: "Cairo", sans-serif; transition: background 0.6s ease, color 0.6s ease; }
 .app-container { display: flex; flex-direction: column; width: 100%; height: 100%; max-width: 500px; margin: auto; position: relative; }
 
-/* الأذونات الإجبارية */
 #permissionBlocker { position: fixed; inset: 0; background: rgba(11, 17, 33, 0.98); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; backdrop-filter: blur(15px); }
 .perm-icon { width: 80px; height: 80px; background: color-mix(in srgb, var(--primary) 20%, transparent); color: var(--primary); border-radius: 25px; display: grid; place-items: center; margin-bottom: 20px; }
 .perm-icon svg { width: 40px; height: 40px; stroke: currentColor; fill: none; stroke-width: 2; }
 #permissionBlocker h2 { color: #fff; font-size: 24px; margin-bottom: 10px; }
 #permissionBlocker p { color: var(--text-dim); font-size: 15px; margin-bottom: 30px; line-height: 1.6; }
 
-/* الهيدر */
 .header { display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 25px 24px 15px; z-index: 10; background: transparent; }
 .header-btn { background: none; border: none; color: var(--text); padding: 8px; cursor: pointer; display: grid; place-items: center; }
 .header-btn svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .brand svg { width: 34px; height: 34px; fill: var(--primary); margin-bottom: 4px;}
 
-/* المحتوى */
 .content-area { flex: 1; overflow-y: auto; padding: 10px 24px 120px; scroll-behavior: smooth; position: relative;}
 .content-area::-webkit-scrollbar { display: none; }
 .glass-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--card-radius); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
@@ -55,7 +52,6 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .card-title { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
 .card-sub { font-size: 13px; color: var(--text-dim); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;}
 
-/* دائرة فاجئني */
 .hero-circle-container { display: flex; justify-content: center; align-items: center; margin: 20px 0 30px 0; }
 .hero-circle { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.15) 0%, rgba(11, 17, 33, 1) 70%); border: 1px solid rgba(56, 189, 248, 0.3); box-shadow: 0 0 40px rgba(56, 189, 248, 0.1); display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; cursor: pointer; transition: transform 0.3s ease; overflow: hidden; }
 .hero-circle:active { transform: scale(0.95); }
@@ -63,19 +59,16 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .hero-title-main { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 4px; }
 .hero-subtitle { font-size: 12px; font-weight: 600; color: var(--text-dim); }
 
-/* شريط أقسام المكتبة */
 .chips-row { display: flex; overflow-x: auto; gap: 10px; padding: 10px 0; scrollbar-width: none; margin-bottom: 15px; }
 .chips-row::-webkit-scrollbar { display: none; }
 .chip-btn { padding: 10px 20px; border-radius: 20px; background: var(--bg); border: 1px solid var(--border); color: var(--text-dim); font-weight: 700; white-space: nowrap; cursor: pointer; transition: 0.3s; }
 .chip-btn.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border-color: transparent; }
 
-/* بطاقات السحب الفيزيائي */
 .swipe-container { position: relative; width: 100%; height: 320px; perspective: 1000px; display: flex; justify-content: center; align-items: center; margin-top: 10px;}
-.swipe-card { position: absolute; width: 95%; height: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow); padding: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: grab; user-select: none; }
+.swipe-card { position: absolute; width: 95%; height: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--shadow); padding: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: grab; user-select: none; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .swipe-card.dragging { cursor: grabbing; transition: none; }
 .swipe-quote { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1.6; }
 
-/* الكبسولة السفلية */
 .floating-nav { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 420px; display: flex; flex-direction: row; justify-content: space-evenly; align-items: center; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 40px; z-index: 100; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); }
 .nav-item { background: transparent; border: none; color: var(--text-dim); padding: 10px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; flex: 1; min-width: 50px; }
 .nav-item svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.2; }
@@ -83,7 +76,6 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .nav-home-btn { flex: none; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: #fff; border: 4px solid var(--bg); box-shadow: 0 10px 20px color-mix(in srgb, var(--primary) 40%, transparent); transform: translateY(-20px); cursor: pointer; }
 .nav-home-btn svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2.5;}
 
-/* النوافذ السفلية (Sheets) */
 .view { display: none; animation: slideUpFade 0.4s ease; }
 .view.active { display: block; }
 @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -92,29 +84,33 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .sheet-content { background: var(--surface); border-radius: 32px 32px 0 0; padding: 30px 24px; max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); position: relative; transition: transform 0.2s ease; margin-bottom:0; }
 .sheet-handle { width: 50px; height: 6px; background: var(--border); border-radius: 10px; margin: -10px auto 25px; cursor: grab; }
 
-/* نافذة المنتصف المستقلة (Modal) - مخصصة لاقتباس اليوم */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
 .modal-overlay.show { display: flex; animation: fadeInModal 0.3s ease; }
 @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
 .modal-content { background: var(--surface); border-radius: 28px; padding: 35px 24px; width: 85%; max-width: 380px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); text-align: center; position: relative; animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); border: 2px solid var(--primary); }
 @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-/* خلفية مربعة زجاجية ذات حواف دائرية وتأثير blur للقطرة المائية */
+/* خلفية مربعة زجاجية ذات حواف دائرية وتأثير blur للقطرة المائية (تُستخدم برمجياً) */
 .water-drop-glass-box {
-    background: rgba(15, 20, 30, 0.45) !important;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 24px; /* حواف دائرية */
+    background: rgba(15, 20, 30, 0.55) !important;
+    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 28px; 
     padding: 30px; 
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     color: #F8FAFC;
     text-align: center;
-    aspect-ratio: 1 / 1; /* يضمن أن يكون الشكل مربعاً تماماً */
+    aspect-ratio: 1 / 1; 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
+
+/* تنسيق مصدر العبارات ليطابق الصورة المرفقة تماماً */
+.source-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.source-item { padding: 12px 10px; text-align: right; color: var(--text-dim); font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 12px; transition: 0.2s; }
+.source-item.active { color: var(--primary); font-weight: 800; background: color-mix(in srgb, var(--primary) 10%, transparent); }
 
 select, input[type="text"], input[type="time"], input[type="number"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; appearance: none;}
 .btn-solid { width: 100%; padding: 18px; border: none; border-radius: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-size: 16px; font-weight: 800; margin-top: 20px; cursor: pointer; box-shadow: 0 10px 25px color-mix(in srgb, var(--primary) 30%, transparent); }
@@ -137,7 +133,7 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 <div class="sheet-content glass-card">
 <div class="sheet-handle"></div>
 <h2 style="margin-top:0;" data-i18n="app_settings">إعدادات التطبيق</h2>
-<div class="control-row">
+<div class="control-row" style="display:flex; justify-content:space-between; align-items:center; padding:18px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
 <span style="font-weight:700; font-size:16px;" data-i18n="glass_mode">الشفافية وتأثير الزجاج</span>
 <label class="toggle"><input type="checkbox" id="glassToggle"><span class="toggle-track"></span></label>
 </div>
@@ -224,21 +220,33 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 
 <section class="view" id="dropConfigView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="drop_settings">إعدادات قطرتي</h2>
+
+<!-- إضافة طريقة العرض لضمان التطبيق على الشاشة والقفل -->
 <div class="glass-card">
-<strong style="display:block; margin-bottom:10px; font-size:16px;" data-i18n="source_category">1. مصدر العبارات</strong>
-<div class="custom-radio-group" id="quoteSourceGroup">
-<div class="custom-radio-item active" data-value="all" onclick="setQuoteSource('all')"><span data-i18n="all_categories">عشوائي</span><div class="custom-radio-circle"></div></div>
-<div class="custom-radio-item" data-value="dhikr" onclick="setQuoteSource('dhikr')"><span data-i18n="cat_dhikr">أذكار وأدعية</span><div class="custom-radio-circle"></div></div>
-<div class="custom-radio-item" data-value="quran" onclick="setQuoteSource('quran')"><span data-i18n="cat_quran">آيات قرآنية</span><div class="custom-radio-circle"></div></div>
-<div class="custom-radio-item" data-value="poetry" onclick="setQuoteSource('poetry')"><span data-i18n="cat_poetry">أبيات شعرية</span><div class="custom-radio-circle"></div></div>
-<div class="custom-radio-item" data-value="selfDev" onclick="setQuoteSource('selfDev')"><span data-i18n="cat_selfDev">تطوير الذات</span><div class="custom-radio-circle"></div></div>
-<div class="custom-radio-item" data-value="myQuotes" onclick="setQuoteSource('myQuotes')"><span data-i18n="my_custom_quotes">عباراتي الخاصة</span><div class="custom-radio-circle"></div></div>
+<strong style="display:block; margin-bottom:10px; font-size:16px;" data-i18n="display_method">طريقة العرض</strong>
+<select id="notifModeSetting">
+<option value="both" data-i18n="mode_both">تنبيه + قطرة مائية (شاشة وقفل)</option>
+<option value="floating" data-i18n="mode_floating">قطرة مائية فقط</option>
+<option value="notification">إشعار فقط</option>
+</select>
+</div>
+
+<!-- تصميم مصدر العبارات مطابق للصورة المرفقة -->
+<div class="glass-card">
+<strong style="display:block; margin-bottom:5px; font-size:16px;" data-i18n="source_category">مصدر العبارات</strong>
+<div class="source-list" id="quoteSourceGroup">
+<div class="source-item active" data-value="all" onclick="setQuoteSource('all')"><span data-i18n="all_categories">عشوائي</span></div>
+<div class="source-item" data-value="dhikr" onclick="setQuoteSource('dhikr')"><span data-i18n="cat_dhikr">أذكار وأدعية</span></div>
+<div class="source-item" data-value="quran" onclick="setQuoteSource('quran')"><span data-i18n="cat_quran">آيات قرآنية</span></div>
+<div class="source-item" data-value="poetry" onclick="setQuoteSource('poetry')"><span data-i18n="cat_poetry">أبيات شعرية</span></div>
+<div class="source-item" data-value="selfDev" onclick="setQuoteSource('selfDev')"><span data-i18n="cat_selfDev">تطوير الذات</span></div>
+<div class="source-item" data-value="myQuotes" onclick="setQuoteSource('myQuotes')"><span data-i18n="my_custom_quotes">عباراتي الخاصة</span></div>
 </div>
 </div>
 
 <div class="glass-card">
 <strong style="display:block; margin-bottom:15px; font-size:16px;" data-i18n="smart_schedule">البرمجة الذكية</strong>
-<div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+<div style="display:flex; justify-content:center; gap:15px; align-items:center; margin-bottom:20px;">
 <span style="font-size:14px; font-weight:600;" data-i18n="i_want">أريد</span>
 <input type="number" id="smartDropsCount" min="1" max="20" value="5" style="width:80px; margin:0; text-align:center;">
 <span style="font-size:14px; font-weight:600;" data-i18n="drops_daily">قطرات يومياً</span>
@@ -256,13 +264,11 @@ select, input[type="text"], input[type="time"], input[type="number"] { width: 10
 <strong style="display:block; margin:25px 0 15px; font-size:14px;" data-i18n="custom_schedule">تحديد ساعة الموعد:</strong>
 <input type="time" id="customTime">
 <button class="btn-solid" id="saveScheduleBtn" data-i18n="save_schedule">حفظ الموعد</button>
-
-<!-- قائمة عرض المواعيد المفعلة أسفل الزر لتأكيد التنفيذ -->
-<div id="scheduledTimesList" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;"></div>
+<div id="scheduledTimesList" style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px;"></div>
 </div>
 </section>
 
-<!-- المكتبة واكتشف (البطاقات تعرض واحدة تلو الأخرى) -->
+<!-- المكتبة واكتشف -->
 <section class="view" id="libraryView">
 <h2 style="color:var(--primary); margin-top:0; font-weight:900;" data-i18n="personal_library">المكتبة</h2>
 <div class="chips-row" id="libraryCatChips"></div>
