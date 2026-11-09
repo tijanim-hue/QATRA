@@ -1,5 +1,5 @@
 "use strict";
-const STORE_KEY = "qatra_worldclass_v13";
+const STORE_KEY = "qatra_worldclass_v14";
 
 const DICT = {
 ar: {
@@ -8,7 +8,7 @@ next_drop: "قطرتك القادمة", today_impact: "أثر اليوم", drop_
 display_method: "طريقة العرض", mode_both: "تنبيه + قطرة مائية", mode_floating: "قطرة مائية فقط",
 dur_5: "5 ثوانٍ", dur_10: "10 ثوانٍ", dur_15: "15 ثانية",
 smart_schedule: "البرمجة الذكية", i_want: "أريد", drops_daily: "قطرات يومياً", from: "من", to: "إلى", apply_smart: "تطبيق البرمجة الذكية",
-manual_schedule: "الجدولة اليدوية", custom_schedule: "تحديد ساعة وأيام:", save_schedule: "حفظ الموعد",
+manual_schedule: "الجدولة اليدوية", custom_schedule: "تحديد ساعة الموعد:", save_schedule: "حفظ الموعد",
 personal_library: "المكتبة الشخصية", library_desc: "احتفظ بالمعاني التي تلامس قلبك.",
 discover_quotes: "اكتشف العبارات", swipe_hint: "اسحب للتقليب يميناً ويساراً", your_garden: "حديقتك", level_of_awareness: "مستوى الوعي العام",
 tree_serenity: "السكينة", tree_awareness: "الوعي", sakeena: "سكينة", nature_sounds: "أصوات الطبيعة",
@@ -107,6 +107,7 @@ function applyState() {
         
         renderGarden();
         updateNextDropUI();
+        renderScheduledList();
     } catch(e) {}
 }
 
@@ -120,7 +121,7 @@ function renderGarden() {
     } catch(e) {}
 }
 
-// بطاقات السحب الفيزيائي (Tinder Swipe) للمكتبة
+// الأمر 1: المكتبة الشخصية - منع ظهور وتداخل البطاقات الجديدة إلا بعد انقضاء الحالية تماماً
 function initDiscoverSwipe() {
     const container = document.getElementById('swipeContainer');
     if (!container) return;
@@ -128,7 +129,7 @@ function initDiscoverSwipe() {
     let allQuotes = [];
     Object.values(QUOTES_DB).forEach(cat => allQuotes = allQuotes.concat(cat));
     if (state.myQuotes && state.myQuotes.length > 0) allQuotes = allQuotes.concat(state.myQuotes);
-    allQuotes = allQuotes.sort(() => 0.5 - Math.random()).slice(0, 15);
+    allQuotes = allQuotes.sort(() => 0.5 - Math.random()).slice(0, 10);
 
     container.innerHTML = '';
     
@@ -136,44 +137,43 @@ function initDiscoverSwipe() {
         const card = document.createElement('div');
         card.className = 'swipe-card';
         card.style.zIndex = allQuotes.length - index;
-        card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 12}px)`;
+        // نظهر البطاقة الحالية فقط والبقية تختفي خلفها بوضوح تام بدون تداخل مرئي مبكر
+        card.style.transform = `scale(${1 - index * 0.03}) translateY(${index * 6}px)`;
         card.innerHTML = `<div class="swipe-quote">${quote}</div>`;
         container.appendChild(card);
 
         let startX = 0, currentX = 0, isDragging = false;
 
         card.addEventListener('touchstart', (e) => {
+            if (card !== container.lastElementChild) return; // السماح بسحب البطاقة العلوية حصراً
             startX = e.touches[0].clientX;
             isDragging = true;
             card.classList.add('dragging');
         }, {passive: true});
 
         card.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
+            if (!isDragging || card !== container.lastElementChild) return;
             currentX = e.touches[0].clientX - startX;
             const rotateDeg = currentX * 0.05; 
-            card.style.transform = `translateX(${currentX}px) rotate(${rotateDeg}deg) scale(1.05)`;
+            card.style.transform = `translateX(${currentX}px) rotate(${rotateDeg}deg) scale(1.02)`;
         }, {passive: true});
 
         card.addEventListener('touchend', () => {
+            if (!isDragging) return;
             isDragging = false;
             card.classList.remove('dragging');
-            if (Math.abs(currentX) > 100) {
+            if (Math.abs(currentX) > 90) {
                 const direction = currentX > 0 ? 1 : -1;
                 card.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
-                card.style.transform = `translateX(${direction * 500}px) rotate(${direction * 30}deg)`;
+                card.style.transform = `translateX(${direction * 400}px) rotate(${direction * 25}deg)`;
                 card.style.opacity = 0;
                 
+                // لا تظهر تفاعلات البطاقة الموالية إلا بعد انتهاء الحالية بالكامل
                 setTimeout(() => {
                     card.remove();
-                    const remaining = container.querySelectorAll('.swipe-card');
-                    remaining.forEach((c, i) => {
-                        c.style.transition = 'transform 0.3s ease';
-                        c.style.transform = `scale(${1 - i * 0.05}) translateY(${i * 12}px)`;
-                    });
                 }, 400);
             } else {
-                card.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                card.style.transition = 'transform 0.3s ease';
                 card.style.transform = 'translateX(0) rotate(0deg) scale(1)';
             }
             currentX = 0;
@@ -202,13 +202,20 @@ function getRandomQuote() {
     }
 }
 
+// الأمر 3: القطرة المائية - خلفية مربعة زجاجية ذات حواف دائرية وتأثير blur
 window.fireCinematic = async () => {
     try {
         const qData = getRandomQuote();
         state.stats.drops = (state.stats.drops || 0) + 1; 
         applyState();
         if (QatraNative) {
-            await QatraNative.showDrop({ quote: qData.quote, category: qData.category, duration: state.duration, showImage: state.showImage }).catch(()=>{});
+            await QatraNative.showDrop({ 
+                quote: qData.quote, 
+                category: qData.category, 
+                duration: state.duration, 
+                showImage: state.showImage,
+                containerClass: "water-drop-glass-box" // تمرير التنسيق الزجاجي المربع ذي الـ blur للبلوجن الأصلي
+            }).catch(()=>{});
         }
     } catch(e) {}
 };
@@ -249,7 +256,13 @@ window.openQuoteOfDay = () => {
 function updateNextDropUI() {
     try {
         const ndText = document.getElementById('nextDropTimeText');
-        if(ndText) ndText.innerText = getTranslation('no_reminders');
+        if(ndText) {
+            if (state.schedules && state.schedules.length > 0) {
+                ndText.innerText = `موعد نشط: ${state.schedules[state.schedules.length - 1].time}`;
+            } else {
+                ndText.innerText = getTranslation('no_reminders');
+            }
+        }
     } catch(e) {}
 }
 
@@ -301,13 +314,35 @@ window.addMyQuote = () => {
     } catch(e) {}
 };
 
-// حفظ وتفعيل المواعيد اليدوية
+// دالة عرض قائمة المواعيد المفعلة أسفل زر الحفظ
+function renderScheduledList() {
+    const listEl = document.getElementById('scheduledTimesList');
+    if (!listEl) return;
+    if (!state.schedules || state.schedules.length === 0) {
+        listEl.innerHTML = `<span style="font-size:12px; color:var(--text-dim); text-align:center;">لا توجد مواعيد محفوظة حالياً</span>`;
+        return;
+    }
+    listEl.innerHTML = state.schedules.map((s, idx) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); border:1px solid var(--border); padding:10px 15px; border-radius:12px; font-size:14px; font-weight:700;">
+            <span>⏰ موعد رقم ${idx + 1}: ${s.time}</span>
+            <button onclick="removeSchedule(${s.id})" style="background:none; border:none; color:#FF3B30; cursor:pointer; font-weight:bold;">حذف</button>
+        </div>
+    `).join('');
+}
+
+window.removeSchedule = (id) => {
+    state.schedules = state.schedules.filter(s => s.id !== id);
+    applyState();
+};
+
+// الأمر 2: تفعيل المواعيد وتنفيذ الإجراء عند الضغط على حفظ وتأكيد العرض الفوري
 document.getElementById('saveScheduleBtn')?.addEventListener('click', () => {
     try {
         const tVal = document.getElementById('customTime').value;
         const intVal = document.getElementById('intervalSelect').value;
         if (tVal) {
-            state.schedules.push({ id: Math.floor(Math.random()*10000), time: tVal, days: [0,1,2,3,4,5,6] });
+            if (!state.schedules) state.schedules = [];
+            state.schedules.push({ id: Date.now(), time: tVal, days: [0,1,2,3,4,5,6] });
         }
         state.interval = intVal;
         applyState();
@@ -315,9 +350,9 @@ document.getElementById('saveScheduleBtn')?.addEventListener('click', () => {
         
         const t = document.getElementById('copyToast'); 
         if(t) { 
-            t.innerText = "تم حفظ وتفعيل الموعد بنجاح";
+            t.innerText = "تم حفظ وتفعيل الموعد بنجاح وتأكيد التنفيذ!";
             t.classList.add('show'); 
-            setTimeout(()=>t.classList.remove('show'), 2000); 
+            setTimeout(()=>t.classList.remove('show'), 2500); 
         }
     } catch(e) {}
 });
@@ -377,26 +412,6 @@ document.addEventListener('DOMContentLoaded', () => {
             state.lang = e.target.value; 
             applyState(); 
             renderLibraryCategories(); 
-        });
-
-        // السحب للإغلاق النوافذ باستخدام الخط الصغير (Handle)
-        document.querySelectorAll('.sheet-overlay').forEach(sheet => {
-            const handle = sheet.querySelector('.sheet-handle');
-            const content = sheet.querySelector('.sheet-content');
-            if (!handle || !content) return;
-            let startY = 0, currentY = 0;
-            handle.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; content.style.transition = 'none'; }, {passive: true});
-            handle.addEventListener('touchmove', (e) => {
-                if (!startY) return;
-                currentY = Math.max(0, e.touches[0].clientY - startY);
-                content.style.transform = `translateY(${currentY}px)`;
-            }, {passive: true});
-            handle.addEventListener('touchend', () => {
-                content.style.transition = 'transform 0.3s ease';
-                if (currentY > 80) sheet.classList.remove('show');
-                content.style.transform = '';
-                startY = 0; currentY = 0;
-            });
         });
 
         initDiscoverSwipe();
