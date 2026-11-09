@@ -43,7 +43,7 @@ all_categories: "Random", cat_dhikr: "Dhikr & Supplications", cat_selfDev: "Self
 // دعم للغات المتبقية بالانجليزية
 const langs = ['fr','es','de']; langs.forEach(l => DICT[l] = DICT['en']);
 
-const generateArray = (base, count) => Array.from({length: count}, (_, i) => ${base} ${i+1});
+const generateArray = (base, count) => Array.from({length: count}, (_, i) => `${base} ${i+1}`);
 const QUOTES_DB = {
 dhikr: { key: "cat_dhikr", icon: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', items: ["سبحان الله وبحمده، سبحان الله العظيم.", "لا إله إلا أنت سبحانك إني كنت من الظالمين.", ...generateArray("دعاء رقم", 98)] },
 selfDev: { key: "cat_selfDev", icon: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>', items: ["الهدوء ليس ضعفاً، بل هو قوة التحكم في الذات.", ...generateArray("فكرة تطوير ذات رقم", 99)] },
@@ -89,7 +89,7 @@ const optVals = ['0','30','60','180','720','1440'];
 const optKeys = ['stop_repeat','every_30','every_1h','every_3h','every_12h','every_24h'];
 const intSel = document.getElementById('intervalSelect');
 if(intSel) {
-intSel.innerHTML = optVals.map((v,i) => <option value="${v}">${getTranslation(optKeys[i])}&lt;/option>).join('');
+intSel.innerHTML = optVals.map((v,i) => `<option value="${v}">${getTranslation(optKeys[i])}</option>`).join('');
 intSel.value = state.interval;
 }
 
@@ -139,14 +139,14 @@ if(d < now) d.setDate(d.getDate()+1);
 return d;
 }).sort((a,b) => a-b)[0];
 const diffMins = Math.round((next - now)/60000);
-nextDrop = بعد ${diffMins} دقيقة`;
+nextDrop = `بعد ${diffMins} دقيقة`;
 }
 const ndEl = document.getElementById('nextDropTimeText'); if(ndEl) ndEl.innerText = nextDrop;
 
 let catText = state.quoteSource === 'all' ? getTranslation('all_categories') : (state.quoteSource === 'myGroups' ? getTranslation('my_library') : getTranslation('cat_'+state.quoteSource));
-const ncatEl = document.getElementById('nextDropCategoryText'); if(ncatEl) ncatEl.innerText = الفئة:${catText}`;
+const ncatEl = document.getElementById('nextDropCategoryText'); if(ncatEl) ncatEl.innerText = `الفئة: ${catText}`;
 
-const tiEl = document.getElementById('todayImpactText'); if(tiEl) tiEl.innerText = لقد تفاعلت مع ${state.stats.likes} قطرات اليوم`;
+const tiEl = document.getElementById('todayImpactText'); if(tiEl) tiEl.innerText = `لقد تفاعلت مع ${state.stats.likes} قطرات اليوم`;
 const tipEl = document.getElementById('todayImpactProgress'); if(tipEl) tipEl.style.width = Math.min((state.stats.likes / 10)*100, 100) + '%';
 
 let momentMsg = "استمتع بلحظتك";
@@ -165,7 +165,7 @@ en: [{id:0,n:"Sun"},{id:1,n:"Mon"},{id:2,n:"Tue"},{id:3,n:"Wed"},{id:4,n:"Thu"},
 let currentSelectedDays = new Set([0,1,2,3,4,5,6]);
 function renderDaysGrid() {
 const dg = document.getElementById('daysGrid');
-if(dg) dg.innerHTML = (WEEK_DAYS[state.lang] || WEEK_DAYS['ar']).map(d => <div class="day-chip${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay( {d.n}</div>`).join('');
+if(dg) dg.innerHTML = (WEEK_DAYS[state.lang] || WEEK_DAYS.ar).map(d => `<div class="day-chip ${currentSelectedDays.has(d.id)?'active':''}" onclick="toggleDay(${d.id})">${d.n}</div>`).join('');
 }
 window.toggleDay = (id) => { currentSelectedDays.has(id) ? currentSelectedDays.delete(id) : currentSelectedDays.add(id); renderDaysGrid(); };
 
@@ -175,15 +175,15 @@ const start = document.getElementById('smartTimeStart').value;
 const end = document.getElementById('smartTimeEnd').value;
 if(count > 0 && start && end) {
 const [sh, sm] = start.split(':').map(Number); const [eh, em] = end.split(':').map(Number);
-let startMins = sh60 + sm; let endMins = eh60 + em;
-if(endMins <= startMins) endMins += 2460;
+let startMins = sh * 60 + sm; let endMins = eh * 60 + em;
+if(endMins <= startMins) endMins += 24 * 60;
 const interval = (endMins - startMins) / count;
 state.schedules = [];
 for(let i=0; i<count; i++) {
-let tMins = startMins + Math.round(iinterval);
+let tMins = startMins + Math.round(i * interval);
 let h = Math.floor((tMins%1440)/60).toString().padStart(2,'0');
 let m = (tMins%60).toString().padStart(2,'0');
-state.schedules.push({id: Math.floor(Math.random()*10000), time: ${h}:${m}, days: [0,1,2,3,4,5,6]});
+state.schedules.push({id: Math.floor(Math.random()*10000), time: `${h}:${m}`, days: [0,1,2,3,4,5,6]});
 }
 applyState(); syncNativeAlarms();
 }
@@ -201,7 +201,7 @@ applyState(); renderSchedules(); syncNativeAlarms();
 
 function renderSchedules() {
 const list = document.getElementById('savedSchedulesList');
-if(list) list.innerHTML = state.schedules.map((s, i) => <div class="modern-row" style="background:var(--bg); padding:18px; border-radius:18px; margin-bottom:12px; border:1px solid var(--border); display:flex; justify-content:space-between;"&gt;&lt;strong style="font-size:18px;"&gt;${s.time}</strong> <button onclick="deleteSchedule(${i})" style="background:rgba(255,0,0,0.1); border:none; color:#ff4d4d; font-weight:bold; cursor:pointer; padding:8px 16px; border-radius:10px;"&gt;${getTranslation('delete')}</button></div>`).join('');
+if(list) list.innerHTML = state.schedules.map((s, i) => `<div class="modern-row" style="background:var(--bg); padding:18px; border-radius:18px; margin-bottom:12px; border:1px solid var(--border); display:flex; justify-content:space-between;"><strong style="font-size:18px;">${s.time}</strong> <button onclick="deleteSchedule(${i})" style="background:rgba(255,0,0,0.1); border:none; color:#ff4d4d; font-weight:bold; cursor:pointer; padding:8px 16px; border-radius:10px;">${getTranslation('delete')}</button></div>`).join('');
 updateHomeCards();
 }
 window.deleteSchedule = (i) => { if(QatraNative && state.schedules[i]) QatraNative.cancel({id: state.schedules[i].id}); state.schedules.splice(i,1); applyState(); syncNativeAlarms(); };
@@ -218,7 +218,7 @@ tEl('treeEmoji_dhikr', getTreeStage(s.dhikr)); tEl('treeEmoji_culture', getTreeS
 tEl('treeEmoji_selfDev', getTreeStage(s.selfDev)); tEl('treeEmoji_poetry', getTreeStage(s.poetry));
 const tot = s.dhikr + s.culture + s.selfDev + s.poetry;
 const pEl = document.getElementById('totalAwarenessProgress'); if(pEl) pEl.style.width = Math.min((tot/500)*100, 100)+'%';
-tEl('totalDaysActiveText', تفاعلت لمدة${s.days} أيام`);
+tEl('totalDaysActiveText', `تفاعلت لمدة ${s.days} أيام`);
 }
 
 // --- المكتبة والمجموعات (أيقونات احترافية للقلب والنسخ) ---
@@ -230,7 +230,7 @@ const container = document.getElementById('catSheetContent');
 if(!container) return;
 container.innerHTML = Object.keys(QUOTES_DB).map(key => {
 const cat = QUOTES_DB[key];
-return <div class="glass-card action-card" onclick="openQuotesList('${key}')" style="margin-bottom:10px;">
+return `<div class="glass-card action-card" onclick="openQuotesList('${key}')" style="margin-bottom:10px;">
 <div class="card-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${cat.icon}&lt;/svg&gt;&lt;/div&gt; &lt;div class="card-info"&gt;&lt;div class="card-title"&gt;${getTranslation(cat.key)}</div></div>
 <div style="color:var(--border); font-size:24px; font-weight:bold;">›</div>
 </div>`;
@@ -243,9 +243,9 @@ document.getElementById('catSheetTitle').innerText = getTranslation(cat.key);
 const content = document.getElementById('catSheetContent');
 if(content) {
 content.innerHTML = cat.items.slice(0, 50).map(q => {
-return <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);"&gt; &lt;div style="font-size:15px; font-weight:700;"&gt;${q}</div>
+return `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);"> <div style="font-size:15px; font-weight:700;">${q}</div>
 <div style="display:flex; gap:8px;">
-<button onclick="copyQuote(' {q.replace(/'/g, "\'")}')" style="background:transparent; border:none; color:var(--secondary); cursor:pointer;">
+<button onclick="copyQuote(decodeURIComponent('${encodeURIComponent(q).replace(/'/g, '%27')}'))" style="background:transparent; border:none; color:var(--secondary); cursor:pointer;">
 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
 </button>
 </div>
@@ -270,9 +270,9 @@ state.groups['favorites'].push(txt); applyState(); alert('تمت الإضافة 
 function renderGroupsList() {
 const list = document.getElementById('customGroupsList');
 if(!list) return;
-list.innerHTML = Object.keys(state.groups).filter(k=> k!'favorites' && k!'myQuotes').map(k => &lt;div class="action-card" style="padding:15px; border:1px solid var(--border); border-radius:16px; margin-bottom:10px;" onclick="openGroup('${k}')">
+list.innerHTML = Object.keys(state.groups).filter(k=> k !== 'favorites' && k !== 'myQuotes').map(k => `<div class="action-card" style="padding:15px; border:1px solid var(--border); border-radius:16px; margin-bottom:10px;" onclick="openGroup('${k}')">
 <div class="card-info"><div class="card-title">${k}&lt;/div&gt;&lt;div class="card-sub"&gt;${state.groups[k].length} عبارة</div></div>
-<button onclick="event.stopPropagation(); deleteGroup('${k}')" class="delete-btn"&gt;حذف&lt;/button&gt; &lt;/div&gt;).join('');
+<button onclick="event.stopPropagation(); deleteGroup('${k}')" class="delete-btn">حذف</button> </div>`).join('');
 }
 safeOn('createGroupBtn', 'click', () => {
 const name = document.getElementById('newGroupNameInput').value.trim();
@@ -286,7 +286,7 @@ currentOpenGroup = k;
 const titleEl = document.getElementById('groupViewTitle'); if(titleEl) titleEl.innerText = (k==='favorites'?'مفضلاتي':(k==='myQuotes'?'عباراتي الخاصة':k));
 const addDiv = document.getElementById('addToGroupDiv'); if(addDiv) addDiv.style.display = (k==='favorites' ? 'none' : 'flex');
 const c = document.getElementById('groupViewContent');
-if(c) c.innerHTML = state.groups[k].map((q,i) => <div class="my-quote-item"&gt;&lt;div style="flex:1;"&gt;${q}</div><button onclick="removeQuoteFromGroup('${k}',${i})" class="delete-btn">حذف</button></div>`).join('');
+if(c) c.innerHTML = state.groups[k].map((q,i) => `<div class="my-quote-item"><div style="flex:1;">${q}</div><button onclick="removeQuoteFromGroup('${k}',${i})" class="delete-btn">حذف</button></div>`).join('');
 document.getElementById('groupViewSheet').classList.add('show');
 };
 window.removeQuoteFromGroup = (k, i) => { state.groups[k].splice(i,1); applyState(); openGroup(k); };
@@ -320,7 +320,7 @@ return { quote, categoryKey };
 
 window.fireCinematic = async () => {
 const { quote, categoryKey } = getRandomQuote();
-const qtEl = document.getElementById('dailyQuoteText'); if (qtEl) qtEl.textContent = "${quote}"`;
+const qtEl = document.getElementById('dailyQuoteText'); if (qtEl) qtEl.textContent = `"${quote}"`;
 if (QatraNative) {
 state.stats.drops++; applyState();
 await QatraNative.showDrop({ quote: quote, category: categoryKey, duration: state.duration, fullScreen: true, showImage: state.showImage }).catch(e=>{});
@@ -357,13 +357,13 @@ randPlayer.src = aMap[type];
 randPlayer.play();
 document.getElementById('audioTitleText').innerText = title || "جاري التشغيل";
 document.getElementById('globalAudioPlayer').classList.add('show');
-document.getElementById('audioPlayPauseBtn').innerHTML = <svg viewBox="0 0 24 24"&gt;&lt;path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/&gt;&lt;/svg>;
+document.getElementById('audioPlayPauseBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
 
 clearInterval(audioUpdateInterval);
 audioUpdateInterval = setInterval(() => {
 if (randPlayer.duration) {
 const p = (randPlayer.currentTime / randPlayer.duration) * 100;
-document.getElementById('audioProgressFill').style.width = ${p}%`;
+document.getElementById('audioProgressFill').style.width = `${p}%`;
 }
 }, 500);
 }
@@ -372,10 +372,10 @@ document.getElementById('audioProgressFill').style.width = ${p}%`;
 window.togglePlayPause = () => {
 if (randPlayer.paused) {
 randPlayer.play();
-document.getElementById('audioPlayPauseBtn').innerHTML = <svg viewBox="0 0 24 24"&gt;&lt;path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/&gt;&lt;/svg>;
+document.getElementById('audioPlayPauseBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
 } else {
 randPlayer.pause();
-document.getElementById('audioPlayPauseBtn').innerHTML = <svg viewBox="0 0 24 24"&gt;&lt;path d="M8 5v14l11-7z"/&gt;&lt;/svg>;
+document.getElementById('audioPlayPauseBtn').innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
 }
 }
 
@@ -386,7 +386,7 @@ document.getElementById('globalAudioPlayer').classList.remove('show');
 }
 
 window.startSession = (mins) => {
-alert(بدأت جلسة${mins} دقائق. يرجى الاسترخاء وإغلاق عينيك.`);
+alert(`بدأت جلسة ${mins} دقائق. يرجى الاسترخاء وإغلاق عينيك.`);
 setTimeout(() => alert("انتهت الجلسة بنجاح."), mins * 60000);
 }
 
@@ -418,7 +418,7 @@ scrollContent.addEventListener('touchstart', e => { if(scrollContent.scrollTop =
 scrollContent.addEventListener('touchmove', e => {
 if (startY > 0 && scrollContent.scrollTop === 0) {
 let y = e.touches[0].clientY - startY;
-if (y > 20 && y < 100) { ptrContainer.style.transform = translateY(${y - 70}px); ptrIcon.style.transform =rotate(${y*4}deg); }
+if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform = `rotate(${y*4}deg)`; }
 }
 }, {passive:true});
 scrollContent.addEventListener('touchend', e => {
@@ -428,9 +428,9 @@ if (y > 70) {
 ptrIcon.classList.add('spin');
 state.dark = !state.dark;
 applyState();
-setTimeout(() => { ptrContainer.style.transform = translateY(-100%); ptrIcon.classList.remove('spin'); }, 600);
+setTimeout(() => { ptrContainer.style.transform = 'translateY(-100%)'; ptrIcon.classList.remove('spin'); }, 600);
 } else {
-ptrContainer.style.transform = translateY(-100%);
+ptrContainer.style.transform = 'translateY(-100%)';
 }
 }
 startY = 0;
@@ -439,7 +439,7 @@ startY = 0;
 
 applyState(); renderDaysGrid();
 const qtEl = document.getElementById('dailyQuoteText');
-if(qtEl) qtEl.textContent = "${getRandomQuote().quote}";
+if(qtEl) qtEl.textContent = `"${getRandomQuote().quote}"`;
 
 setTimeout(() => { const splash = document.getElementById('splash'); if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 800); } }, 2500);
 });
