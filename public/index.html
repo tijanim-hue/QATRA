@@ -36,8 +36,8 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 
 /* شاشة الإقلاع السينمائية */
 #splash { position: fixed; inset: 0; background: #050811; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-.splash-drop { width: 75px; height: 75px; border-radius: 0 50% 50% 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); transform: rotate(45deg); animation: breathe 2.5s infinite ease-in-out; box-shadow: 0 15px 35px color-mix(in srgb, var(--primary) 40%, transparent); }
-@keyframes breathe { 0%, 100% { transform: rotate(45deg) scale(1); } 50% { transform: rotate(45deg) scale(1.1); } }
+.splash-drop { width: 110px; height: 110px; border-radius: 30px; background: url('assets/icon.png') center/cover no-repeat; animation: breathe-img 2.5s infinite ease-in-out; box-shadow: 0 15px 40px rgba(56,189,248,0.35); }
+@keyframes breathe-img { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } } 50% { transform: rotate(45deg) scale(1.1); } }
 .splash-title { margin-top: 35px; font-size: 32px; font-weight: 900; letter-spacing: 1px; color: #fff; }
 .loading-container { width: 140px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 25px; overflow: hidden; }
 .loading-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 4px; animation: loadBar 2s ease-in-out forwards; }
