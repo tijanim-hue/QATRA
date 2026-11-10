@@ -134,19 +134,48 @@ function render(){
     animation.finished.then(done).catch(()=>{if(version===renderVersion)render();});
    }else{card.style.transition='transform 330ms ease, opacity 330ms ease';card.style.transform=end;card.style.opacity='0';setTimeout(done,340);}
   }
-  let pointer=null;
-  card.addEventListener('pointerdown',event=>{
-   if(moving||entries.length<2||event.isPrimary===false||(event.button!==undefined&&event.button!==0)||event.target.closest('button'))return;
-   card.style.transition='';pointer={id:event.pointerId,x:event.clientX,y:event.clientY,dx:0};if(card.setPointerCapture)card.setPointerCapture(event.pointerId);
+  
+  let startX = 0;
+  let currentX = 0;
+  let isDragging = false;
+  
+  card.addEventListener('touchstart', (e) => {
+    if(entries.length < 2 || moving) return;
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    card.style.transition = 'none';
+  }, {passive: true});
+
+  card.addEventListener('touchmove', (e) => {
+    if(!isDragging || entries.length < 2 || moving) return;
+    currentX = e.touches[0].clientX - startX;
+    // إضافة الميلان (Tilt) بناءً على مسافة السحب
+    let rotation = currentX * 0.05; 
+    card.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+  }, {passive: true});
+
+  card.addEventListener('touchend', (e) => {
+    if(!isDragging || entries.length < 2 || moving) return;
+    isDragging = false;
+    card.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+    
+    if (currentX > 100) {
+      // سحب لليمين (السابق)
+      card.style.transform = `translateX(150%) rotate(20deg)`;
+      card.style.opacity = '0';
+      setTimeout(() => advance(-1, 1), 300);
+    } else if (currentX < -100) {
+      // سحب لليسار (التالي)
+      card.style.transform = `translateX(-150%) rotate(-20deg)`;
+      card.style.opacity = '0';
+      setTimeout(() => advance(1, -1), 300);
+    } else {
+      // عودة للمنتصف إذا لم يكن السحب كافياً
+      card.style.transform = 'translateX(0) rotate(0deg)';
+    }
+    currentX = 0;
   });
-  card.addEventListener('pointermove',event=>{
-   if(!pointer||pointer.id!==event.pointerId||moving)return;
-   const dx=event.clientX-pointer.x,dy=event.clientY-pointer.y;
-   if(Math.abs(dy)>Math.abs(dx)+18){pointer=null;card.style.transform='';return;}
-   pointer.dx=dx;card.style.transform='translateX('+dx+'px) rotate('+(dx/18)+'deg)';
-  });
-  const release=event=>{if(!pointer||pointer.id!==event.pointerId)return;const dx=pointer.dx;pointer=null;if(Math.abs(dx)>Math.max(45,card.getBoundingClientRect().width*.17))advance(1,dx>0?1:-1);else{card.style.transition='transform 180ms ease';card.style.transform='';setTimeout(()=>{card.style.transition='';},200);}};
-  card.addEventListener('pointerup',release);card.addEventListener('pointercancel',()=>{pointer=null;card.style.transform='';});
+  
  }
  const use=element('button','btn-solid ql-use',t('use'));use.type='button';use.disabled=!state.myChoices.length;use.addEventListener('click',()=>{if(!state.myChoices.length){notify(t('emptyChoices'));return;}window.setQuoteSource('myChoices');notify(t('using'));});host.appendChild(use);
  const statusLabel=element('p','ql-status',status);statusLabel.id='ql-status';statusLabel.setAttribute('role','status');host.appendChild(statusLabel);
