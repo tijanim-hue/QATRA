@@ -115,7 +115,6 @@ function render(){
   const mini=element('div','ql-mini-actions');const favorite=element('button','ql-small-button',state.groups.favorites.includes(entry.text)?t('saved'):t('save'));favorite.type='button';favorite.addEventListener('click',()=>{if(!state.groups.favorites.includes(entry.text))state.groups.favorites.push(entry.text);save();favorite.textContent=t('saved');});mini.appendChild(favorite);
   const copy=element('button','ql-small-button',t('copy'));copy.type='button';copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(entry.text);copy.textContent=t('copied');}catch(_){notify(t('copyFail'));}});mini.appendChild(copy);actions.appendChild(mini);card.appendChild(actions);deck.appendChild(card);host.appendChild(deck);
   const nav=element('div','ql-navigation');
-  const nav=element('div','ql-navigation');
   nav.style.justifyContent = 'center';
   const page=element('span','ql-page',new Intl.NumberFormat(LANG()).format(position+1)+' / '+new Intl.NumberFormat(LANG()).format(entries.length));
   page.setAttribute('dir','ltr');page.setAttribute('aria-live','polite');
