@@ -46,5 +46,6 @@
             <activity android:name=".QatraScreenWakeActivity"
             android:exported="false" android:excludeFromRecents="true"
             android:noHistory="true" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_qatra" />
     </application>
 </manifest>

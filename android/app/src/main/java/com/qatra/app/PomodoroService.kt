@@ -32,7 +32,7 @@ class PomodoroService : Service() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("جلسة تركيز وهدوء")
             .setContentText("جارٍ الاسترخاء...")
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(R.drawable.ic_stat_qatra)
             .setUsesChronometer(true)
             .setChronometerCountDown(true) // عد تنازلي
             .setWhen(System.currentTimeMillis() + (minutes * 60 * 1000L))

@@ -37,7 +37,7 @@ class QatraAlarmReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(channel)
         }
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_popup_reminder)
+            .setSmallIcon(R.drawable.ic_stat_qatra)
             .setContentTitle("قطرة (QATRA)")
             .setContentText(quote)
             .setAutoCancel(true)
