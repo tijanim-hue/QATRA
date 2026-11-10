@@ -179,7 +179,7 @@ private fun experienceStatus():JSObject {
         put("overlay",Build.VERSION.SDK_INT<Build.VERSION_CODES.M||Settings.canDrawOverlays(context))
         put("notifications",NotificationManagerCompat.from(context).areNotificationsEnabled())
         put("exactAlarms",Build.VERSION.SDK_INT<Build.VERSION_CODES.S||alarms.canScheduleExactAlarms())
-        put("uiSounds",p.getBoolean("uiSounds",true));put("wakeScreen",p.getBoolean("wakeScreen",false))
+        put("readAloud",p.getBoolean("readAloud",true));put("wakeScreen",p.getBoolean("wakeScreen",false))
         put("wakeAttemptAt",p.getLong("wakeAttemptAt",0L));put("wakeOpenedAt",p.getLong("wakeOpenedAt",0L))
     }
 }
@@ -210,7 +210,7 @@ private fun qatraNotificationsResult(call:PluginCall){call.resolve(experienceSta
 @PluginMethod
 fun setExperiencePreferences(call:PluginCall){
     val edit=context.getSharedPreferences("QatraExperiencePrefs",Context.MODE_PRIVATE).edit()
-    call.getBoolean("uiSounds")?.let{edit.putBoolean("uiSounds",it)}
+    call.getBoolean("readAloud")?.let{edit.putBoolean("readAloud",it)}
     call.getBoolean("wakeScreen")?.let{edit.putBoolean("wakeScreen",it)}
     edit.commit();call.resolve(experienceStatus())
 }

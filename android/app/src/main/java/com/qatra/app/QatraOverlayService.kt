@@ -22,6 +22,8 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.SystemClock
 import android.provider.Settings
+import android.speech.tts.TextToSpeech
+import java.util.Locale
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.Gravity
@@ -47,6 +49,9 @@ class QatraOverlayService : Service() {
     private var fallPlayer: MediaPlayer? = null
     private var popPlayer: MediaPlayer? = null
     private var experienceSounds:QatraUiSounds? = null
+    private var tts: TextToSpeech? = null
+    private var readAloudEnabled = true
+    private var textToRead = ""
     private var startedAt = 0L
     private var totalMs = 10000L
     private var impactMs = 1050L
@@ -101,6 +106,22 @@ class QatraOverlayService : Service() {
         experienceSounds=try{QatraUiSounds(this)}catch(error:Exception){Log.w(TAG,"Optional UI sounds unavailable",error);null}
         totalMs = duration.coerceIn(5000,15000).toLong()
         reducedMotion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !android.animation.ValueAnimator.areAnimatorsEnabled()
+        val prefs = getSharedPreferences("QatraExperiencePrefs", Context.MODE_PRIVATE)
+        readAloudEnabled = prefs.getBoolean("readAloud", true)
+        textToRead = quote
+        if (readAloudEnabled) {
+            tts = TextToSpeech(this) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    val locale = Locale("ar")
+                    if (tts?.isLanguageAvailable(locale)!! >= TextToSpeech.LANG_AVAILABLE) {
+                        tts?.language = locale
+                        tts?.setPitch(0.85f) // صوت أعمق وأكثر رزانة
+                        tts?.setSpeechRate(0.85f) // قراءة متأنية
+                    }
+                }
+            }
+        }
+
         impactMs = if (reducedMotion) 0L else 1050L
         riseMs = if (reducedMotion) 1L else 1750L
         occurrenceId = UUID.randomUUID().toString()
@@ -203,7 +224,10 @@ class QatraOverlayService : Service() {
             val rise=if(reducedMotion)1f else smooth(progress(elapsed,impactMs,riseMs))
             val settling=elapsed-impactMs-riseMs
             val fade=progress(elapsed,totalMs-550L,550L)
-            if(elapsed>=impactMs&&!impactPlayed){impactPlayed=true;playSound("drop_pop_sound",false)}
+            if(elapsed>=impactMs&&!impactPlayed){impactPlayed=true;playSound("drop_pop_sound",false)
+            if (readAloudEnabled) {
+                tts?.speak(textToRead, TextToSpeech.QUEUE_FLUSH, null, null)
+            }}
             panel.alpha=if(elapsed<impactMs)0f else progress(elapsed,impactMs,650L)
             panel.translationY=originY*(1f-rise)
             val pulse=if(!reducedMotion&&settling in 0L..650L) (sin(settling/650f*PI*2)*.012f).toFloat() else 0f
@@ -268,6 +292,10 @@ class QatraOverlayService : Service() {
     private fun cleanup(){
         active=false;QatraScreenWakeActivity.closeActive();handler.removeCallbacksAndMessages(null)
         experienceSounds?.release();experienceSounds=null
+        tts?.stop()
+        tts?.shutdown()
+        tts = null
+
         try{fallPlayer?.release()}catch(_:Exception){};fallPlayer=null
         try{popPlayer?.release()}catch(_:Exception){};popPlayer=null
         scene?.let{try{manager?.removeViewImmediate(it)}catch(_:Exception){}}

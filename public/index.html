@@ -219,7 +219,7 @@ transition: 0.3s;
 .toggle-track::before { content: ""; position: absolute; width: 22px; height: 22px; right: 3px; top: 3px; border-radius: 50%; background: var(--text); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
 .toggle input:checked + .toggle-track { background: var(--primary); }
 .toggle input:checked + .toggle-track::before { transform: translateX(-22px); background: #fff;}
-select, input[type="text"], input[type="time"], input[type="number"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none;}
+select, input[type="text"], input[type="time"], input[type="number"] { width: 100%; padding: 16px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 16px; font-family: inherit; font-size: 15px; margin-top: 10px; outline: none; transition: border 0.3s; appearance: none; box-sizing: border-box; display: block; max-width: 100%;}
 select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="number"]:focus { border-color: var(--primary); }
 
 /* QATRA surprise: scoped additions; existing views remain unchanged. */
