@@ -250,31 +250,31 @@ select:focus, input[type="text"]:focus, input[type="time"]:focus, input[type="nu
 
 /* QATRA stage 1: theme-aware glass, with readable non-blur fallback. */
 body.glass-active {
---qg-panel:rgba(255,255,255,.72);
---qg-sheet:rgba(244,248,255,.86);
---qg-border:rgba(255,255,255,.82);
---qg-shadow:0 12px 32px rgba(42,67,125,.12),inset 0 1px 0 rgba(255,255,255,.92);
-background:radial-gradient(ellipse at 8% 15%,rgba(56,189,248,.20),transparent 52%),radial-gradient(ellipse at 95% 70%,rgba(167,139,250,.22),transparent 55%),var(--bg);
+--qg-panel: rgba(255, 255, 255, 0.15);
+--qg-sheet: rgba(255, 255, 255, 0.25);
+--qg-border: rgba(255, 255, 255, 0.3);
+--qg-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+background: radial-gradient(circle at 15% 50%, rgba(56,189,248,0.25), transparent 50%), radial-gradient(circle at 85% 30%, rgba(167,139,250,0.25), transparent 50%), var(--bg);
 }
 body.glass-active.dark-mode {
---qg-panel:rgba(21,31,55,.64);
---qg-sheet:rgba(14,23,43,.88);
---qg-border:rgba(163,188,242,.20);
---qg-shadow:0 14px 34px rgba(0,0,0,.26),inset 0 1px 0 rgba(224,237,255,.09);
-background:radial-gradient(ellipse at 4% 5%,rgba(14,165,233,.18),transparent 52%),radial-gradient(ellipse at 95% 76%,rgba(139,92,246,.20),transparent 55%),var(--bg);
+--qg-panel: rgba(16, 20, 30, 0.25);
+--qg-sheet: rgba(10, 15, 25, 0.35);
+--qg-border: rgba(255, 255, 255, 0.07);
+--qg-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+background: radial-gradient(circle at 10% 20%, rgba(14,165,233,0.25), transparent 60%), radial-gradient(circle at 90% 80%, rgba(139,92,246,0.25), transparent 60%), var(--bg);
 }
 body.glass-active .glass-card,
 body.glass-active .floating-nav,
 body.glass-active .audio-player,
 body.glass-active .garden-card {
-background:var(--qg-panel) !important;
-border:1px solid var(--qg-border);
-box-shadow:var(--qg-shadow);
-backdrop-filter:blur(22px) saturate(135%);
--webkit-backdrop-filter:blur(22px) saturate(135%);
+background: var(--qg-panel) !important;
+border: 1px solid var(--qg-border);
+box-shadow: var(--qg-shadow);
+backdrop-filter: blur(16px) saturate(180%);
+-webkit-backdrop-filter: blur(16px) saturate(180%);
 }
-body.glass-active .sheet-content.glass-card { background:var(--qg-sheet) !important; border-color:var(--qg-border); }
-body.glass-active .sheet-overlay { backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px); }
+body.glass-active .sheet-content.glass-card { background:var(--qg-sheet) !important; border-color:var(--qg-border); backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%); }
+body.glass-active .sheet-overlay { background: rgba(0,0,0,0.2); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
 body.glass-active .setting-icon { box-shadow:inset 0 1px 0 rgba(255,255,255,.10); border:1px solid var(--qg-border); }
 body.glass-active select, body.glass-active input:not([type="checkbox"]) { background:var(--qg-panel); color:var(--text); border:1px solid var(--qg-border); }
 body.glass-active select option { background:var(--surface); color:var(--text); }
