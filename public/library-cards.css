@@ -1,0 +1,38 @@
+/* Phase 3, scoped to the discovery sheet and new source controls. */
+.ql-sheet .sheet-content {height:90vh!important;max-height:94vh;}
+.ql-sheet #catSheetContent {overflow-x:hidden;padding:0 3px 6px!important;}
+.ql-library,.ql-library * {box-sizing:border-box;}
+.ql-tabs {display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;padding:4px 0 12px;scrollbar-width:thin;touch-action:pan-x;}
+.ql-tab {flex:none;padding:10px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);font:inherit;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer;}
+.ql-tab.active {color:var(--primary);border-color:var(--primary);background:linear-gradient(140deg,rgba(56,189,248,.14),rgba(139,92,246,.12));}
+.ql-tools {display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0 0 14px;}
+.ql-count {font-size:11px;line-height:1.7;color:var(--text-dim);}
+.ql-text-button {border:0;background:transparent;color:var(--primary);font:inherit;font-weight:700;font-size:12px;padding:6px;cursor:pointer;}
+.ql-deck {position:relative;width:min(100%,350px);aspect-ratio:1;margin:0 auto 14px;isolation:isolate;}
+.ql-card {position:absolute;inset:0;border-radius:26px;border:1px solid var(--border);background:var(--surface);box-shadow:0 12px 28px rgba(0,0,0,.12);padding:18px;display:flex;flex-direction:column;overflow:hidden;}
+body.glass-active .ql-card {background:var(--qg-sheet,var(--surface));border-color:var(--qg-border,var(--border));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.ql-ghost {pointer-events:none;}
+.ql-ghost-2 {z-index:0;transform:translateY(10px) scale(.92) rotate(-3deg);opacity:.35;}
+.ql-ghost-1 {z-index:1;transform:translateY(5px) scale(.96) rotate(2deg);opacity:.65;}
+.ql-front {z-index:2;touch-action:pan-y;transform-origin:50% 85%;}
+.ql-badge {align-self:flex-start;padding:5px 10px;border-radius:12px;color:var(--primary);background:rgba(56,189,248,.10);font-size:11px;font-weight:800;}
+.ql-text {flex:1;min-height:0;overflow-y:auto;white-space:pre-wrap;overflow-wrap:anywhere;display:block;align-content:center;text-align:center;color:var(--text);font-size:clamp(16px,4.8vw,21px);font-weight:800;line-height:1.85;padding:10px 0;}
+.ql-source {margin:0 0 8px;text-align:center;color:var(--text-dim);font-size:10px;line-height:1.6;}
+.ql-actions {flex:none;display:flex;flex-direction:column;gap:7px;}
+.ql-choose {width:100%;padding:10px 6px;border:1px solid var(--primary);border-radius:13px;background:rgba(56,189,248,.09);color:var(--primary);font:inherit;font-weight:800;font-size:12px;cursor:pointer;}
+.ql-choose.chosen {background:linear-gradient(135deg,#0ea5e9,#8b5cf6);border-color:transparent;color:white;}
+.ql-mini-actions {display:flex;gap:8px;}
+.ql-small-button {flex:1;min-width:0;padding:7px 4px;border:1px solid var(--border);border-radius:11px;background:transparent;color:var(--text-dim);font:inherit;font-size:10px;font-weight:700;cursor:pointer;}
+.ql-navigation {display:flex;justify-content:space-between;gap:10px;align-items:center;}
+.ql-nav-button {padding:9px 16px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text);font:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+.ql-page {color:var(--primary);font-size:12px;font-variant-numeric:tabular-nums;}
+.ql-hint {font-size:10px;text-align:center;color:var(--text-dim);margin:10px 0;}
+.ql-use {margin-top:8px;}
+.ql-status {min-height:20px;margin:9px 0 0;font-size:11px;line-height:1.8;color:var(--primary);}
+.ql-empty {text-align:center;min-height:160px;align-content:center;font-size:15px;line-height:1.9;color:var(--text-dim);}
+.ql-manage {display:block;width:100%;padding:10px;border-radius:14px;border:1px solid var(--border);background:transparent;color:var(--primary);font:inherit;font-size:12px;font-weight:800;margin:12px 0;cursor:pointer;}
+.ql-source-option {width:100%;box-sizing:border-box;color:var(--text);font:inherit;text-align:start;cursor:pointer;}
+.ql-library button:disabled {opacity:.45;cursor:default;}
+.ql-library button:focus-visible,.ql-manage:focus-visible,.ql-source-option:focus-visible {outline:2px solid var(--primary);outline-offset:3px;}
+@media(max-width:340px){.ql-card{padding:12px}.ql-text{font-size:15px}.ql-small-button{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.ql-card{transition:none!important}}

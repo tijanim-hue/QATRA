@@ -60,7 +60,7 @@ function mergeMetrics(snapshot) {
  state.stats.likes=(Number(baseline.likes)||0)+(Number(snapshot.totalLikes)||0);
  const totals={dhikr:0,culture:0,selfDev:0,poetry:0};
  for(const [category,count] of Object.entries(snapshot.categories||{})) {
-  const key=category==='quran'?'dhikr':category==='myGroups'||category==='favorites'?'selfDev':category;
+  const key=category==='quran'?'dhikr':category==='generalCulture'?'culture':category==='myGroups'||category==='favorites'?'selfDev':category;
   if(Object.prototype.hasOwnProperty.call(totals,key))totals[key]+=Number(count)||0;
  }
  for(const key of Object.keys(totals)) state.stats[key]=(Number(baseline.categories[key])||0)+totals[key];
@@ -78,6 +78,13 @@ async function refreshHome() {
  return readPromise;
 }
 function selectScheduledQuote() {
+ if (state.quoteSource === 'myChoices') {
+  const selected = (state.myChoices || []).filter(entry => entry && typeof entry.text === 'string' && entry.text.trim());
+  if (!selected.length) throw new Error('My choices is empty; scheduling is paused.');
+  const entry = selected[Math.floor(Math.random() * selected.length)];
+  return {quote: entry.text, categoryKey: entry.category};
+ }
+
  const real = q => typeof q==='string'&&q.trim()&&!/^(دعاء رقم|فكرة تطوير ذات رقم|آية رقم|حكمة رقم|بيت شعر رقم)\s*\d+\s*$/.test(q);
  let pool=[];
  const source=state.quoteSource;

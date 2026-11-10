@@ -94,7 +94,7 @@ if (showImage) {
 val bgImageName = when (category) {
 "dhikr", "quran" -> "bg_islamic"
 "selfDev" -> "bg_motivation"
-"culture" -> "bg_culture"
+"culture", "generalCulture" -> "bg_culture"
 "myLibrary", "favorites", "poetry" -> "bg_custom"
 else -> "bg_islamic"
 }
