@@ -112,12 +112,25 @@ class QatraOverlayService : Service() {
         if (readAloudEnabled) {
             tts = TextToSpeech(this) { status ->
                 if (status == TextToSpeech.SUCCESS) {
-                    val locale = Locale("ar")
-                    if (tts?.isLanguageAvailable(locale)!! >= TextToSpeech.LANG_AVAILABLE) {
-                        tts?.language = locale
-                        tts?.setPitch(0.85f) // صوت أعمق وأكثر رزانة
-                        tts?.setSpeechRate(0.85f) // قراءة متأنية
-                    }
+                    try {
+                        val voiceId = prefs.getString("selectedVoice", "")
+                        var customVoiceSet = false
+                        if (!voiceId.isNullOrEmpty()) {
+                            val v = tts?.voices?.firstOrNull { it.name == voiceId }
+                            if (v != null) {
+                                tts?.voice = v
+                                customVoiceSet = true
+                            }
+                        }
+                        if (!customVoiceSet) {
+                            val locale = Locale("ar")
+                            if (tts?.isLanguageAvailable(locale)!! >= TextToSpeech.LANG_AVAILABLE) {
+                                tts?.language = locale
+                            }
+                        }
+                        tts?.setPitch(0.85f)
+                        tts?.setSpeechRate(0.85f)
+                    } catch(e:Exception){}
                 }
             }
         }

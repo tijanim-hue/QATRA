@@ -179,7 +179,8 @@ private fun experienceStatus():JSObject {
         put("overlay",Build.VERSION.SDK_INT<Build.VERSION_CODES.M||Settings.canDrawOverlays(context))
         put("notifications",NotificationManagerCompat.from(context).areNotificationsEnabled())
         put("exactAlarms",Build.VERSION.SDK_INT<Build.VERSION_CODES.S||alarms.canScheduleExactAlarms())
-        put("readAloud",p.getBoolean("readAloud",true));put("wakeScreen",p.getBoolean("wakeScreen",false))
+        put("readAloud",p.getBoolean("readAloud",true))
+        put("selectedVoice",p.getString("selectedVoice",""));put("wakeScreen",p.getBoolean("wakeScreen",false))
         put("wakeAttemptAt",p.getLong("wakeAttemptAt",0L));put("wakeOpenedAt",p.getLong("wakeOpenedAt",0L))
     }
 }
@@ -225,4 +226,62 @@ fun playUiSound(call:PluginCall){
 override fun handleOnResume(){super.handleOnResume();notifyListeners("experienceResumed",experienceStatus())}
 override fun handleOnDestroy(){qatraUiSounds?.release();qatraUiSounds=null;super.handleOnDestroy()}
 
+
+    private var pluginTts: android.speech.tts.TextToSpeech? = null
+
+    @PluginMethod
+    fun getAvailableVoices(call: PluginCall) {
+        if (pluginTts == null) {
+            activity?.runOnUiThread {
+                pluginTts = android.speech.tts.TextToSpeech(context) { status ->
+                    if (status == android.speech.tts.TextToSpeech.SUCCESS) {
+                        fetchVoices(call)
+                    } else {
+                        call.reject("TTS failed")
+                    }
+                }
+            }
+        } else {
+            fetchVoices(call)
+        }
+    }
+
+    private fun fetchVoices(call: PluginCall) {
+        try {
+            val arr = org.json.JSONArray()
+            pluginTts?.voices?.forEach { v ->
+                if (v.locale.language.startsWith("ar")) {
+                    val obj = JSObject()
+                    obj.put("id", v.name)
+                    // تنظيف الاسم ليظهر بشكل مناسب
+                    val shortName = v.name.split("-").lastOrNull() ?: v.name
+                    obj.put("name", "${v.locale.displayName} ($shortName)")
+                    arr.put(obj)
+                }
+            }
+            call.resolve(JSObject().put("voices", arr))
+        } catch (e: Exception) { call.reject(e.message) }
+    }
+
+    @PluginMethod
+    fun testVoice(call: PluginCall) {
+        val voiceId = call.getString("voiceId") ?: return call.reject("No id")
+        try {
+            val v = pluginTts?.voices?.firstOrNull { it.name == voiceId }
+            if (v != null) {
+                pluginTts?.voice = v
+                pluginTts?.setPitch(0.85f)
+                pluginTts?.setSpeechRate(0.85f)
+                pluginTts?.speak("هكذا سيكون صوتي", android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, null)
+            }
+        } catch (e: Exception) {}
+        call.resolve()
+    }
+
+    @PluginMethod
+    fun setVoicePreference(call: PluginCall) {
+        val voiceId = call.getString("voiceId")
+        context.getSharedPreferences("QatraExperiencePrefs", Context.MODE_PRIVATE).edit().putString("selectedVoice", voiceId).apply()
+        call.resolve()
+    }
 }
