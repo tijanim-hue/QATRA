@@ -46,6 +46,7 @@ class QatraOverlayService : Service() {
     private var params: WindowManager.LayoutParams? = null
     private var fallPlayer: MediaPlayer? = null
     private var popPlayer: MediaPlayer? = null
+    private var experienceSounds:QatraUiSounds? = null
     private var startedAt = 0L
     private var totalMs = 10000L
     private var impactMs = 1050L
@@ -97,6 +98,7 @@ class QatraOverlayService : Service() {
 
     private fun show(quote: String, category: String, showImage: Boolean, duration: Int) {
         manager = getSystemService(WINDOW_SERVICE) as WindowManager
+        experienceSounds=try{QatraUiSounds(this)}catch(error:Exception){Log.w(TAG,"Optional UI sounds unavailable",error);null}
         totalMs = duration.coerceIn(5000,15000).toLong()
         reducedMotion = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !android.animation.ValueAnimator.areAnimatorsEnabled()
         impactMs = if (reducedMotion) 0L else 1050L
@@ -148,6 +150,7 @@ class QatraOverlayService : Service() {
             if(like.liked || !active || like.alpha<.5f)return@setOnClickListener
             if(!QatraHomeStore.like(this@QatraOverlayService,occurrenceId,category))return@setOnClickListener
             like.liked=true;likedAt=SystemClock.uptimeMillis()-startedAt
+            experienceSounds?.play("tap")
             like.contentDescription=if(resources.configuration.locale.language=="ar")"تم تسجيل الإعجاب" else "Quote liked"
             val event=Intent("com.qatra.app.QUOTE_LIKED").setPackage(packageName)
             event.putExtra("category",category);event.putExtra("occurrenceId",occurrenceId)
@@ -178,8 +181,13 @@ class QatraOverlayService : Service() {
             originY=root.impactY-root.dropHeight*.45f-(panel.top+panel.height/2f)
             panel.pivotX=panel.width/2f;panel.pivotY=panel.height/2f
             heartTargetY=(panel.top-px(76f)).toFloat().coerceAtLeast(insets.top+dp(8f))
-            startedAt=SystemClock.uptimeMillis()
-            if(!reducedMotion)playSound("drop_fall_sound",true)
+            val wakeRequested=QatraScreenWakeActivity.requestIfNeeded(this@QatraOverlayService,totalMs)
+            val wakeDelay=if(wakeRequested)650L else 0L
+            startedAt=SystemClock.uptimeMillis()+wakeDelay
+            if(!reducedMotion){
+                if(wakeDelay>0L)handler.postDelayed({if(active)playSound("drop_fall_sound",true)},wakeDelay)
+                else playSound("drop_fall_sound",true)
+            }
             handler.post(tick)
         }
     }
@@ -206,8 +214,8 @@ class QatraOverlayService : Service() {
             val heartOrigin=root.impactY-dp(70f)
             like.translationY=heartOrigin+(heartTargetY-heartOrigin)*heartProgress+
                 if(!reducedMotion&&heartProgress>=1f)(sin(elapsed/900.0)*dp(5f)).toFloat() else 0f
-            like.alpha=heartProgress
-            like.isEnabled=heartProgress>.90f&&fade==0f
+            like.alpha=if(elapsed<0L)0f else heartProgress
+            like.isEnabled=elapsed>=0L&&heartProgress>.90f&&fade==0f
             val burst=if(likedAt<0L)1f else progress(elapsed,likedAt,800L)
             like.burst=burst
             val heartPulse=if(likedAt>=0L&&burst<1f&&!reducedMotion)(sin(burst*PI)*.22f).toFloat() else 0f
@@ -258,7 +266,8 @@ class QatraOverlayService : Service() {
 
     private fun finish(){cleanup();stopSelf()}
     private fun cleanup(){
-        active=false;handler.removeCallbacksAndMessages(null)
+        active=false;QatraScreenWakeActivity.closeActive();handler.removeCallbacksAndMessages(null)
+        experienceSounds?.release();experienceSounds=null
         try{fallPlayer?.release()}catch(_:Exception){};fallPlayer=null
         try{popPlayer?.release()}catch(_:Exception){};popPlayer=null
         scene?.let{try{manager?.removeViewImmediate(it)}catch(_:Exception){}}

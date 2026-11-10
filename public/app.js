@@ -947,10 +947,7 @@ setTimeout(() => alert(getTranslation('session_end')), mins * 60000);
 
 document.addEventListener('DOMContentLoaded', () => {
 
-if (QatraNative) {
-// إجبار طلب الأذونات فور فتح التطبيق
-QatraNative.askPermissions().catch(e => console.log(e));
-}
+// Sequential permission onboarding is handled by experience.js.
 
 document.querySelectorAll('.nav-item, .nav-home-btn, .header-btn').forEach(btn => {
 btn.addEventListener('click', () => {

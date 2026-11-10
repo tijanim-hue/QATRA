@@ -1,0 +1,21 @@
+/* No touch flash. Keyboard focus and text selection remain available. */
+*{-webkit-tap-highlight-color:transparent!important;}
+:focus:not(:focus-visible){outline:none!important;}
+:focus-visible{outline:2px solid var(--primary);outline-offset:3px;}
+.qe-backdrop{position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;padding:22px;box-sizing:border-box;background:rgba(3,8,19,.76);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+.qe-panel{box-sizing:border-box;width:100%;max-width:430px;max-height:90vh;overflow:auto;margin:0!important;padding:26px;border-radius:30px;}
+.qe-title{font-size:24px;line-height:1.5;margin:0 0 12px;color:var(--primary);}
+.qe-intro{font-size:14px;line-height:1.9;color:var(--text-dim);}
+.qe-step{display:flex;gap:12px;padding:15px 0;align-items:flex-start;border-bottom:1px solid var(--border);}
+.qe-step-mark{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:11px;background:rgba(56,189,248,.14);color:var(--primary);font-weight:900;}
+.qe-step.granted .qe-step-mark{background:rgba(16,185,129,.16);color:#10b981;}
+.qe-step strong{font-size:14px;line-height:1.7;color:var(--text);}
+.qe-step p{font-size:12px;line-height:1.8;color:var(--text-dim);margin:4px 0 0;}
+.qe-later,.qe-manage{width:100%;padding:11px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text-dim);font:inherit;font-size:13px;margin-top:10px;cursor:pointer;}
+.qe-settings{margin-top:16px;border-top:1px solid var(--border);padding-top:8px;}
+.qe-preference{gap:14px;align-items:center;}
+.qe-pref-copy{min-width:0;flex:1;}
+.qe-pref-copy strong{font-size:13px;line-height:1.7;}
+.qe-pref-copy p,.qe-hint{font-size:11px;line-height:1.8;color:var(--text-dim);margin:5px 0 0;}
+.qe-preference .toggle{flex-shrink:0;}
+.qe-panel button:disabled{opacity:.5;}

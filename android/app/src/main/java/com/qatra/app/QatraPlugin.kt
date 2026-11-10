@@ -17,8 +17,13 @@ import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import java.util.Calendar
+import com.getcapacitor.PermissionState
+import com.getcapacitor.annotation.Permission
+import com.getcapacitor.annotation.PermissionCallback
+import androidx.core.app.NotificationManagerCompat
 
-@CapacitorPlugin(name = "QatraNative")
+
+@CapacitorPlugin(name = "QatraNative", permissions = [Permission(alias = "qatraNotifications", strings = [Manifest.permission.POST_NOTIFICATIONS])])
 class QatraPlugin : Plugin() {
 
 private val likeReceiver = object : BroadcastReceiver() {
@@ -164,4 +169,60 @@ QatraHomeStore.prune(context, ids)
 call.resolve()
 } catch (e: Exception) { call.reject("Unable to reconcile alarms", e) }
 }
+
+// QATRA stage 5: experience bridge; existing alarms and likes remain unchanged.
+private var qatraUiSounds:QatraUiSounds?=null
+private fun experienceStatus():JSObject {
+    val p=context.getSharedPreferences("QatraExperiencePrefs",Context.MODE_PRIVATE)
+    val alarms=context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    return JSObject().apply{
+        put("overlay",Build.VERSION.SDK_INT<Build.VERSION_CODES.M||Settings.canDrawOverlays(context))
+        put("notifications",NotificationManagerCompat.from(context).areNotificationsEnabled())
+        put("exactAlarms",Build.VERSION.SDK_INT<Build.VERSION_CODES.S||alarms.canScheduleExactAlarms())
+        put("uiSounds",p.getBoolean("uiSounds",true));put("wakeScreen",p.getBoolean("wakeScreen",false))
+        put("wakeAttemptAt",p.getLong("wakeAttemptAt",0L));put("wakeOpenedAt",p.getLong("wakeOpenedAt",0L))
+    }
+}
+@PluginMethod
+fun getExperienceStatus(call:PluginCall){call.resolve(experienceStatus())}
+@PluginMethod
+fun openOverlayPermission(call:PluginCall){
+    if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M||Settings.canDrawOverlays(context)){call.resolve(experienceStatus());return}
+    val screen=activity?:return call.reject("No activity")
+    try{screen.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,Uri.parse("package:${context.packageName}")));call.resolve()}
+    catch(e:Exception){call.reject("Unable to open overlay settings",e)}
+}
+@PluginMethod
+fun requestQatraNotifications(call:PluginCall){
+    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU&&context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED&&getPermissionState("qatraNotifications")!=PermissionState.DENIED){
+        requestPermissionForAlias("qatraNotifications",call,"qatraNotificationsResult")
+    }else if(!NotificationManagerCompat.from(context).areNotificationsEnabled()){
+        val screen=activity?:return call.reject("No activity")
+        try{
+            val intent=if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O)Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE,context.packageName)
+                else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:${context.packageName}"))
+            screen.startActivity(intent);call.resolve()
+        }catch(e:Exception){call.reject("Unable to open notification settings",e)}
+    }else call.resolve(experienceStatus())
+}
+@PermissionCallback
+private fun qatraNotificationsResult(call:PluginCall){call.resolve(experienceStatus())}
+@PluginMethod
+fun setExperiencePreferences(call:PluginCall){
+    val edit=context.getSharedPreferences("QatraExperiencePrefs",Context.MODE_PRIVATE).edit()
+    call.getBoolean("uiSounds")?.let{edit.putBoolean("uiSounds",it)}
+    call.getBoolean("wakeScreen")?.let{edit.putBoolean("wakeScreen",it)}
+    edit.commit();call.resolve(experienceStatus())
+}
+@PluginMethod
+fun playUiSound(call:PluginCall){
+    val name=call.getString("name")?:"tap"
+    if(name!="tap"&&name!="startup"){call.reject("Unknown sound");return}
+    val screen=activity?:return call.resolve()
+    screen.runOnUiThread{try{if(qatraUiSounds==null)qatraUiSounds=QatraUiSounds(context);qatraUiSounds?.play(name)}catch(e:Exception){android.util.Log.w("QatraUiSounds","Optional UI sound unavailable",e)}}
+    call.resolve()
+}
+override fun handleOnResume(){super.handleOnResume();notifyListeners("experienceResumed",experienceStatus())}
+override fun handleOnDestroy(){qatraUiSounds?.release();qatraUiSounds=null;super.handleOnDestroy()}
+
 }

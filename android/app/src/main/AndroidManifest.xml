@@ -43,5 +43,8 @@
         </receiver>
         <service android:name=".QatraOverlayService" android:exported="false" />
         <service android:name=".PomodoroService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
+            <activity android:name=".QatraScreenWakeActivity"
+            android:exported="false" android:excludeFromRecents="true"
+            android:noHistory="true" android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 </manifest>
