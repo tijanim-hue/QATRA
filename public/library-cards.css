@@ -36,3 +36,5 @@ body.glass-active .ql-card {background:var(--qg-sheet,var(--surface));border-col
 .ql-library button:focus-visible,.ql-manage:focus-visible,.ql-source-option:focus-visible {outline:2px solid var(--primary);outline-offset:3px;}
 @media(max-width:340px){.ql-card{padding:12px}.ql-text{font-size:15px}.ql-small-button{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.ql-card{transition:none!important}}
+
+.ql-nav-button { display: none !important; }
