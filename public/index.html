@@ -743,5 +743,73 @@ body.glass-active.dark-mode { --qg-panel:rgba(20,30,51,.96); --qg-sheet:rgba(14,
     </div>
 </div>
 
+
+<!-- JOURNEY WITH QATRA SHEET -->
+<div id="journeySheet" class="sheet-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:2000; justify-content:center; align-items:flex-end; opacity:0; transition:opacity 0.3s ease;">
+    <div id="journeySheetContent" class="sheet-content" style="width:100%; height:85vh; background:var(--t-card, #ffffff); border-radius:24px 24px 0 0; padding:25px 20px; box-shadow:0 -10px 40px rgba(0,0,0,0.2); transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display:flex; flex-direction:column; overflow:hidden;">
+        
+        <div style="width:45px; height:6px; background:rgba(128,128,128,0.2); border-radius:10px; margin:0 auto 20px auto;"></div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+            <div>
+                <h2 style="margin:0; color:var(--t-text, #111); font-size:1.8rem; font-weight:900;">رحلتك مع قطرة</h2>
+                <p style="margin:5px 0 0 0; color:var(--t-sub, #666); font-size:0.9rem; font-weight:600;">كل قطرة تصنع أثراً، وكل يوم يمثل خطوة.</p>
+            </div>
+            <button id="closeJourneySheet" style="background:transparent; border:none; color:var(--t-sub, #666); cursor:pointer; padding:5px;">
+                <svg viewBox="0 0 24 24" style="width:28px; height:28px; stroke:currentColor; fill:none; stroke-width:2;"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div style="flex:1; overflow-y:auto; padding-bottom:20px;">
+            
+            <!-- شبكة الإحصائيات الرئيسية -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+                
+                <!-- الأيام النشطة -->
+                <div style="background:rgba(14,165,233,0.1); border:1px solid rgba(14,165,233,0.2); border-radius:20px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center;">
+                    <div style="background:#0ea5e9; color:#fff; width:45px; height:45px; border-radius:12px; display:flex; justify-content:center; align-items:center; margin-bottom:10px;">
+                        <svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:2;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <span id="statActiveDays" style="font-size:2rem; font-weight:900; color:var(--t-text, #111); line-height:1;">0</span>
+                    <span style="font-size:0.85rem; font-weight:bold; color:#0ea5e9; margin-top:5px;">أيام نشطة</span>
+                </div>
+
+                <!-- سلسلة الالتزام -->
+                <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.2); border-radius:20px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center;">
+                    <div style="background:#f59e0b; color:#fff; width:45px; height:45px; border-radius:12px; display:flex; justify-content:center; align-items:center; margin-bottom:10px;">
+                        <svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:2;"><path d="M12 2c0 0-5 6.47-5 11.08a5 5 0 1 0 10 0C17 8.47 12 2 12 2z"/></svg>
+                    </div>
+                    <span id="statStreak" style="font-size:2rem; font-weight:900; color:var(--t-text, #111); line-height:1;">0</span>
+                    <span style="font-size:0.85rem; font-weight:bold; color:#f59e0b; margin-top:5px;">أيام متتالية</span>
+                </div>
+
+            </div>
+
+            <!-- بطاقة أفقية للإنجازات -->
+            <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); border-radius:20px; padding:20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div>
+                    <span style="display:block; font-size:1rem; font-weight:bold; color:var(--t-text, #111);">الخطوات المنجزة</span>
+                    <span style="font-size:0.85rem; color:#10b981; font-weight:600;">أفعال إيجابية قمت بها</span>
+                </div>
+                <div style="font-size:2.2rem; font-weight:900; color:#10b981;" id="statSteps">0</div>
+            </div>
+
+            <!-- بطاقة أفقية للمفضلات -->
+            <div style="background:rgba(236,72,153,0.1); border:1px solid rgba(236,72,153,0.2); border-radius:20px; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <span style="display:block; font-size:1rem; font-weight:bold; color:var(--t-text, #111);">الاقتباسات المحفوظة</span>
+                    <span style="font-size:0.85rem; color:#ec4899; font-weight:600;">كلمات لامست قلبك</span>
+                </div>
+                <div style="font-size:2.2rem; font-weight:900; color:#ec4899;" id="statQuotes">0</div>
+            </div>
+
+            <div style="text-align:center; margin-top:30px;">
+                <p style="color:var(--t-sub, #666); font-size:0.85rem; font-weight:600;">«قليل دائم خير من كثير منقطع»</p>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

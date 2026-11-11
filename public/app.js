@@ -1838,3 +1838,103 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 700); // 700ms لضمان أن كل البطاقات قد تم رسمها
 });
+
+
+// === FEATURE 4: JOURNEY STATS ===
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. نظام التتبع الصامت (يسجل الأيام تلقائياً عند فتح التطبيق)
+    const today = new Date().toDateString();
+    let journeyData = JSON.parse(localStorage.getItem('qatra_journey_data') || '{"activeDaysList": []}');
+    
+    // إذا لم يكن اليوم مسجلاً مسبقاً، أضفه
+    if (!journeyData.activeDaysList.includes(today)) {
+        journeyData.activeDaysList.push(today);
+        localStorage.setItem('qatra_journey_data', JSON.stringify(journeyData));
+    }
+
+    // حساب السلسلة المتتالية (Streak)
+    let currentStreak = 0;
+    if (journeyData.activeDaysList.length > 0) {
+        // ترتيب الأيام من الأحدث للأقدم
+        const sortedDays = journeyData.activeDaysList.map(d => new Date(d)).sort((a,b) => b - a);
+        let checkDate = new Date(); // نبدأ من اليوم
+        checkDate.setHours(0,0,0,0);
+        
+        // التحقق من الاستمرارية
+        for (let i = 0; i < sortedDays.length; i++) {
+            sortedDays[i].setHours(0,0,0,0);
+            const diffTime = Math.abs(checkDate - sortedDays[i]);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) { // نشط اليوم
+                currentStreak++;
+                checkDate.setDate(checkDate.getDate() - 1); // نعود للوراء يوماً
+            } else if (diffDays === 1 && i === 0) { // لم ينشط اليوم، لكنه نشط أمس
+                checkDate.setDate(checkDate.getDate() - 1);
+                currentStreak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                break; // انقطعت السلسلة
+            }
+        }
+    }
+
+    // 2. ربط زر الإحصائيات في الهيدر لفتح اللوحة الجديدة
+    setTimeout(() => {
+        // البحث عن الزر القديم الخاص بالإحصائيات (عن طريق الأيقونة أو الحدث)
+        const headerBtns = document.querySelectorAll('header button');
+        let statsBtn = null;
+        headerBtns.forEach(btn => {
+            if (btn.innerHTML.includes('M18 20V10M12 20V4M6 20v-6') || (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes('statsSheet'))) {
+                statsBtn = btn;
+            }
+        });
+
+        if (statsBtn) {
+            // إزالة الأحداث القديمة بالاستنساخ
+            const newStatsBtn = statsBtn.cloneNode(true);
+            statsBtn.parentNode.replaceChild(newStatsBtn, statsBtn);
+            newStatsBtn.removeAttribute('onclick');
+
+            const journeySheet = document.getElementById('journeySheet');
+            const journeyContent = document.getElementById('journeySheetContent');
+            
+            // فتح النافذة وعرض الأرقام الحقيقية
+            newStatsBtn.addEventListener('click', () => {
+                // جلب الأرقام المحدثة لحظياً من الذاكرة
+                const latestJourney = JSON.parse(localStorage.getItem('qatra_journey_data') || '{"activeDaysList": []}');
+                const activeDaysCount = latestJourney.activeDaysList.length;
+                
+                const stepStats = JSON.parse(localStorage.getItem('qatra_stats') || '{"completedSteps": 0}');
+                const completedStepsCount = stepStats.completedSteps || 0;
+                
+                const savedQuotes = JSON.parse(localStorage.getItem('saved_quotes') || '[]');
+                const savedQuotesCount = savedQuotes.length || 0;
+
+                // تحديث الـ DOM
+                document.getElementById('statActiveDays').textContent = activeDaysCount;
+                document.getElementById('statStreak').textContent = currentStreak;
+                document.getElementById('statSteps').textContent = completedStepsCount;
+                document.getElementById('statQuotes').textContent = savedQuotesCount;
+
+                // عرض النافذة
+                journeySheet.style.display = 'flex';
+                setTimeout(() => {
+                    journeySheet.style.opacity = '1';
+                    journeyContent.style.transform = 'translateY(0)';
+                }, 10);
+            });
+
+            // إغلاق النافذة
+            const closeJourney = () => {
+                journeySheet.style.opacity = '0';
+                journeyContent.style.transform = 'translateY(100%)';
+                setTimeout(() => { journeySheet.style.display = 'none'; }, 300);
+            };
+            
+            document.getElementById('closeJourneySheet').onclick = closeJourney;
+            journeySheet.onclick = (e) => { if(e.target === journeySheet) closeJourney(); };
+        }
+    }, 800);
+});
