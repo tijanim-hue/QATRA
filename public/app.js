@@ -1739,3 +1739,102 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 800);
 });
+
+
+// === FEATURE 3: SEPARATE MOMENT AND QUOTE ===
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const cards = document.querySelectorAll('.glass-card, .card');
+        let momentCard = null;
+        let quoteCard = null;
+
+        // 1. البحث عن البطاقتين بذكاء
+        cards.forEach(card => {
+            const titleEl = card.querySelector('.title, span');
+            if (titleEl) {
+                if (titleEl.textContent.includes('لحظتك الحالية')) momentCard = card;
+                if (titleEl.textContent.includes('اقتباس اليوم') || titleEl.textContent.includes('اقتباس')) quoteCard = card;
+            }
+        });
+
+        // 2. معالجة قسم "لحظتك الحالية" (رسائل مرتبطة بالوقت)
+        if (momentCard) {
+            const descEl = momentCard.querySelector('.desc') || momentCard.querySelectorAll('span')[1];
+            const currentHour = new Date().getHours();
+            let timePeriod = '';
+            let periodMessages = [];
+
+            if (currentHour >= 5 && currentHour < 12) {
+                timePeriod = 'Morning';
+                periodMessages = [
+                    "ابدأ يومك بخطوة صغيرة، فالبدايات العظيمة لا تحتاج دائماً إلى ضجيج.",
+                    "نفس جديد، نية متجددة، وفرصة أخرى لتبدأ من جديد.",
+                    "صباح الخير. لا تحمل هم الأمس، اليوم قصة جديدة."
+                ];
+            } else if (currentHour >= 12 && currentHour < 17) {
+                timePeriod = 'Noon';
+                periodMessages = [
+                    "توقف لحظة، أعد ترتيب أولوياتك، ثم تابع طريقك.",
+                    "في زحام يومك، لا تنسَ أن تمنح نفسك دقائق من السكون.",
+                    "خذ نفساً عميقاً، أنت تبلي بلاءً حسناً حتى الآن."
+                ];
+            } else if (currentHour >= 17 && currentHour < 21) {
+                timePeriod = 'Evening';
+                periodMessages = [
+                    "امنح نفسك فرصة لتقدير ما أنجزته، حتى لو كان بسيطاً.",
+                    "مضى تعب النهار، هذا وقت الهدوء والعودة إلى الذات.",
+                    "مساء الامتنان لكل خطوة تجاوزتها اليوم."
+                ];
+            } else {
+                timePeriod = 'Night';
+                periodMessages = [
+                    "ليس عليك أن تحل كل شيء الليلة؛ بعض الأمور تحتاج إلى وقت.",
+                    "اسمح لجسدك وعقلك بالراحة، غداً يوم أفضل بإذن الله.",
+                    "سامح نفسك على تقصير اليوم، ونم بقلب مطمئن."
+                ];
+            }
+
+            // حفظ الرسالة للفترة الحالية حتى لا تتغير مع كل فتح للتطبيق
+            const todayDate = new Date().toDateString();
+            const momentStorageKey = 'qatra_moment_' + timePeriod + '_' + todayDate;
+            let savedMoment = localStorage.getItem(momentStorageKey);
+            
+            if (!savedMoment) {
+                savedMoment = periodMessages[Math.floor(Math.random() * periodMessages.length)];
+                localStorage.setItem(momentStorageKey, savedMoment);
+            }
+
+            if (descEl) descEl.textContent = savedMoment;
+        }
+
+        // 3. معالجة قسم "اقتباس اليوم" (محتوى ثقافي وروحي عميق)
+        if (quoteCard) {
+            const descEl = quoteCard.querySelector('.desc') || quoteCard.querySelectorAll('span')[1];
+            
+            const deepQuotes = [
+                "﴿وَاصْبِرْ فَإِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسِنِينَ﴾ - سورة هود",
+                "«احرص على ما ينفعك، واستعن بالله ولا تعجز» - حديث صحيح",
+                "«وإنّما المرءُ حديثٌ بَعدَهُ، فَكُن حديثاً حَسَناً لِمَن وَعَى» - ابن دريد",
+                "«لا تحقرن صغيرة إن الجبال من الحصى» - مثل عربي",
+                "«كل متوقع آتٍ، فتوقع ما تتمنى.» - علي بن أبي طالب",
+                "«لا يقلق من كان له أب، فكيف بمن كان له رب.» - الشعراوي",
+                "﴿وَأَنْ لَيْسَ لِلْإِنْسَانِ إِلَّا مَا سَعَى﴾ - سورة النجم",
+                "«النفسُ ترجو والأماني جمّةٌ، والعبد يدعو والكريمُ كريمُ» - شعر عربي"
+            ];
+
+            const todayDate = new Date().toDateString();
+            let savedQuoteData = JSON.parse(localStorage.getItem('qatra_daily_quote') || '{}');
+
+            // إذا كان يوماً جديداً، جلب اقتباس جديد
+            if (savedQuoteData.date !== todayDate) {
+                savedQuoteData = {
+                    date: todayDate,
+                    text: deepQuotes[Math.floor(Math.random() * deepQuotes.length)]
+                };
+                localStorage.setItem('qatra_daily_quote', JSON.stringify(savedQuoteData));
+            }
+
+            if (descEl) descEl.textContent = savedQuoteData.text;
+        }
+    }, 700); // 700ms لضمان أن كل البطاقات قد تم رسمها
+});
