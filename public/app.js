@@ -1355,3 +1355,144 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 600);
 });
+
+
+// === FEATURE 1: EXACT LOGIC ===
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const cards = document.querySelectorAll('.glass-card, .card');
+        let stepCard = null;
+        
+        // العثور على بطاقة خطوة اليوم
+        cards.forEach(card => {
+            const title = card.querySelector('.title, span');
+            if(title && title.textContent.includes('خطوة اليوم')) {
+                stepCard = card;
+            }
+        });
+
+        if (stepCard) {
+            // الاستنساخ لعزل البطاقة عن أي نافذة "أثر" قديمة
+            const cleanCard = stepCard.cloneNode(true);
+            stepCard.parentNode.replaceChild(cleanCard, stepCard);
+            stepCard = cleanCard;
+            
+            const cardDesc = stepCard.querySelector('.desc') || stepCard.querySelectorAll('span')[1];
+            const cardIcon = stepCard.querySelector('.icon') || stepCard.querySelector('.card-icon');
+
+            // قاعدة بيانات الخطوات مع التصنيفات (استعداداً للمستقبل)
+            const stepsDatabase = [
+                { cat: 'العلاقات الإنسانية', text: 'اتصل بشخص تحبه واسأل عنه.' },
+                { cat: 'الهدوء النفسي', text: 'خصّص خمس دقائق دون هاتف.' },
+                { cat: 'تطوير الذات', text: 'سامح نفسك على خطأ قديم.' },
+                { cat: 'المعرفة', text: 'اقرأ صفحتين من كتاب.' },
+                { cat: 'العلاقات الإنسانية', text: 'قل كلمة طيبة لشخص لم تتحدث معه منذ مدة.' },
+                { cat: 'الامتنان', text: 'اكتب شيئاً واحداً تشعر بالامتنان لوجوده.' },
+                { cat: 'العمل الصالح', text: 'ساعد شخصاً دون انتظار مقابل.' },
+                { cat: 'البيئة والترتيب', text: 'رتّب مساحة صغيرة من غرفتك.' },
+                { cat: 'الصحة والهدوء', text: 'امشِ عشر دقائق وتأمل ما حولك.' },
+                { cat: 'الهدوء النفسي', text: 'تخلّص من فكرة سلبية تستنزف طاقتك.' }
+            ];
+
+            const today = new Date().toDateString();
+            let savedData = JSON.parse(localStorage.getItem('qatra_daily_step') || '{}');
+
+            // تعيين خطوة جديدة إذا كان يوماً جديداً
+            if (savedData.date !== today) {
+                const randomStep = stepsDatabase[Math.floor(Math.random() * stepsDatabase.length)];
+                savedData = { date: today, text: randomStep.text, category: randomStep.cat, completed: false };
+                localStorage.setItem('qatra_daily_step', JSON.stringify(savedData));
+            }
+
+            // عناصر النافذة
+            const sheet = document.getElementById('stepSheet');
+            const sheetContent = sheet.querySelector('.sheet-content');
+            const sheetDesc = document.getElementById('stepSheetDesc');
+            const sheetCat = document.getElementById('stepCategory');
+            const btnComplete = document.getElementById('btnCompleteStep');
+            const btnClose = document.getElementById('btnCloseStep');
+            const animContainer = document.getElementById('dropAnimContainer');
+            const dropIcon = document.getElementById('waterDropIcon');
+
+            // تحديث واجهة البطاقة الرئيسية
+            function updateMainCard() {
+                if(savedData.completed) {
+                    if(cardDesc) cardDesc.textContent = "أنجزت خطوة اليوم!";
+                    if(cardIcon) cardIcon.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:#10B981;fill:rgba(16,185,129,0.2);stroke-width:2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                } else {
+                    if(cardDesc) cardDesc.textContent = "اضغط لاكتشاف خطوتك...";
+                    if(cardIcon) cardIcon.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                }
+            }
+            updateMainCard();
+
+            // فتح النافذة عند الضغط على البطاقة
+            stepCard.onclick = () => {
+                sheetDesc.textContent = savedData.text;
+                sheetCat.textContent = savedData.category;
+                
+                if(savedData.completed) {
+                    btnComplete.style.display = 'none';
+                    animContainer.style.display = 'flex';
+                    dropIcon.style.opacity = '1';
+                    dropIcon.style.transform = 'translateY(0) scale(1.2)';
+                    sheetDesc.textContent = "لقد أنجزت هذه الخطوة اليوم. شكراً لك!";
+                } else {
+                    btnComplete.style.display = 'block';
+                    animContainer.style.display = 'none';
+                    dropIcon.style.opacity = '0';
+                    dropIcon.style.transform = 'translateY(-20px)';
+                }
+
+                sheet.style.display = 'flex';
+                setTimeout(() => {
+                    sheet.style.opacity = '1';
+                    sheetContent.style.transform = 'translateY(0)';
+                }, 10);
+            };
+
+            // دالة الإغلاق
+            const closeSheet = () => {
+                sheet.style.opacity = '0';
+                sheetContent.style.transform = 'translateY(100%)';
+                setTimeout(() => { sheet.style.display = 'none'; }, 300);
+            };
+
+            btnClose.onclick = closeSheet;
+            sheet.onclick = (e) => { if(e.target === sheet) closeSheet(); };
+
+            // الضغط على زر "أنجزت الخطوة" (حركة القطرة)
+            btnComplete.onclick = () => {
+                if(savedData.completed) return;
+                
+                // 1. تسجيل الإنجاز
+                savedData.completed = true;
+                localStorage.setItem('qatra_daily_step', JSON.stringify(savedData));
+                
+                // تحديث الإحصائيات الوهمية حتى نبرمج الميزة الرابعة
+                let stats = JSON.parse(localStorage.getItem('qatra_stats') || '{"completedSteps": 0}');
+                stats.completedSteps = (stats.completedSteps || 0) + 1;
+                localStorage.setItem('qatra_stats', JSON.stringify(stats));
+
+                // 2. الحركة البصرية لقطرة الماء
+                btnComplete.style.display = 'none';
+                animContainer.style.display = 'flex';
+                
+                // حركة نزول القطرة وانبثاقها (Ripple effect)
+                setTimeout(() => {
+                    dropIcon.style.opacity = '1';
+                    dropIcon.style.transform = 'translateY(0) scale(1.5)';
+                    
+                    setTimeout(() => {
+                        dropIcon.style.transform = 'translateY(0) scale(1)';
+                        sheetDesc.textContent = "تم تسجيل الإنجاز بنجاح!";
+                        updateMainCard();
+                        
+                        // إغلاق النافذة تلقائياً بعد الإنجاز بثانيتين
+                        setTimeout(closeSheet, 2000);
+                    }, 400);
+                }, 50);
+            };
+        }
+    }, 600);
+});
