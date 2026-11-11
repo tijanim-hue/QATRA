@@ -12,7 +12,7 @@ const DICT = {
     "moment_zen": "لحظة وعي",
     "click_to_program": "اضغط لبرمجة قطرتك",
     "next_drop": "قطرتك القادمة",
-    "today_impact": "أثر اليوم",
+    "today_impact": "خطوة اليوم",
     "current_moment": "لحظتك الحالية",
     "drop_settings": "إعدادات قطرتي",
     "display_method": "طريقة العرض وتفضيلاتك",
@@ -1081,13 +1081,13 @@ setTimeout(initDailyStep, 600);
 // --- Stage 10 (Part 1): Daily Step DOM Logic ---
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        // 1. البحث عن بطاقة أثر اليوم بذكاء مهما كان تصميمها
+        // 1. البحث عن بطاقة خطوة اليوم بذكاء مهما كان تصميمها
         const cards = document.querySelectorAll('.glass-card, .card');
         let targetCard = null;
         
         cards.forEach(card => {
             const titleEl = card.querySelector('.title');
-            if(titleEl && titleEl.textContent.includes('أثر اليوم')) {
+            if(titleEl && titleEl.textContent.includes('خطوة اليوم')) {
                 targetCard = card;
             }
         });
