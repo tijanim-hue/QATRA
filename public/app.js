@@ -2088,3 +2088,146 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }, 900);
 });
+
+// === PRO PHASE 1: DAILY STEP ===
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        const stepsDB = [
+            { id: 1, cat: 'العلاقات والأسرة', title: 'أعد وصل خيط الود', task: 'تواصل اليوم مع شخص عزيز لم تتحدث معه منذ مدة. لا تحتاج إلى حديث طويل؛ رسالة صادقة تكفي.', why: 'العلاقات الجميلة تحتاج إلى اهتمام متبادل، وأحياناً تكون المبادرة الصغيرة بداية لعودة الدفء.', time: 'دقيقتان' },
+            { id: 2, cat: 'الامتنان والسعادة', title: 'ثلاث نعم خفية', task: 'قبل النوم، تذكر ثلاثة أشياء جميلة حدثت لك اليوم، مهما كانت بسيطة.', why: 'توجيه العقل لملاحظة الإيجابيات يعيد برمجة نظرتك للحياة ويقلل من تأثير التوتر.', time: '3 دقائق' },
+            { id: 3, cat: 'الصحة والعناية بالنفس', title: 'تنفس بعمق', task: 'خذ 5 أنفاس عميقة جداً (شهيق من الأنف وزفير بطيء من الفم)، وركز فقط على حركة الهواء.', why: 'التنفس العميق يرسل إشارة فورية للدماغ بتقليل هرمونات التوتر والاسترخاء.', time: 'دقيقة واحدة' },
+            { id: 4, cat: 'المعرفة والقراءة', title: 'غذاء العقل', task: 'اقرأ صفحتين من كتاب مفيد، أو مقالاً يضيف لك معلومة جديدة.', why: 'القراءة المستمرة، ولو بكمية قليلة، تبني حصيلة معرفية ضخمة بمرور الوقت وتوسع المدارك.', time: '5 دقائق' },
+            { id: 5, cat: 'التركيز والإنتاجية', title: 'عزلة رقمية قصيرة', task: 'ضع هاتفك في وضع الطيران أو في غرفة أخرى لمدة 15 دقيقة وركز على مهمة واحدة أو استرخِ.', why: 'تشتت الانتباه المستمر يرهق الدماغ. هذه العزلة تعيد شحن قدرتك على التركيز.', time: '15 دقيقة' },
+            { id: 6, cat: 'الوعي العاطفي', title: 'مراقبة صامتة', task: 'راقب فكرة سلبية تخطر ببالك اليوم دون أن تحكم عليها أو تقاومها، دعها تمر كغيمة.', why: 'مراقبة الأفكار بوعي تفصلك عنها وتمنعها من السيطرة على مشاعرك وتصرفاتك.', time: 'مستمر' },
+            { id: 7, cat: 'العطاء والعمل الإنساني', title: 'صنيع خفي', task: 'قدم مساعدة صغيرة لشخص اليوم (ابتسامة، مساعدة في الطريق، كلمة طيبة) دون انتظار مقابل.', why: 'العطاء الخالص يفرز هرمونات السعادة ويعزز الشعور بالانتماء والقيمة الإنسانية.', time: 'مفتوح' },
+            { id: 8, cat: 'الانضباط والعادات', title: 'مساحة منظمة', task: 'قم بترتيب مساحة صغيرة جداً حولك (مكتبك، سريرك، أو رف صغير) لمدة 5 دقائق فقط.', why: 'الترتيب الخارجي ينعكس إيجاباً على الترتيب الداخلي ويمنح شعوراً بالإنجاز السريع.', time: '5 دقائق' },
+            { id: 9, cat: 'التوازن والراحة', title: 'كوب من الهدوء', task: 'اصنع مشروبك المفضل، واشربه ببطء شديد دون تصفح الهاتف أو التفكير في العمل.', why: 'الاستمتاع الواعي باللحظة يكسر روتين العجلة ويعيد توازن الجهاز العصبي.', time: '10 دقائق' },
+            { id: 10, cat: 'الروحانيات والقيم', title: 'خلوة قصيرة', task: 'اجلس بمفردك في صمت تام لعدة دقائق، راجع فيها نيتك وجدد عزمك.', why: 'الخلوة تمنح الروح مساحة للتنفس بعيداً عن ضجيج الحياة ومطالب الآخرين.', time: '5 دقائق' }
+        ];
+
+        const todayDate = new Date().toDateString();
+        let currentStepData = JSON.parse(localStorage.getItem('qatra_pro_daily_step') || '{}');
+        let stepHistory = JSON.parse(localStorage.getItem('qatra_steps_history') || '[]');
+
+        if (currentStepData.date !== todayDate) {
+            const recentlyDoneIds = stepHistory.slice(-7).map(h => h.id);
+            const availableSteps = stepsDB.filter(s => !recentlyDoneIds.includes(s.id));
+            const pool = availableSteps.length > 0 ? availableSteps : stepsDB;
+            const selectedStep = pool[Math.floor(Math.random() * pool.length)];
+
+            currentStepData = { date: todayDate, step: selectedStep, completed: false };
+            localStorage.setItem('qatra_pro_daily_step', JSON.stringify(currentStepData));
+        }
+
+        const cards = document.querySelectorAll('.glass-card, .card');
+        let oldCard = null;
+        cards.forEach(card => {
+            const text = card.textContent;
+            if (text.includes('خطوة اليوم') || text.includes('أثر اليوم')) oldCard = card;
+        });
+
+        if (oldCard) {
+            oldCard.style.display = 'none';
+
+            const newWidget = document.createElement('div');
+            newWidget.className = oldCard.className;
+            newWidget.style.display = 'flex';
+            newWidget.style.justifyContent = 'space-between';
+            newWidget.style.alignItems = 'center';
+            newWidget.style.cursor = 'pointer';
+            newWidget.style.padding = '18px 20px';
+            newWidget.style.marginBottom = '12px';
+            
+            const step = currentStepData.step;
+            const isDone = currentStepData.completed;
+
+            newWidget.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-weight:900; font-size:1.15rem; color:var(--t-text, inherit);">خطوة اليوم</span>
+                        <span style="font-size: 0.65rem; background: rgba(14, 165, 233, 0.15); color: #0ea5e9; padding: 3px 8px; border-radius: 12px; font-weight: bold;">${step.cat}</span>
+                    </div>
+                    <span style="font-weight:700; font-size:0.95rem; color:var(--t-sub, inherit); opacity:0.9;">${isDone ? 'تم إنجاز الخطوة بنجاح 🤍' : step.title}</span>
+                    <div style="display:flex; align-items: center; gap: 5px; opacity: 0.7; font-size: 0.8rem; color:var(--t-sub, inherit);">
+                         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                         <span>${step.time}</span>
+                    </div>
+                </div>
+                <div id="widgetIcon">
+                    ${isDone 
+                        ? '<svg viewBox="0 0 24 24" width="28" height="28" stroke="#10b981" fill="rgba(16,185,129,0.2)" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>'
+                        : '<div style="background:rgba(14, 165, 233, 0.1); color:#0ea5e9; padding:8px 15px; border-radius:12px; font-weight:bold; font-size:0.85rem;">ابدأ</div>'
+                    }
+                </div>
+            `;
+
+            oldCard.parentNode.insertBefore(newWidget, oldCard.nextSibling);
+
+            const sheet = document.getElementById('proDailyStepSheet');
+            const sheetContent = document.getElementById('proDailyStepContent');
+            const btnComplete = document.getElementById('proBtnComplete');
+            const animArea = document.getElementById('proDropAnimationArea');
+            const dropSvg = document.getElementById('proDropSvg');
+            const successMsg = document.getElementById('proSuccessMsg');
+
+            newWidget.onclick = () => {
+                document.getElementById('proStepCat').textContent = step.cat;
+                document.getElementById('proStepTitle').textContent = step.title;
+                document.getElementById('proStepTime').textContent = step.time;
+                document.getElementById('proStepTask').textContent = step.task;
+                document.getElementById('proStepWhy').textContent = step.why;
+
+                if (currentStepData.completed) {
+                    btnComplete.style.display = 'none';
+                    animArea.style.display = 'none';
+                } else {
+                    btnComplete.style.display = 'block';
+                    animArea.style.display = 'none';
+                    dropSvg.classList.remove('anim-drop');
+                    successMsg.style.opacity = '0';
+                }
+
+                sheet.style.display = 'flex';
+                setTimeout(() => {
+                    sheet.style.opacity = '1';
+                    sheetContent.style.transform = 'translateY(0)';
+                }, 10);
+            };
+
+            const closeSheet = () => {
+                sheet.style.opacity = '0';
+                sheetContent.style.transform = 'translateY(100%)';
+                setTimeout(() => { sheet.style.display = 'none'; }, 400);
+            };
+            document.getElementById('proBtnClose').onclick = closeSheet;
+            sheet.onclick = (e) => { if(e.target === sheet) closeSheet(); };
+
+            btnComplete.onclick = () => {
+                if (currentStepData.completed) return;
+                btnComplete.style.display = 'none';
+                animArea.style.display = 'flex';
+                
+                dropSvg.classList.add('anim-drop');
+                successMsg.style.opacity = '1';
+
+                currentStepData.completed = true;
+                localStorage.setItem('qatra_pro_daily_step', JSON.stringify(currentStepData));
+                
+                stepHistory.push({
+                    date: todayDate,
+                    id: step.id,
+                    title: step.title,
+                    category: step.cat
+                });
+                localStorage.setItem('qatra_steps_history', JSON.stringify(stepHistory));
+
+                const widgetIcon = newWidget.querySelector('#widgetIcon');
+                widgetIcon.innerHTML = '<svg viewBox="0 0 24 24" width="28" height="28" stroke="#10b981" fill="rgba(16,185,129,0.2)" stroke-width="2"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                newWidget.querySelectorAll('span')[2].textContent = 'تم إنجاز الخطوة بنجاح 🤍';
+
+                setTimeout(closeSheet, 2500);
+            };
+        }
+    }, 1000);
+});
+// === END PRO PHASE 1 ===
