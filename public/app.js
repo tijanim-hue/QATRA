@@ -1076,3 +1076,92 @@ function completeStep(stepData) {
 
 // تشغيل التهيئة عند تحميل التطبيق
 setTimeout(initDailyStep, 600);
+
+
+// --- Stage 10 (Part 1): Daily Step DOM Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        // 1. البحث عن بطاقة أثر اليوم بذكاء مهما كان تصميمها
+        const cards = document.querySelectorAll('.glass-card, .card');
+        let targetCard = null;
+        
+        cards.forEach(card => {
+            const titleEl = card.querySelector('.title');
+            if(titleEl && titleEl.textContent.includes('أثر اليوم')) {
+                targetCard = card;
+            }
+        });
+
+        // 2. إذا وجدناها، نقوم بتحويلها وبرمجتها
+        if(targetCard) {
+            const titleEl = targetCard.querySelector('.title');
+            const descEl = targetCard.querySelector('.desc');
+            const iconContainer = targetCard.querySelector('.icon') || targetCard.querySelector('.card-icon');
+            
+            titleEl.textContent = "خطوة اليوم";
+            
+            const dailySteps = [
+                "اتصل بشخص تحبه واسأل عنه.",
+                "خصّص خمس دقائق دون هاتف.",
+                "سامح نفسك على خطأ قديم.",
+                "اقرأ صفحتين من كتاب.",
+                "قل كلمة طيبة لشخص لم تتحدث معه منذ مدة.",
+                "اكتب شيئاً واحداً تشعر بالامتنان لوجوده.",
+                "ساعد شخصاً دون انتظار مقابل.",
+                "رتّب مساحة صغيرة من غرفتك.",
+                "امشِ عشر دقائق وتأمل ما حولك.",
+                "تخلّص من فكرة سلبية تستنزف طاقتك."
+            ];
+
+            function renderStep(stepData) {
+                if (stepData.completed) {
+                    if(descEl) descEl.textContent = "أنجزت خطوة اليوم! أحسنت.";
+                    if(iconContainer) {
+                        iconContainer.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke: #10B981; fill: rgba(16,185,129,0.2); stroke-width: 2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                    }
+                    targetCard.style.opacity = '0.7';
+                    targetCard.onclick = null;
+                    targetCard.style.cursor = 'default';
+                } else {
+                    if(descEl) descEl.textContent = stepData.stepText;
+                    if(iconContainer) {
+                        iconContainer.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke: currentColor; fill: none; stroke-width: 2; transition: transform 0.3s;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                    }
+                    targetCard.style.opacity = '1';
+                    targetCard.style.cursor = 'pointer';
+                    
+                    targetCard.onclick = () => {
+                        stepData.completed = true;
+                        localStorage.setItem('qatra_daily_step', JSON.stringify(stepData));
+                        
+                        // حركة بصرية
+                        if(iconContainer) {
+                            iconContainer.style.transform = 'scale(1.4)';
+                            setTimeout(() => {
+                                iconContainer.style.transform = 'scale(1)';
+                                renderStep(stepData);
+                            }, 300);
+                        } else {
+                            renderStep(stepData);
+                        }
+                    };
+                }
+            }
+
+            // 3. التحقق من تاريخ اليوم وتهيئة الخطوة
+            const today = new Date().toDateString();
+            let stepData = JSON.parse(localStorage.getItem('qatra_daily_step') || '{}');
+            
+            if (stepData.date !== today) {
+                stepData = {
+                    date: today,
+                    stepText: dailySteps[Math.floor(Math.random() * dailySteps.length)],
+                    completed: false
+                };
+                localStorage.setItem('qatra_daily_step', JSON.stringify(stepData));
+            }
+            
+            renderStep(stepData);
+        }
+    }, 600); // تأخير بسيط لضمان اكتمال تحميل الواجهة الأساسية
+});
