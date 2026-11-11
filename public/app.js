@@ -1165,3 +1165,101 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 600); // تأخير بسيط لضمان اكتمال تحميل الواجهة الأساسية
 });
+
+
+// === BULLETPROOF DAILY STEP ===
+document.addEventListener('DOMContentLoaded', () => {
+    // ننتظر قليلاً حتى تكتمل الواجهة
+    setTimeout(() => {
+        const elements = document.querySelectorAll('*');
+        let targetCard = null;
+
+        // 1. البحث الدقيق عن البطاقة التي تحتوي على كلمة "خطوة اليوم"
+        for (let el of elements) {
+            if (el.textContent && el.textContent.includes('خطوة اليوم')) {
+                let curr = el;
+                // الصعود في الشجرة للعثور على إطار البطاقة الأساسي
+                while (curr && curr !== document.body) {
+                    if (curr.classList.contains('glass-card') || curr.classList.contains('card')) {
+                        targetCard = curr;
+                        break;
+                    }
+                    curr = curr.parentElement;
+                }
+                if (targetCard) break;
+            }
+        }
+
+        if (targetCard) {
+            // 2. إعادة بناء محتوى البطاقة برمجياً لضمان الشكل والاستجابة
+            targetCard.style.display = 'flex';
+            targetCard.style.justifyContent = 'space-between';
+            targetCard.style.alignItems = 'center';
+            targetCard.style.cursor = 'pointer';
+            
+            targetCard.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                    <span style="font-weight:800; font-size:1.1rem; color:inherit;">خطوة اليوم</span>
+                    <span id="ds-desc" style="font-weight:600; font-size:0.85rem; color:inherit; opacity:0.8; margin-top:2px; line-height:1.4;">جاري التحميل...</span>
+                </div>
+                <div id="ds-icon" style="display:flex; align-items:center; justify-content:center; padding-right:10px;">
+                </div>
+            `;
+
+            const desc = targetCard.querySelector('#ds-desc');
+            const icon = targetCard.querySelector('#ds-icon');
+            
+            // 3. قائمة المهام والمنطق
+            const steps = [
+                "اتصل بشخص تحبه واسأل عنه.", "خصّص خمس دقائق دون هاتف.", "سامح نفسك على خطأ قديم.",
+                "اقرأ صفحتين من كتاب.", "قل كلمة طيبة لشخص لم تتحدث معه منذ مدة.",
+                "اكتب شيئاً واحداً تشعر بالامتنان لوجوده.", "ساعد شخصاً دون انتظار مقابل.",
+                "رتّب مساحة صغيرة من غرفتك.", "امشِ عشر دقائق وتأمل ما حولك.",
+                "تخلّص من فكرة سلبية تستنزف طاقتك."
+            ];
+
+            const today = new Date().toDateString();
+            let stepData = JSON.parse(localStorage.getItem('qatra_daily_step') || '{}');
+
+            // إذا كان يوم جديد، نعين خطوة جديدة
+            if (stepData.date !== today) {
+                stepData = { date: today, text: steps[Math.floor(Math.random() * steps.length)], completed: false };
+                localStorage.setItem('qatra_daily_step', JSON.stringify(stepData));
+            }
+
+            // 4. دالة تحديث الواجهة والتفاعل
+            function updateCard() {
+                if (stepData.completed) {
+                    desc.textContent = "أنجزت خطوة اليوم! أحسنت.";
+                    icon.innerHTML = '<svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:#10B981;fill:rgba(16,185,129,0.2);stroke-width:2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                    targetCard.style.opacity = '0.7';
+                    targetCard.onclick = null; // تعطيل النقر بعد الإنجاز
+                } else {
+                    desc.textContent = stepData.text;
+                    icon.innerHTML = '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                    targetCard.style.opacity = '1';
+                    
+                    // التفاعل عند النقر
+                    targetCard.onclick = () => {
+                        stepData.completed = true;
+                        localStorage.setItem('qatra_daily_step', JSON.stringify(stepData));
+                        
+                        // تحديث الإحصائيات (للمرحلة 4 لاحقاً)
+                        let stats = JSON.parse(localStorage.getItem('qatra_stats') || '{"completedSteps":0}');
+                        stats.completedSteps = (stats.completedSteps || 0) + 1;
+                        localStorage.setItem('qatra_stats', JSON.stringify(stats));
+
+                        // حركة بصرية أنيقة (Animation)
+                        icon.style.transform = 'scale(1.4)';
+                        icon.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                        setTimeout(() => {
+                            icon.style.transform = 'scale(1)';
+                            setTimeout(updateCard, 150); // إظهار التحديث
+                        }, 300);
+                    };
+                }
+            }
+            updateCard();
+        }
+    }, 800); // 800ms لضمان أن الواجهة حُملت بالكامل قبل التعديل
+});
