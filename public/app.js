@@ -1263,3 +1263,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 800); // 800ms لضمان أن الواجهة حُملت بالكامل قبل التعديل
 });
+
+
+// === FEATURE 1: DAILY STEP ===
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        // البحث عن بطاقة خطوة اليوم
+        const cards = document.querySelectorAll('.glass-card, .card');
+        let stepCard = null;
+        
+        cards.forEach(card => {
+            const titleEl = card.querySelector('.title, span');
+            if (titleEl && titleEl.textContent.includes('خطوة اليوم')) {
+                stepCard = card;
+            }
+        });
+
+        if (stepCard) {
+            const descEl = stepCard.querySelector('.desc') || stepCard.querySelectorAll('span')[1];
+            const iconEl = stepCard.querySelector('.icon') || stepCard.querySelector('.card-icon');
+
+            const dailyStepsList = [
+                "اتصل بشخص تحبه واسأل عنه.", "خصّص خمس دقائق دون هاتف.", "سامح نفسك على خطأ قديم.",
+                "اقرأ صفحتين من كتاب.", "قل كلمة طيبة لشخص لم تتحدث معه منذ مدة.",
+                "اكتب شيئاً واحداً تشعر بالامتنان لوجوده.", "ساعد شخصاً دون انتظار مقابل.",
+                "رتّب مساحة صغيرة من غرفتك.", "امشِ عشر دقائق وتأمل ما حولك.",
+                "تخلّص من فكرة سلبية تستنزف طاقتك."
+            ];
+
+            const todayKey = new Date().toDateString();
+            let savedData = JSON.parse(localStorage.getItem('qatra_daily_step') || '{}');
+
+            // إذا كان يوماً جديداً، استخرج خطوة عشوائية جديدة
+            if (savedData.date !== todayKey) {
+                savedData = {
+                    date: todayKey,
+                    stepText: dailyStepsList[Math.floor(Math.random() * dailyStepsList.length)],
+                    completed: false
+                };
+                localStorage.setItem('qatra_daily_step', JSON.stringify(savedData));
+            }
+
+            const updateStepUI = () => {
+                if (savedData.completed) {
+                    if (descEl) descEl.textContent = "أنجزت الخطوة!";
+                    if (iconEl) iconEl.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:#10B981;fill:rgba(16,185,129,0.2);stroke-width:2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                    stepCard.style.opacity = '0.7';
+                    stepCard.onclick = null; // إيقاف النقر بعد الإنجاز
+                    stepCard.style.cursor = 'default';
+                } else {
+                    if (descEl) descEl.textContent = savedData.stepText;
+                    if (iconEl) iconEl.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+                    stepCard.style.cursor = 'pointer';
+                    
+                    // التفاعل عند النقر
+                    stepCard.onclick = () => {
+                        savedData.completed = true;
+                        localStorage.setItem('qatra_daily_step', JSON.stringify(savedData));
+                        
+                        // حركة بصرية أنيقة للقطرة/الأيقونة
+                        if (iconEl) {
+                            iconEl.style.transform = 'scale(1.4)';
+                            iconEl.style.transition = 'transform 0.3s ease';
+                            setTimeout(() => {
+                                iconEl.style.transform = 'scale(1)';
+                                setTimeout(updateStepUI, 150);
+                            }, 300);
+                        } else {
+                            updateStepUI();
+                        }
+                    };
+                }
+            };
+
+            updateStepUI();
+        }
+    }, 500); // تأخير لضمان تحميل عناصر الـ DOM بالكامل
+});
