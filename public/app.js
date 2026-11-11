@@ -1496,3 +1496,246 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 600);
 });
+
+
+// === FEATURE 2: MINDFUL MINUTE ===
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        // 1. البحث عن زر الصوت في البار السفلي (الذي يحتوي على أيقونة polygon/الصوت)
+        let soundBtn = null;
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            if (item.innerHTML.includes('polygon') && item.innerHTML.includes('11 5 6 9')) {
+                soundBtn = item;
+            }
+        });
+
+        // إذا لم يجده بدقة الـ SVG، نأخذ الزر الثاني كاحتياطي
+        if (!soundBtn && navItems.length >= 5) {
+            soundBtn = navItems[1]; 
+        }
+
+        if (soundBtn) {
+            // عزل الزر عن الوظائف القديمة باستخدام الاستنساخ
+            const mindfulBtn = soundBtn.cloneNode(true);
+            soundBtn.parentNode.replaceChild(mindfulBtn, soundBtn);
+            
+            // تغيير الأيقونة لأيقونة (الوعي / شرارة) تتناسب مع الهوية
+            mindfulBtn.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>';
+            
+            // عناصر النافذة
+            const sheet = document.getElementById('mindfulSheet');
+            const sheetContent = document.getElementById('mindfulSheetContent');
+            const dynamicArea = document.getElementById('mindfulDynamicArea');
+            const closeBtn = document.getElementById('closeMindfulSheet');
+
+            // 2. ربط فتح النافذة
+            mindfulBtn.addEventListener('click', () => {
+                sheet.style.display = 'flex';
+                setTimeout(() => {
+                    sheet.style.opacity = '1';
+                    sheetContent.style.transform = 'translateY(0)';
+                }, 10);
+                renderMainMenu();
+            });
+
+            // إغلاق النافذة
+            const closeSheet = () => {
+                sheet.style.opacity = '0';
+                sheetContent.style.transform = 'translateY(100%)';
+                setTimeout(() => { sheet.style.display = 'none'; }, 300);
+            };
+            closeBtn.onclick = closeSheet;
+            sheet.onclick = (e) => { if(e.target === sheet) closeSheet(); };
+
+            // ==========================================
+            // 3. أنشطة دقيقة وعي (الستة)
+            // ==========================================
+            const activities = [
+                { id: 1, title: 'سمِّ شعورك', icon: '🤍', desc: 'تعرف على مشاعرك الحالية وتقبلها' },
+                { id: 2, title: 'أعد ترتيب فكرتك', icon: '🔄', desc: 'صغ أفكارك المزعجة بواقعية واتزان' },
+                { id: 3, title: 'لحظة امتنان', icon: '✨', desc: 'ما الشيء الصغير الذي أسعدك اليوم؟' },
+                { id: 4, title: 'عد إلى اللحظة', icon: '🧘', desc: 'تمرين بسيط للانتباه إلى محيطك' },
+                { id: 5, title: 'نية صغيرة', icon: '🌱', desc: 'ما الذي تود منح نفسك فرصة لإنجازه؟' },
+                { id: 6, title: 'أفرغ ذهنك', icon: '✍️', desc: 'مساحة حرة وآمنة لتفريغ ما يشغلك' }
+            ];
+
+            function renderMainMenu() {
+                let html = `<h2 style="margin:0 0 20px 0; color:var(--t-text, #111); font-size:1.6rem; font-weight:900;">دقيقة وعي</h2>`;
+                activities.forEach(act => {
+                    html += `
+                    <div class="mindful-act-btn" data-id="${act.id}" style="background:rgba(128,128,128,0.05); border:1px solid rgba(128,128,128,0.1); border-radius:16px; padding:15px; display:flex; align-items:center; gap:15px; margin-bottom:12px; cursor:pointer; transition:background 0.3s;">
+                        <div style="font-size:1.8rem; background:rgba(128,128,128,0.1); width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:12px;">${act.icon}</div>
+                        <div>
+                            <div style="font-weight:bold; font-size:1.1rem; color:var(--t-text, #111); margin-bottom:4px;">${act.title}</div>
+                            <div style="font-size:0.85rem; color:var(--t-sub, #666);">${act.desc}</div>
+                        </div>
+                    </div>`;
+                });
+                dynamicArea.innerHTML = html;
+
+                document.querySelectorAll('.mindful-act-btn').forEach(btn => {
+                    btn.onclick = () => renderActivity(parseInt(btn.getAttribute('data-id')));
+                });
+            }
+
+            function getBackButton() {
+                return `<button id="btnBackMenu" style="background:transparent; border:none; color:var(--t-sub, #666); font-size:1rem; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:5px; margin-bottom:20px; padding:0;">
+                    <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M15 18l-6-6 6-6"/></svg> عودة للأنشطة
+                </button>`;
+            }
+
+            function renderActivity(id) {
+                let html = getBackButton();
+                
+                if(id === 1) { // سم شعورك
+                    const feelings = ['القلق', 'الفرح', 'الحزن', 'الغضب', 'الامتنان', 'الحيرة', 'الهدوء', 'الخوف', 'الأمل'];
+                    html += `<h3 style="color:var(--t-text, #111); margin-bottom:15px;">بماذا تشعر الآن؟</h3><div style="display:flex; flex-wrap:wrap; gap:10px;">`;
+                    feelings.forEach(f => {
+                        html += `<button class="feeling-btn" style="padding:10px 20px; border-radius:20px; border:1px solid var(--t-sub, #888); background:transparent; color:var(--t-text, #111); font-weight:bold; cursor:pointer;">${f}</button>`;
+                    });
+                    html += `</div><div id="feelingResponse" style="margin-top:20px; font-size:1.1rem; color:var(--t-text, #111); line-height:1.6; font-weight:bold; opacity:0; transition:opacity 0.4s;"></div>`;
+                    
+                    dynamicArea.innerHTML = html;
+                    
+                    const responses = {
+                        'القلق': 'القلق شعور طبيعي يخبرك أنك تهتم. خذ نفساً عميقاً، لست مضطراً لحل كل شيء في هذه اللحظة.',
+                        'الفرح': 'ما أجمله من شعور! اسمح لنفسك بأن تعيش هذه اللحظة بالكامل وتحتفل بها.',
+                        'الحزن': 'من حقك أن تحزن. لا تقاوم الشعور، فهو ضيف سيمضي عندما يأخذ وقته.',
+                        'الغضب': 'غضبك رسالة بأن حدودك قد مُست. امنح نفسك مساحة لتهدأ قبل أن تتصرف.',
+                        'الامتنان': 'الامتنان يضاعف النعم ويوسع القلب. احتفظ بهذا الشعور الجميل.',
+                        'الحيرة': 'لا بأس ألا تعرف الجواب الآن. الرؤية تتضح دائماً عندما يهدأ العقل.',
+                        'الهدوء': 'استمتع بهذا السكون المريح، فهو المساحة التي تتجدد فيها روحك.',
+                        'الخوف': 'أنت لست وحدك، والخوف يحاول حمايتك. طمئن نفسك أنك بأمان الآن.',
+                        'الأمل': 'الأمل هو النور الذي يقودك. تمسك به واجعله وقودك للأيام القادمة.'
+                    };
+                    
+                    document.querySelectorAll('.feeling-btn').forEach(btn => {
+                        btn.onclick = (e) => {
+                            document.querySelectorAll('.feeling-btn').forEach(b => b.style.background = 'transparent');
+                            e.target.style.background = 'rgba(128,128,128,0.2)';
+                            const resEl = document.getElementById('feelingResponse');
+                            resEl.textContent = responses[e.target.textContent];
+                            resEl.style.opacity = '1';
+                        };
+                    });
+                }
+                
+                else if(id === 2) { // أعد ترتيب فكرتك
+                    html += `<h3 style="color:var(--t-text, #111); margin-bottom:10px;">أعد ترتيب فكرتك</h3>
+                             <p style="color:var(--t-sub, #666); font-size:0.9rem; margin-bottom:15px;">اكتب الفكرة السلبية التي تزعجك لنعيد صياغتها معاً:</p>
+                             <textarea id="reframeInput" rows="3" placeholder="مثال: أنا أفشل دائماً..." style="width:100%; padding:15px; border-radius:12px; border:1px solid rgba(128,128,128,0.3); background:transparent; color:var(--t-text, #111); font-family:inherit; font-size:1rem; margin-bottom:15px;"></textarea>
+                             <button id="btnReframe" style="width:100%; padding:12px; border-radius:12px; border:none; background:var(--t-text, #111); color:var(--t-card, #fff); font-weight:bold; cursor:pointer;">أعد الصياغة</button>
+                             <div id="reframeOutput" style="margin-top:20px; font-size:1.05rem; color:var(--t-text, #111); line-height:1.6; padding:15px; background:rgba(128,128,128,0.1); border-radius:12px; display:none;"></div>`;
+                    dynamicArea.innerHTML = html;
+                    
+                    document.getElementById('btnReframe').onclick = () => {
+                        const input = document.getElementById('reframeInput').value.trim();
+                        const out = document.getElementById('reframeOutput');
+                        if(input) {
+                            out.style.display = 'block';
+                            out.innerHTML = `<strong>الصياغة المتزنة:</strong><br><br>"هذه الفكرة قاسية قليلاً. تذكر: لم تنجح في هذه المحاولة المعينة، أو في هذا الموقف، لكنك قادر دائماً على التعلم، والتصحيح، والمحاولة من جديد بوعي أكبر."`;
+                        }
+                    };
+                }
+
+                else if(id === 3) { // لحظة امتنان
+                    html += `<h3 style="color:var(--t-text, #111); margin-bottom:10px;">لحظة امتنان</h3>
+                             <p style="color:var(--t-sub, #666); font-size:0.9rem; margin-bottom:15px;">ما الشيء الصغير الذي أسعدك أو تشعر بالامتنان له اليوم؟</p>
+                             <textarea id="gratitudeInput" rows="4" placeholder="اكتب هنا..." style="width:100%; padding:15px; border-radius:12px; border:1px solid rgba(128,128,128,0.3); background:transparent; color:var(--t-text, #111); font-family:inherit; font-size:1rem; margin-bottom:15px;"></textarea>
+                             <button id="btnSaveGratitude" style="width:100%; padding:12px; border-radius:12px; border:none; background:var(--t-text, #111); color:var(--t-card, #fff); font-weight:bold; cursor:pointer;">حفظ في السجل</button>
+                             <p id="gratitudeMsg" style="margin-top:10px; color:#10B981; font-weight:bold; display:none; text-align:center;">تم الحفظ بنجاح!</p>`;
+                    dynamicArea.innerHTML = html;
+                    
+                    document.getElementById('btnSaveGratitude').onclick = () => {
+                        const input = document.getElementById('gratitudeInput').value.trim();
+                        if(input) {
+                            let history = JSON.parse(localStorage.getItem('qatra_gratitude') || '[]');
+                            history.push({ date: new Date().toLocaleDateString(), text: input });
+                            localStorage.setItem('qatra_gratitude', JSON.stringify(history));
+                            document.getElementById('gratitudeMsg').style.display = 'block';
+                            setTimeout(renderMainMenu, 1500);
+                        }
+                    };
+                }
+
+                else if(id === 4) { // عد إلى اللحظة
+                    html += `<h3 style="color:var(--t-text, #111); margin-bottom:15px;">عد إلى اللحظة (تمرين الانتباه)</h3>
+                             <div style="display:flex; flex-direction:column; gap:15px;">
+                                <div style="background:rgba(128,128,128,0.05); padding:15px; border-radius:12px;">
+                                    <strong style="font-size:1.2rem; color:var(--t-text, #111);">👀 لاحظ:</strong><br>
+                                    <span style="color:var(--t-sub, #666);">ابحث عن 3 أشياء مختلفة حولك وتأمل تفاصيلها ببطء.</span>
+                                </div>
+                                <div style="background:rgba(128,128,128,0.05); padding:15px; border-radius:12px;">
+                                    <strong style="font-size:1.2rem; color:var(--t-text, #111);">👂 اسمع:</strong><br>
+                                    <span style="color:var(--t-sub, #666);">أغلق عينيك ثانية.. حدد صوتين مختلفين يمكنك سماعهما الآن.</span>
+                                </div>
+                                <div style="background:rgba(128,128,128,0.05); padding:15px; border-radius:12px;">
+                                    <strong style="font-size:1.2rem; color:var(--t-text, #111);">✋ اشعر:</strong><br>
+                                    <span style="color:var(--t-sub, #666);">ركز على إحساس جسدي واحد (ملمس ملابسك، أو حرارة الهواء).</span>
+                                </div>
+                             </div>`;
+                    dynamicArea.innerHTML = html;
+                }
+
+                else if(id === 5) { // نية صغيرة
+                    const intentions = ['التركيز وإنجاز المهام', 'الراحة والهدوء', 'اللطف مع الذات والآخرين', 'تجاوز القلق بسلام'];
+                    html += `<h3 style="color:var(--t-text, #111); margin-bottom:10px;">نية صغيرة</h3>
+                             <p style="color:var(--t-sub, #666); font-size:0.9rem; margin-bottom:15px;">ما الشيء الذي تريد أن تمنح نفسك فرصة لإنجازه أو الشعور به اليوم؟</p>
+                             <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px;">`;
+                    intentions.forEach(i => {
+                        html += `<button class="intention-btn" style="padding:10px 15px; border-radius:20px; border:1px solid rgba(128,128,128,0.3); background:transparent; color:var(--t-text, #111); cursor:pointer;">${i}</button>`;
+                    });
+                    html += `</div>
+                             <textarea id="intentionInput" rows="2" placeholder="أو اكتب نيتك الخاصة..." style="width:100%; padding:15px; border-radius:12px; border:1px solid rgba(128,128,128,0.3); background:transparent; color:var(--t-text, #111); font-family:inherit; font-size:1rem; margin-bottom:15px;"></textarea>
+                             <button id="btnSaveIntention" style="width:100%; padding:12px; border-radius:12px; border:none; background:var(--t-text, #111); color:var(--t-card, #fff); font-weight:bold; cursor:pointer;">تثبيت النية</button>
+                             <p id="intentionMsg" style="margin-top:10px; color:#10B981; font-weight:bold; display:none; text-align:center;">تم تثبيت النية. يومك مبارك!</p>`;
+                    dynamicArea.innerHTML = html;
+
+                    document.querySelectorAll('.intention-btn').forEach(btn => {
+                        btn.onclick = (e) => { document.getElementById('intentionInput').value = e.target.textContent; };
+                    });
+                    
+                    document.getElementById('btnSaveIntention').onclick = () => {
+                        if(document.getElementById('intentionInput').value.trim()) {
+                            document.getElementById('intentionMsg').style.display = 'block';
+                            setTimeout(renderMainMenu, 1500);
+                        }
+                    };
+                }
+
+                else if(id === 6) { // أفرغ ذهنك
+                    html += `<h3 style="color:var(--t-text, #111); margin-bottom:10px;">أفرغ ذهنك</h3>
+                             <p style="color:var(--t-sub, #666); font-size:0.9rem; margin-bottom:15px;">مساحة حرة وآمنة. اكتب كل ما يزعجك أو يشغلك دون أحكام أو تنسيق.</p>
+                             <textarea id="clearMindInput" rows="6" placeholder="ابدأ الكتابة للتحرر من الأفكار..." style="width:100%; padding:15px; border-radius:12px; border:1px solid rgba(128,128,128,0.3); background:transparent; color:var(--t-text, #111); font-family:inherit; font-size:1rem; margin-bottom:15px; line-height:1.6;"></textarea>
+                             <div style="display:flex; gap:10px;">
+                                <button id="btnSaveMind" style="flex:1; padding:12px; border-radius:12px; border:none; background:var(--t-text, #111); color:var(--t-card, #fff); font-weight:bold; cursor:pointer;">حفظ في الدفتر</button>
+                                <button id="btnDeleteMind" style="flex:1; padding:12px; border-radius:12px; border:1px solid #ef4444; background:rgba(239, 68, 68, 0.1); color:#ef4444; font-weight:bold; cursor:pointer;">حذف للتحرر</button>
+                             </div>
+                             <p id="mindMsg" style="margin-top:10px; font-weight:bold; display:none; text-align:center;"></p>`;
+                    dynamicArea.innerHTML = html;
+                    
+                    document.getElementById('btnSaveMind').onclick = () => {
+                        if(document.getElementById('clearMindInput').value.trim()) {
+                            let msg = document.getElementById('mindMsg');
+                            msg.textContent = 'تم الحفظ في سجلاتك.';
+                            msg.style.color = '#10B981';
+                            msg.style.display = 'block';
+                            setTimeout(renderMainMenu, 1500);
+                        }
+                    };
+                    document.getElementById('btnDeleteMind').onclick = () => {
+                        document.getElementById('clearMindInput').value = '';
+                        let msg = document.getElementById('mindMsg');
+                        msg.textContent = 'تلاشت الأفكار. أتمنى لك ذهنًا صافيًا.';
+                        msg.style.color = '#ef4444';
+                        msg.style.display = 'block';
+                        setTimeout(renderMainMenu, 2000);
+                    };
+                }
+                
+                document.getElementById('btnBackMenu').onclick = renderMainMenu;
+            }
+        }
+    }, 800);
+});
