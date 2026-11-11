@@ -1265,21 +1265,34 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+
 // === FEATURE 1: DAILY STEP ===
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        // البحث عن بطاقة خطوة اليوم
         const cards = document.querySelectorAll('.glass-card, .card');
         let stepCard = null;
         
+        // 1. البحث عن البطاقة
         cards.forEach(card => {
             const titleEl = card.querySelector('.title, span');
-            if (titleEl && titleEl.textContent.includes('خطوة اليوم')) {
+            if (titleEl && (titleEl.textContent.includes('خطوة اليوم') || titleEl.textContent.includes('أثر اليوم'))) {
                 stepCard = card;
+                titleEl.textContent = 'خطوة اليوم'; // تأكيد تغيير الاسم
             }
         });
 
         if (stepCard) {
+            // 🔴 2. القضاء على وظيفة "أثر اليوم" القديمة
+            // الاستنساخ (cloneNode) يمسح جميع الارتباطات والأحداث السابقة المخفية
+            const cleanCard = stepCard.cloneNode(true);
+            stepCard.parentNode.replaceChild(cleanCard, stepCard);
+            stepCard = cleanCard; // تحديث المؤشر للبطاقة الجديدة النظيفة
+            
+            // إزالة أي حدث onclick مبرمج مسبقاً في الـ HTML
+            stepCard.removeAttribute('onclick');
+
+            // 3. إعداد الواجهة والمحتوى
             const descEl = stepCard.querySelector('.desc') || stepCard.querySelectorAll('span')[1];
             const iconEl = stepCard.querySelector('.icon') || stepCard.querySelector('.card-icon');
 
@@ -1294,7 +1307,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const todayKey = new Date().toDateString();
             let savedData = JSON.parse(localStorage.getItem('qatra_daily_step') || '{}');
 
-            // إذا كان يوماً جديداً، استخرج خطوة عشوائية جديدة
             if (savedData.date !== todayKey) {
                 savedData = {
                     date: todayKey,
@@ -1309,19 +1321,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (descEl) descEl.textContent = "أنجزت الخطوة!";
                     if (iconEl) iconEl.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:#10B981;fill:rgba(16,185,129,0.2);stroke-width:2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
                     stepCard.style.opacity = '0.7';
-                    stepCard.onclick = null; // إيقاف النقر بعد الإنجاز
                     stepCard.style.cursor = 'default';
+                    // إبطال أي تفاعل إضافي
+                    stepCard.onclick = (e) => { e.preventDefault(); e.stopPropagation(); };
                 } else {
                     if (descEl) descEl.textContent = savedData.stepText;
                     if (iconEl) iconEl.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
                     stepCard.style.cursor = 'pointer';
                     
-                    // التفاعل عند النقر
-                    stepCard.onclick = () => {
+                    // 4. تنفيذ الخطوة الجديدة فقط
+                    stepCard.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation(); // منع انتقال النقر لأي عنصر آخر
+                        
                         savedData.completed = true;
                         localStorage.setItem('qatra_daily_step', JSON.stringify(savedData));
                         
-                        // حركة بصرية أنيقة للقطرة/الأيقونة
                         if (iconEl) {
                             iconEl.style.transform = 'scale(1.4)';
                             iconEl.style.transition = 'transform 0.3s ease';
@@ -1338,5 +1353,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
             updateStepUI();
         }
-    }, 500); // تأخير لضمان تحميل عناصر الـ DOM بالكامل
+    }, 600);
 });
