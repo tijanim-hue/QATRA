@@ -811,5 +811,41 @@ body.glass-active.dark-mode { --qg-panel:rgba(20,30,51,.96); --qg-sheet:rgba(14,
     </div>
 </div>
 
+
+<!-- QATRA NOTEBOOK SHEET -->
+<div id="notebookSheet" class="sheet-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:2000; justify-content:center; align-items:flex-end; opacity:0; transition:opacity 0.3s ease;">
+    <div id="notebookSheetContent" class="sheet-content" style="width:100%; height:90vh; background:var(--t-card, #ffffff); border-radius:24px 24px 0 0; padding:25px 20px; box-shadow:0 -10px 40px rgba(0,0,0,0.2); transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display:flex; flex-direction:column; overflow:hidden;">
+        
+        <div style="width:45px; height:6px; background:rgba(128,128,128,0.2); border-radius:10px; margin:0 auto 15px auto;"></div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0; color:var(--t-text, #111); font-size:1.7rem; font-weight:900;">دفتر قطرة</h2>
+            <div style="display:flex; gap:10px;">
+                <button id="btnExportNotes" style="background:rgba(128,128,128,0.1); border-radius:12px; padding:6px 12px; border:none; color:var(--t-text, #333); cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:bold; font-size:0.85rem;">
+                    <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> نسخة احتياطية
+                </button>
+                <button id="closeNotebookSheet" style="background:transparent; border:none; color:var(--t-sub, #666); cursor:pointer; padding:0;">
+                    <svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none; -ms-overflow-style:none;">
+            <button class="note-cat-btn" data-cat="خواطري" data-placeholder="ما الذي يدور في ذهنك الآن؟..." style="white-space:nowrap; padding:10px 16px; border-radius:20px; border:1px solid rgba(128,128,128,0.2); background:var(--t-nav-act, rgba(0,0,0,0.1)); color:var(--t-text, #111); font-weight:bold; cursor:pointer;">خواطري</button>
+            <button class="note-cat-btn" data-cat="ما تعلمته" data-placeholder="دوّن درساً أو حكمة تعلمتها اليوم..." style="white-space:nowrap; padding:10px 16px; border-radius:20px; border:1px solid rgba(128,128,128,0.2); background:transparent; color:var(--t-text, #111); font-weight:bold; cursor:pointer;">ما تعلمته اليوم</button>
+            <button class="note-cat-btn" data-cat="أريد تذكره" data-placeholder="اكتب شيئاً تريد العودة إليه لاحقاً..." style="white-space:nowrap; padding:10px 16px; border-radius:20px; border:1px solid rgba(128,128,128,0.2); background:transparent; color:var(--t-text, #111); font-weight:bold; cursor:pointer;">ما أريد تذكره</button>
+        </div>
+
+        <textarea id="noteInput" rows="4" placeholder="ما الذي يدور في ذهنك الآن؟..." style="width:100%; padding:15px; border-radius:16px; border:1px solid rgba(128,128,128,0.2); background:transparent; color:var(--t-text, #111); font-family:inherit; font-size:1rem; line-height:1.6; margin-bottom:10px; resize:none;"></textarea>
+        
+        <button id="btnSaveNote" style="width:100%; padding:15px; border-radius:16px; border:none; background:var(--t-text, #111); color:var(--t-card, #fff); font-size:1.1rem; font-weight:bold; cursor:pointer; margin-bottom:25px; transition:opacity 0.3s;">حفظ في الدفتر</button>
+        
+        <h3 style="color:var(--t-text, #111); font-size:1.2rem; margin-bottom:15px;">سجل الكتابات</h3>
+        <div id="notebookHistory" style="flex:1; overflow-y:auto; padding-bottom:20px; display:flex; flex-direction:column;">
+            <!-- تُحقن التدوينات المحفوظة هنا -->
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

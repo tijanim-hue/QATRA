@@ -1938,3 +1938,153 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 800);
 });
+
+
+// === FEATURE 5: NOTEBOOK ===
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        // 1. إضافة زر "دفتر قطرة" في الهيدر بجانب زر الإعدادات
+        const headerGroups = document.querySelectorAll('header .header-group');
+        if (headerGroups.length > 0 && !document.getElementById('notebookBtn')) {
+            const firstGroup = headerGroups[0];
+            const notebookBtn = document.createElement('button');
+            notebookBtn.className = 'header-btn';
+            notebookBtn.id = 'notebookBtn';
+            notebookBtn.innerHTML = '<svg viewBox="0 0 24 24" style="width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>';
+            // إضافته بجانب زر الإعدادات
+            firstGroup.appendChild(notebookBtn);
+        }
+
+        const notebookBtn = document.getElementById('notebookBtn');
+        const sheet = document.getElementById('notebookSheet');
+        const sheetContent = document.getElementById('notebookSheetContent');
+        const closeBtn = document.getElementById('closeNotebookSheet');
+        const saveBtn = document.getElementById('btnSaveNote');
+        const exportBtn = document.getElementById('btnExportNotes');
+        const noteInput = document.getElementById('noteInput');
+        const historyContainer = document.getElementById('notebookHistory');
+        const catBtns = document.querySelectorAll('.note-cat-btn');
+        
+        let currentCategory = 'خواطري';
+
+        // 2. التحكم بأزرار التصنيفات
+        catBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                catBtns.forEach(b => {
+                    b.style.background = 'transparent';
+                    b.style.color = 'var(--t-text)';
+                });
+                btn.style.background = 'var(--t-nav-act)';
+                currentCategory = btn.getAttribute('data-cat');
+                noteInput.placeholder = btn.getAttribute('data-placeholder');
+            });
+        });
+
+        // 3. عرض التدوينات من الذاكرة المحلية
+        function renderNotes() {
+            const notes = JSON.parse(localStorage.getItem('qatra_notebook') || '[]');
+            if (notes.length === 0) {
+                historyContainer.innerHTML = '<div style="text-align:center; margin-top:30px;"><svg viewBox="0 0 24 24" style="width:50px;height:50px;stroke:var(--t-sub);fill:none;stroke-width:1;margin-bottom:10px;"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><p style="color:var(--t-sub, #666); font-weight:600;">دفترك فارغ حالياً. المساحة لك لتبدأ التدوين.</p></div>';
+                return;
+            }
+            
+            historyContainer.innerHTML = '';
+            // عرض من الأحدث للأقدم
+            notes.slice().reverse().forEach((note, index) => {
+                const actualIndex = notes.length - 1 - index;
+                const noteEl = document.createElement('div');
+                noteEl.style = "background:rgba(128,128,128,0.05); border:1px solid rgba(128,128,128,0.1); border-radius:16px; padding:18px; margin-bottom:12px; position:relative;";
+                
+                let catColor = '#0ea5e9';
+                if(note.category === 'ما تعلمته') catColor = '#10b981';
+                if(note.category === 'أريد تذكره') catColor = '#f59e0b';
+                if(note.category === 'لحظات أثرت فيّ') catColor = '#ec4899'; // استعداداً لربطها باقتباساتك لاحقاً
+
+                noteEl.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.75rem; background:rgba(128,128,128,0.1); color:${catColor}; padding:5px 12px; border-radius:12px; font-weight:bold;">${note.category}</span>
+                        <span style="font-size:0.75rem; color:var(--t-sub, #666); font-weight:bold;">${note.date}</span>
+                    </div>
+                    <p style="font-size:1.05rem; color:var(--t-text, #111); line-height:1.7; margin:0 0 15px 0; white-space:pre-wrap;">${note.text}</p>
+                    <button class="delete-note-btn" data-index="${actualIndex}" style="background:rgba(239,68,68,0.1); border:none; border-radius:8px; color:#ef4444; font-size:0.8rem; font-weight:bold; cursor:pointer; padding:6px 12px; display:flex; align-items:center; gap:5px;">
+                        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> حذف
+                    </button>
+                `;
+                historyContainer.appendChild(noteEl);
+            });
+
+            // تفعيل أزرار الحذف
+            document.querySelectorAll('.delete-note-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    const idx = parseInt(e.target.closest('button').dataset.index);
+                    notes.splice(idx, 1);
+                    localStorage.setItem('qatra_notebook', JSON.stringify(notes));
+                    renderNotes();
+                };
+            });
+        }
+
+        // 4. حفظ تدوينة جديدة
+        saveBtn.onclick = () => {
+            const text = noteInput.value.trim();
+            if (text) {
+                const notes = JSON.parse(localStorage.getItem('qatra_notebook') || '[]');
+                const dateObj = new Date();
+                const timeStr = dateObj.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+                const dateStr = dateObj.toLocaleDateString('ar-EG');
+                
+                notes.push({
+                    category: currentCategory,
+                    text: text,
+                    date: dateStr + ' - ' + timeStr
+                });
+                
+                localStorage.setItem('qatra_notebook', JSON.stringify(notes));
+                noteInput.value = '';
+                saveBtn.textContent = 'تم الحفظ بنجاح!';
+                saveBtn.style.background = '#10B981';
+                renderNotes();
+                
+                setTimeout(() => {
+                    saveBtn.textContent = 'حفظ في الدفتر';
+                    saveBtn.style.background = 'var(--t-text, #111)';
+                }, 2000);
+            }
+        };
+
+        // 5. تصدير الخواطر كنسخة احتياطية (ملف JSON محلي)
+        exportBtn.onclick = () => {
+            const notes = localStorage.getItem('qatra_notebook') || '[]';
+            const blob = new Blob([notes], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'qatra_notebook_backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        // 6. فتح وإغلاق الدفتر
+        if(notebookBtn) {
+            notebookBtn.addEventListener('click', () => {
+                renderNotes();
+                sheet.style.display = 'flex';
+                setTimeout(() => {
+                    sheet.style.opacity = '1';
+                    sheetContent.style.transform = 'translateY(0)';
+                }, 10);
+            });
+        }
+
+        const closeSheet = () => {
+            sheet.style.opacity = '0';
+            sheetContent.style.transform = 'translateY(100%)';
+            setTimeout(() => { sheet.style.display = 'none'; }, 300);
+        };
+        closeBtn.onclick = closeSheet;
+        sheet.onclick = (e) => { if(e.target === sheet) closeSheet(); };
+
+    }, 900);
+});
