@@ -1,0 +1,34 @@
+
+/* QATRA PACKAGE TWO: home-only styling. Navigation SVGs and labels are untouched. */
+.app-container.q2-home{isolation:isolate;background:var(--q2-bgsolid,#071422)}
+.q2-wall{position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .65s ease}
+.q2-wall.q2-visible{opacity:1}
+.app-container.q2-home .header{background:transparent!important;color:var(--q2-fg)!important}
+.app-container.q2-home .header-btn{color:var(--q2-fg)!important}
+.app-container.q2-home .brand{color:var(--q2-fg)!important}
+.app-container.q2-home .content-area{background:transparent;padding-inline:20px;padding-top:8px;overscroll-behavior-y:contain}
+.app-container.q2-home #homeView{color:var(--q2-fg)!important}
+.app-container.q2-home #surpriseButton{width:min(78vw,294px);max-width:100%;aspect-ratio:1;height:auto;margin:0 auto 22px;padding:20px 14px 18px;gap:0;isolation:isolate;border-radius:50%;overflow:hidden;background:var(--q2-orb);color:var(--q2-fg);border:1px solid var(--q2-ring);box-shadow:0 0 24px var(--q2-glow),inset 0 0 24px var(--q2-glow);transition:box-shadow .6s,border-color .6s,color .6s,background-color .6s}
+#surpriseButton .q2-scene{position:absolute;inset:0;border-radius:inherit;background-size:cover;background-position:center;opacity:0;z-index:-2;pointer-events:none;transition:opacity .65s ease}
+#surpriseButton .q2-scene.q2-visible{opacity:1}
+.app-container.q2-home #surpriseButton::after{content:'';position:absolute;inset:0;border-radius:inherit;background:var(--q2-orbshade);z-index:-1;pointer-events:none}
+.app-container.q2-home #surpriseButton .surprise-orbit{border-color:var(--q2-ring);box-shadow:inset 0 0 16px var(--q2-glow)}
+/* Keep the existing central illustration: recolor neither its SVG nor its paths. */
+.app-container.q2-home #surpriseButton .surprise-art{width:32%;height:auto;max-height:82px;margin:0;flex-shrink:1}
+.app-container.q2-home #surpriseButton .surprise-title{color:var(--q2-fg);font-size:clamp(28px,8vw,39px);margin-top:0;text-shadow:0 2px 15px var(--q2-glow)}
+.app-container.q2-home #surpriseButton .surprise-description{color:var(--q2-fg);font-size:clamp(11px,3.4vw,15px);margin-top:4px}
+.app-container.q2-home #surpriseButton .surprise-play{width:49px;height:49px;min-height:42px;border-radius:50%;margin-top:10px;border:1px solid var(--q2-ring);background:var(--q2-play);box-shadow:0 0 20px var(--q2-glow)}
+.app-container.q2-home #surpriseButton .surprise-play svg{fill:var(--q2-playink)}
+.app-container.q2-home #homeView .glass-card{background:var(--q2-card)!important;border:1px solid var(--q2-border)!important;box-shadow:0 8px 22px var(--q2-shadow),inset 0 1px 0 #ffffff15!important;border-radius:23px!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(--q2-fg)!important;transition:background .55s,color .55s,border-color .55s,box-shadow .55s;padding:15px 17px;margin-bottom:10px;min-height:69px}
+.app-container.q2-home #homeView .action-card{gap:13px}
+.app-container.q2-home #homeView .card-title{font-size:16px;font-weight:800;color:var(--q2-fg)!important}
+.app-container.q2-home #homeView .card-sub{font-size:12px;color:var(--q2-muted)!important}
+.app-container.q2-home #homeView .card-icon{width:38px;height:38px;border-radius:13px;background:transparent!important;color:var(--q2-accent)!important}
+.app-container.q2-home #homeView .card-icon svg{width:28px;height:28px}
+.app-container.q2-home #homeView .card-info{min-width:0}
+.app-container.q2-home #homeView .glass-card span{color:var(--q2-fg)!important}
+.app-container.q2-home #nextDropCategoryText{color:var(--q2-accent)!important}
+.app-container.q2-home #ptrContainer,.app-container.q2-home .ptr-container{color:var(--q2-fg)!important}
+/* Intentionally no .floating-nav, .nav-item, or .nav-home-btn rules. */
+@media(max-height:720px){.app-container.q2-home #surpriseButton{width:min(68vw,250px)}.app-container.q2-home #homeView .glass-card{padding:12px 15px}}
+@media(prefers-reduced-motion:reduce){.q2-wall,#surpriseButton .q2-scene,.app-container.q2-home #surpriseButton,.app-container.q2-home #homeView .glass-card{transition:none!important}}

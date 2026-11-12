@@ -960,34 +960,10 @@ btn.classList.add('active');
 });
 });
 
-let startY = 0;
 const scrollContent = document.getElementById('scrollContent');
 const ptrContainer = document.getElementById('ptrContainer');
 const ptrIcon = document.getElementById('ptrIcon');
-
-if(scrollContent && ptrContainer && ptrIcon) {
-scrollContent.addEventListener('touchstart', e => { if(scrollContent.scrollTop === 0) startY = e.touches[0].clientY; }, {passive:true});
-scrollContent.addEventListener('touchmove', e => {
-if (startY > 0 && scrollContent.scrollTop === 0) {
-let y = e.touches[0].clientY - startY;
-if (y > 20 && y < 100) { ptrContainer.style.transform = `translateY(${y - 70}px)`; ptrIcon.style.transform = `rotate(${y*4}deg)`; }
-}
-}, {passive:true});
-scrollContent.addEventListener('touchend', e => {
-if (startY > 0 && scrollContent.scrollTop === 0) {
-let y = e.changedTouches[0].clientY - startY;
-if (y > 70) {
-ptrIcon.classList.add('spin');
-state.dark = !state.dark;
-applyState();
-setTimeout(() => { ptrContainer.style.transform = 'translateY(-100%)'; ptrIcon.classList.remove('spin'); }, 600);
-} else {
-ptrContainer.style.transform = 'translateY(-100%)';
-}
-}
-startY = 0;
-}, {passive:true});
-}
+window.QatraSkins.installPull(scrollContent,ptrContainer,ptrIcon);
 
 applyState(); renderDaysGrid();
 const qtEl = document.getElementById('dailyQuoteText');
@@ -2156,3 +2132,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
 });
 // === END PRO PHASE 1 ===
+
+// === QATRA PACKAGE TWO SKINS BEGIN ===
+(() => {
+'use strict';
+const themes=[{"label": "جبال الفجر", "image": "assets/qatra-skins/hero-1.jpg", "wall": "radial-gradient(ellipse at 50% 22%,#665e9166,transparent 55%),linear-gradient(180deg,#182348,#101530 65%,#0c1226)", "vars": {"bgsolid": "#101630", "fg": "#eff4ff", "muted": "#c9d0ef", "accent": "#b8bdff", "ring": "#9fa6ef88", "glow": "#a6aaff55", "card": "linear-gradient(135deg,#4b568b99,#151d3c99)", "border": "#b8bdff55", "play": "linear-gradient(135deg,#ffffff,#9198ec)", "playink": "#17254c", "orb": "#151f47", "orbshade": "linear-gradient(180deg,#242f5933,#121a3f22)", "shadow": "#00000033"}}, {"label": "ورقة الندى", "image": "assets/qatra-skins/hero-2.jpg", "wall": "radial-gradient(ellipse at 10% 18%,#39742555,transparent 42%),radial-gradient(ellipse at 95% 60%,#17704144,transparent 40%),linear-gradient(#002e22,#001a13)", "vars": {"bgsolid": "#001d16", "fg": "#f0fff6", "muted": "#c3e9d1", "accent": "#8af0b2", "ring": "#63f3c788", "glow": "#2ceeab55", "card": "linear-gradient(135deg,#19664f99,#002c2299)", "border": "#78e5ba55", "play": "linear-gradient(135deg,#efffe5,#8ae6ba)", "playink": "#06462f", "orb": "#003428", "orbshade": "linear-gradient(180deg,#001f1510,#00291c33)", "shadow": "#00000033"}}, {"label": "الموج الأزرق", "image": "assets/qatra-skins/hero-3.jpg", "wall": "radial-gradient(ellipse at 50% 30%,#005e8855,transparent 55%),radial-gradient(ellipse at 5% 47%,#00bcf033,transparent 30%),linear-gradient(#001d31,#00101e)", "vars": {"bgsolid": "#001321", "fg": "#edfbff", "muted": "#b8dcea", "accent": "#81e8ff", "ring": "#58dbff99", "glow": "#00bfff66", "card": "linear-gradient(135deg,#17577a99,#032339bb)", "border": "#72ddff55", "play": "linear-gradient(135deg,#f2ffff,#58ccff)", "playink": "#004473", "orb": "#00334a", "orbshade": "linear-gradient(180deg,#002e4910,#002a3b22)", "shadow": "#00000033"}}, {"label": "الثلج السماوي", "image": "assets/qatra-skins/hero-4.jpg", "wall": "radial-gradient(ellipse at 95% 30%,#73c3f855,transparent 50%),linear-gradient(155deg,#f8fcff,#dcecff 70%,#eff7ff)", "vars": {"bgsolid": "#eaf3ff", "fg": "#0c2944", "muted": "#38536d", "accent": "#0875b2", "ring": "#a9e9ffbb", "glow": "#40bbff44", "card": "linear-gradient(135deg,#ffffffdd,#eaf3ffc9)", "border": "#ffffffaa", "play": "linear-gradient(135deg,#ffffff,#77dcff)", "playink": "#005b91", "orb": "#c6e5fa", "orbshade": "linear-gradient(180deg,#ffffff05,#b2dcff11)", "shadow": "#00101c22"}}, {"label": "رمال دافئة", "image": "assets/qatra-skins/hero-5.jpg", "wall": "radial-gradient(ellipse at 50% 35%,#ffd9a366,transparent 50%),linear-gradient(#fbf5f0,#eee1d8)", "vars": {"bgsolid": "#f4ece6", "fg": "#241c18", "muted": "#65554c", "accent": "#97612b", "ring": "#fff9edcc", "glow": "#e3b77b44", "card": "linear-gradient(135deg,#fffaf3d9,#f3e8dfbb)", "border": "#ffffffaa", "play": "linear-gradient(135deg,#fffef5,#f6d8ae)", "playink": "#593817", "orb": "#f3ddc7", "orbshade": "linear-gradient(180deg,#fff8ee08,#e0a45715)", "shadow": "#00101c22"}}, {"label": "القمر الفضي", "image": "assets/qatra-skins/hero-6.jpg", "wall": "radial-gradient(ellipse at 30% 21%,#3c536a66,transparent 48%),linear-gradient(#071421,#020b12)", "vars": {"bgsolid": "#030d16", "fg": "#f0f5fc", "muted": "#b5c5d7", "accent": "#d0e5fc", "ring": "#e3efffbb", "glow": "#b7d7ff55", "card": "linear-gradient(135deg,#40536a88,#0b182899)", "border": "#d5e7ff55", "play": "linear-gradient(135deg,#ffffff,#93abc7)", "playink": "#152640", "orb": "#0c1b2c", "orbshade": "linear-gradient(180deg,#08132100,#06122033)", "shadow": "#00000033"}}, {"label": "غروب أرجواني", "image": "assets/qatra-skins/hero-7.jpg", "wall": "radial-gradient(ellipse at 50% 20%,#bd548055,transparent 55%),linear-gradient(#2b124c,#1b0c2e)", "vars": {"bgsolid": "#1c0c30", "fg": "#fff4ff", "muted": "#e5c6e4", "accent": "#f2a1db", "ring": "#ffb9f3aa", "glow": "#f050e966", "card": "linear-gradient(135deg,#733f7caa,#29113fbb)", "border": "#e8b1f455", "play": "linear-gradient(135deg,#ffe2d7,#f167d5)", "playink": "#5c1e60", "orb": "#4e226a", "orbshade": "linear-gradient(180deg,#46124b05,#330d4444)", "shadow": "#00000033"}}];
+const key='qatra_visual_skin_v2';
+let index=0,initialized=false,root=null,hero=null,walls=[],scenes=[],front=0,lockedUntil=0;
+const reduced=()=>window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function homeActive(){return document.getElementById('homeView')?.classList.contains('active');}
+function initialize(){
+ if(initialized)return;root=document.querySelector('.app-container');hero=document.getElementById('surpriseButton');if(!root||!hero)return;
+ initialized=true;
+ try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved?.version===2&&Number.isInteger(saved.index)&&saved.index>=0&&saved.index<themes.length)index=saved.index;}catch(error){console.warn('QATRA skin preference unavailable',error);}
+ for(let n=0;n<2;n++){
+  const wall=document.createElement('div');wall.className='q2-wall';wall.setAttribute('aria-hidden','true');root.prepend(wall);walls.push(wall);
+  const scene=document.createElement('span');scene.className='q2-scene';scene.setAttribute('aria-hidden','true');hero.prepend(scene);scenes.push(scene);
+ }
+ const sync=()=>{root.classList.toggle('q2-home',!!homeActive());walls.forEach(w=>{w.hidden=!homeActive();});};
+ const observer=new MutationObserver(sync);document.querySelectorAll('.view').forEach(v=>observer.observe(v,{attributes:true,attributeFilter:['class']}));
+ sync();apply(index,false);
+ // All backgrounds are local bundled assets, with no network image dependency.
+ themes.forEach(t=>{const image=new Image();image.src=t.image;});
+}
+function apply(next,save=true){
+ if(!initialized)return;
+ index=(next+themes.length)%themes.length;const theme=themes[index];
+ for(const [name,value] of Object.entries(theme.vars))root.style.setProperty('--q2-'+name,value);
+ const back=1-front;walls[back].style.background=theme.wall;scenes[back].style.backgroundImage='url("'+theme.image+'")';
+ walls[back].classList.add('q2-visible');scenes[back].classList.add('q2-visible');walls[front].classList.remove('q2-visible');scenes[front].classList.remove('q2-visible');front=back;
+ root.dataset.qatraSkin=String(index+1);
+ if(save){try{localStorage.setItem(key,JSON.stringify({version:2,index}));}catch(error){console.warn('QATRA skin not saved',error);}}
+}
+function installPull(scroll,container,icon){
+ initialize();if(!scroll||!container||!icon)return;
+ let start=null,pulled=false;
+ const text=container.querySelector('.ptr-text');
+ const prompt=()=>{if(text)text.textContent='اسحب لتغيير التصميم';};
+ const reset=()=>{start=null;pulled=false;container.style.transform='translateY(-100%)';icon.classList.remove('spin');};
+ scroll.addEventListener('touchstart',event=>{
+  reset();
+  if(event.touches.length!==1||scroll.scrollTop>1||!homeActive()||Date.now()<lockedUntil)return;
+  if(event.target.closest('textarea,input,select,[contenteditable="true"]'))return;
+  start={x:event.touches[0].clientX,y:event.touches[0].clientY};prompt();
+ },{passive:true});
+ scroll.addEventListener('touchmove',event=>{
+  if(!start)return;
+  if(event.touches.length!==1||!homeActive()){reset();return;}
+  const dx=event.touches[0].clientX-start.x,dy=event.touches[0].clientY-start.y;
+  if(dy<=0||scroll.scrollTop>1||Math.abs(dx)>Math.max(20,dy)){reset();return;}
+  if(dy>12){pulled=true;if(event.cancelable)event.preventDefault();const travel=Math.min(dy*.62,95);container.style.transform='translateY('+(travel-70)+'px)';icon.style.transform='rotate('+dy*3+'deg)';if(text)text.textContent=dy>=78?'أفلت لتطبيق '+themes[(index+1)%themes.length].label:'اسحب لتغيير التصميم';}
+ },{passive:false});
+ scroll.addEventListener('touchend',event=>{
+  if(!start)return;
+  const dy=event.changedTouches[0].clientY-start.y;
+  if(pulled&&dy>=78&&scroll.scrollTop<=1&&homeActive()){
+   lockedUntil=Date.now()+(reduced()?250:750);apply(index+1);icon.classList.add('spin');if(text)text.textContent=themes[index].label;
+   start=null;pulled=false;setTimeout(reset,reduced()?100:550);
+  }else reset();
+ },{passive:true});
+ scroll.addEventListener('touchcancel',reset,{passive:true});
+}
+window.QatraSkins={installPull,init:initialize,get count(){return themes.length;},get current(){return index+1;}};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize);else initialize();
+})();
+// === QATRA PACKAGE TWO SKINS END ===
