@@ -1193,5 +1193,156 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+
+<!-- CUSTOM FIXES V2 -->
+<style>
+/* 1. إصلاح رحلتك مع قطرة لتصبح نافذة طافية متناسقة ولا تُقطع من الأعلى */
+#journeySheet {
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 20px !important;
+}
+#journeySheet .sheet-content {
+    width: 100% !important;
+    max-width: 450px !important;
+    max-height: 85vh !important;
+    border-radius: 32px !important;
+    padding: 30px 20px !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5) !important;
+}
+#journeySheet .sheet-handle { display: none !important; }
+
+/* 2. النوافذ الطافية لـ لحظتك واقتباس اليوم */
+.float-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s;
+}
+.float-modal-overlay.show { display: flex; opacity: 1; }
+.float-modal-content {
+    width: 100%; max-width: 400px; background: var(--surface);
+    border-radius: 32px; padding: 30px 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid var(--border); position: relative;
+}
+.float-modal-overlay.show .float-modal-content { transform: scale(1); }
+
+.like-btn {
+    background: transparent; border: none; cursor: pointer; padding: 5px;
+    color: var(--text-dim); transition: 0.3s; display: flex; align-items: center; justify-content: center;
+}
+.like-btn.liked { color: #ef4444; transform: scale(1.15); }
+.like-btn svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2; transition: 0.3s; }
+.like-btn.liked svg { fill: #ef4444; stroke: #ef4444; }
+</style>
+
+<!-- نافذة لحظتك الحالية -->
+<div id="modalMoment" class="float-modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="float-modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
+            <button id="likeMomentBtn" class="like-btn" onclick="toggleLike(this, 'moment')">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+            <h3 style="margin:0; color:var(--primary); font-size:1.3rem;">لحظتك الحالية</h3>
+            <button onclick="document.getElementById('modalMoment').classList.remove('show')" style="background:transparent; border:none; color:var(--text); cursor:pointer; padding:5px;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <p id="modalMomentText" style="font-size:1.15rem; line-height:1.7; color:var(--text); text-align:center; font-weight:600; margin:0;"></p>
+    </div>
+</div>
+
+<!-- نافذة اقتباس اليوم -->
+<div id="modalQuote" class="float-modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="float-modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px;">
+            <button id="likeQuoteBtn" class="like-btn" onclick="toggleLike(this, 'quote')">
+                <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+            <h3 style="margin:0; color:var(--secondary); font-size:1.3rem;">اقتباس اليوم</h3>
+            <button onclick="document.getElementById('modalQuote').classList.remove('show')" style="background:transparent; border:none; color:var(--text); cursor:pointer; padding:5px;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <p id="modalQuoteText" style="font-size:1.2rem; line-height:1.8; color:var(--text); text-align:center; font-weight:700; margin:0;"></p>
+    </div>
+</div>
+
+<script>
+window.toggleLike = function(btn, type) {
+    const isLiked = btn.classList.contains('liked');
+    const today = new Date().toDateString();
+    const likeKey = 'qatra_liked_' + type + '_' + today;
+    
+    let stats = JSON.parse(localStorage.getItem('qatra_stats') || '{"likes":0,"dhikr":0,"culture":0,"selfDev":0,"poetry":0,"days":1}');
+    
+    if(!isLiked) {
+        btn.classList.add('liked');
+        localStorage.setItem(likeKey, 'true');
+        stats.likes = (stats.likes || 0) + 1;
+        
+        // زيادة نقاط حديقتك (مستوى الوعي)
+        const cats = ['dhikr', 'culture', 'selfDev', 'poetry'];
+        const rCat = cats[Math.floor(Math.random() * cats.length)];
+        stats[rCat] = (stats[rCat] || 0) + 10; // إضافة 10 نقاط
+        
+        const toast = document.getElementById('copyToast');
+        if(toast) { 
+            toast.textContent = "تم الإعجاب! ارتفع مستوى وعيك 🌱"; 
+            toast.classList.add('show'); 
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(()=>toast.textContent="تم النسخ بنجاح",300); }, 2000); 
+        }
+    } else {
+        btn.classList.remove('liked');
+        localStorage.removeItem(likeKey);
+        stats.likes = Math.max(0, (stats.likes || 0) - 1);
+    }
+    
+    localStorage.setItem('qatra_stats', JSON.stringify(stats));
+    if(typeof updateStatsChart === 'function') updateStatsChart();
+    if(typeof renderGarden === 'function') renderGarden();
+};
+
+window.openFloatModal = function(type) {
+    const today = new Date().toDateString();
+    const likeKey = 'qatra_liked_' + type + '_' + today;
+    
+    if(type === 'moment') {
+        const text = document.getElementById('currentMomentText').textContent;
+        document.getElementById('modalMomentText').textContent = text;
+        const btn = document.getElementById('likeMomentBtn');
+        if(localStorage.getItem(likeKey) === 'true') btn.classList.add('liked'); else btn.classList.remove('liked');
+        document.getElementById('modalMoment').classList.add('show');
+    } else if(type === 'quote') {
+        const text = document.getElementById('dailyQuoteText').textContent;
+        document.getElementById('modalQuoteText').textContent = text;
+        const btn = document.getElementById('likeQuoteBtn');
+        if(localStorage.getItem(likeKey) === 'true') btn.classList.add('liked'); else btn.classList.remove('liked');
+        document.getElementById('modalQuote').classList.add('show');
+    }
+};
+
+// اعتراض النقرات على البطاقات بذكاء
+document.addEventListener("DOMContentLoaded", () => {
+    setInterval(() => {
+        document.querySelectorAll('.glass-card.action-card').forEach(card => {
+            const title = card.querySelector('.card-title');
+            if(title) {
+                if(title.textContent.includes('لحظتك الحالية') && !card.hasAttribute('data-modal-bound')) {
+                    card.onclick = (e) => { e.preventDefault(); openFloatModal('moment'); };
+                    card.setAttribute('data-modal-bound', 'true');
+                } else if(title.textContent.includes('اقتباس اليوم') && !card.hasAttribute('data-modal-bound')) {
+                    card.onclick = (e) => { e.preventDefault(); openFloatModal('quote'); };
+                    card.setAttribute('data-modal-bound', 'true');
+                }
+            }
+        });
+    }, 1000);
+});
+</script>
+<!-- END CUSTOM FIXES V2 -->
+
 </body>
 </html>
