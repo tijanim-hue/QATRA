@@ -33,13 +33,15 @@ val category = intent.getStringExtra("category") ?: "dhikr"
 val ret = JSObject()
 ret.put("category", category)
 notifyListeners("quoteLiked", ret)
+} else if (intent?.action == "com.qatra.app.PROGRESS_CHANGED") {
+notifyListeners("progressChanged", JSObject())
 }
 }
 }
 
 override fun load() {
 super.load()
-context.registerReceiver(likeReceiver, IntentFilter("com.qatra.app.QUOTE_LIKED"), Context.RECEIVER_EXPORTED)
+context.registerReceiver(likeReceiver, IntentFilter("com.qatra.app.QUOTE_LIKED").apply { addAction("com.qatra.app.PROGRESS_CHANGED") }, Context.RECEIVER_EXPORTED)
 }
 
 @PluginMethod
@@ -284,4 +286,15 @@ override fun handleOnDestroy(){qatraUiSounds?.release();qatraUiSounds=null;super
         context.getSharedPreferences("QatraExperiencePrefs", Context.MODE_PRIVATE).edit().putString("selectedVoice", voiceId).apply()
         call.resolve()
     }
+
+@PluginMethod
+fun progressEvent(call: PluginCall) {
+    try {
+        val result = QatraProgressStore.mutate(context,
+            call.getString("action") ?: "read", call.getString("text") ?: "",
+            call.getString("category") ?: "selfDev", call.getBoolean("value") ?: false,
+            call.getArray("items") ?: org.json.JSONArray())
+        call.resolve(JSObject(result.toString()))
+    } catch (error: Exception) { call.reject("Unable to persist progress", error) }
+}
 }

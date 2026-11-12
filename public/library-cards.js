@@ -79,7 +79,7 @@ getRandomQuote=function(){
  if(state.quoteSource==='myGroups'||state.quoteSource==='favorites'){
   const keys=state.quoteSource==='favorites'?['favorites']:Object.keys(state.groups);
   const pool=keys.flatMap(key=>state.groups[key]||[]).filter(isReal);
-  return {quote:pool.length?pool[Math.floor(Math.random()*pool.length)]:getTranslation('no_custom_quotes'),categoryKey:state.quoteSource};
+  const picked=pool.length?pool[Math.floor(Math.random()*pool.length)]:getTranslation('no_custom_quotes');return {quote:picked,categoryKey:window.QatraProgress?.category(picked,state.quoteSource)||state.quoteSource};
  }
  for(const key of categories){const pool=records(key);if(pool.length)available.push(pool);}
  if(!available.length)return {quote:t('empty'),categoryKey:state.quoteSource};
@@ -88,7 +88,7 @@ getRandomQuote=function(){
 function toggleChoice(entry){
  const at=state.myChoices.findIndex(e=>e.category===entry.category&&e.text===entry.text);
  if(at>=0)state.myChoices.splice(at,1);else state.myChoices.push({...entry});
- save();updateCounts();render();
+ save();updateCounts();render();window.QatraProgress?.syncGroups().catch(console.error);
  if(state.quoteSource==='myChoices')syncNativeAlarms();
 }
 function cardText(card,entry){
@@ -112,8 +112,9 @@ function render(){
   for(let layer=2;layer>=1;layer--){const ghost=element('div','ql-card ql-ghost ql-ghost-'+layer);ghost.setAttribute('aria-hidden','true');cardText(ghost,entries[(position+layer)%entries.length]);deck.appendChild(ghost);}
   const entry=entries[position];const card=element('article','ql-card ql-front');cardText(card,entry);
   const actions=element('div','ql-actions');const choose=element('button','ql-choose'+(hasChoice(entry)?' chosen':''),hasChoice(entry)?t('selected'):t('add'));choose.type='button';choose.setAttribute('aria-pressed',hasChoice(entry)?'true':'false');choose.addEventListener('click',()=>toggleChoice(entry));actions.appendChild(choose);
-  const mini=element('div','ql-mini-actions');const favorite=element('button','ql-small-button',state.groups.favorites.includes(entry.text)?t('saved'):t('save'));favorite.type='button';favorite.addEventListener('click',()=>{if(!state.groups.favorites.includes(entry.text))state.groups.favorites.push(entry.text);save();favorite.textContent=t('saved');});mini.appendChild(favorite);
-  const copy=element('button','ql-small-button',t('copy'));copy.type='button';copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(entry.text);copy.textContent=t('copied');}catch(_){notify(t('copyFail'));}});mini.appendChild(copy);actions.appendChild(mini);card.appendChild(actions);deck.appendChild(card);host.appendChild(deck);
+  const mini=element('div','ql-mini-actions');mini.appendChild(window.QatraProgress.heartButton(entry.text,entry.category));
+  const favorite=element('button','ql-small-button',state.groups.favorites.includes(entry.text)?t('saved'):t('save'));favorite.type='button';favorite.addEventListener('click',async()=>{favorite.disabled=true;try{const kept=await window.QatraProgress.toggleSave(entry.text,entry.category);save();favorite.textContent=kept?t('saved'):t('save');}catch(error){notify(error.message);}finally{favorite.disabled=false;}});mini.appendChild(favorite);
+  const copy=element('button','ql-small-button',t('copy'));copy.type='button';copy.addEventListener('click',async()=>{try{await window.QatraProgress.copy(entry.text,entry.category);copy.textContent=t('copied');}catch(_){notify(t('copyFail'));}});mini.appendChild(copy);actions.appendChild(mini);card.appendChild(actions);deck.appendChild(card);host.appendChild(deck);
   const nav=element('div','ql-navigation');
   nav.style.justifyContent = 'center';
   const page=element('span','ql-page',new Intl.NumberFormat(LANG()).format(position+1)+' / '+new Intl.NumberFormat(LANG()).format(entries.length));

@@ -112,6 +112,8 @@ object QatraHomeStore {
             put("initialized", p.getBoolean("initialized", false)); put("next", next ?: JSONObject.NULL)
             put("todayLikes", day.optLong("likes", 0L)); put("todayCategories", day.optJSONObject("categories") ?: JSONObject())
             put("totalLikes", p.getLong("total", 0L)); put("categories", json(p.getString("categories", null)))
+            val progress = QatraProgressStore.snapshot(context)
+            put("progress", progress); put("totalLikes", progress.getLong("likes")); put("todayLikes", progress.getLong("todayLikes")); put("todayCategories", progress.getJSONObject("todayCategories"))
         }
     }
 

@@ -27,6 +27,7 @@ import java.util.Locale
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
@@ -65,6 +66,10 @@ class QatraOverlayService : Service() {
     private var heartTargetY = 0f
     private var likedAt = -1L
     private var occurrenceId = ""
+    private var scheduledDrop = false
+    private var activeQuote = ""
+    private var activeCategory = "selfDev"
+    private var shownLogged = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -77,6 +82,8 @@ class QatraOverlayService : Service() {
             return START_NOT_STICKY
         }
         try {
+            scheduledDrop = intent.getBooleanExtra("scheduled", false)
+            occurrenceId = intent.getStringExtra("occurrenceId") ?: UUID.randomUUID().toString()
             show(
                 intent.getStringExtra("quote") ?: "الحمد لله",
                 intent.getStringExtra("category") ?: "dhikr",
@@ -137,7 +144,7 @@ class QatraOverlayService : Service() {
 
         impactMs = if (reducedMotion) 0L else 1050L
         riseMs = if (reducedMotion) 1L else 1750L
-        occurrenceId = UUID.randomUUID().toString()
+        activeQuote = quote; activeCategory = category; shownLogged = false
         impactPlayed=false; likedAt=-1L; blurApplied=false; blurCheckedAt=-1000L
         val root=Scene(this)
         root.setWillNotDraw(false)
@@ -179,13 +186,17 @@ class QatraOverlayService : Service() {
         root.addView(panel,FrameLayout.LayoutParams(width,panelHeight,Gravity.CENTER))
         val like=Heart(this).apply {alpha=0f;isEnabled=false;elevation=dp(22f)}
         like.contentDescription=if(resources.configuration.locale.language=="ar")"إعجاب بالعبارة" else "Like quote"
+        like.liked=QatraProgressStore.isLiked(this,quote)
+        if (like.liked) like.contentDescription=if(resources.configuration.locale.language=="ar")"إزالة الإعجاب" else "Unlike quote"
         like.isClickable=true;like.isFocusable=true
         like.setOnClickListener {
-            if(like.liked || !active || like.alpha<.5f)return@setOnClickListener
-            if(!QatraHomeStore.like(this@QatraOverlayService,occurrenceId,category))return@setOnClickListener
-            like.liked=true;likedAt=SystemClock.uptimeMillis()-startedAt
+            if(!active || like.alpha<.5f)return@setOnClickListener
+            val next = !like.liked
+            try { QatraProgressStore.setLike(this@QatraOverlayService,quote,category,next) }
+            catch(error:Exception) { Log.e(TAG,"Like storage failed",error); return@setOnClickListener }
+            like.liked=next;likedAt=if(next)SystemClock.uptimeMillis()-startedAt else -1L
             experienceSounds?.play("tap")
-            like.contentDescription=if(resources.configuration.locale.language=="ar")"تم تسجيل الإعجاب" else "Quote liked"
+            like.contentDescription=if(resources.configuration.locale.language=="ar"){if(like.liked)"إزالة الإعجاب" else "إعجاب بالعبارة"} else {if(like.liked)"Unlike quote" else "Like quote"}
             val event=Intent("com.qatra.app.QUOTE_LIKED").setPackage(packageName)
             event.putExtra("category",category);event.putExtra("occurrenceId",occurrenceId)
             sendBroadcast(event)
@@ -242,6 +253,10 @@ class QatraOverlayService : Service() {
                 tts?.speak(textToRead, TextToSpeech.QUEUE_FLUSH, null, null)
             }}
             panel.alpha=if(elapsed<impactMs)0f else progress(elapsed,impactMs,650L)
+            if (!shownLogged && panel.alpha >= .5f) {
+                try { QatraProgressStore.shown(this@QatraOverlayService,occurrenceId,activeQuote,activeCategory,scheduledDrop); shownLogged=true }
+                catch(error:Exception) { Log.e(TAG,"Delivery storage failed",error) }
+            }
             panel.translationY=originY*(1f-rise)
             val pulse=if(!reducedMotion&&settling in 0L..650L) (sin(settling/650f*PI*2)*.012f).toFloat() else 0f
             panel.scaleX=.045f+.955f*rise+pulse;panel.scaleY=.045f+.955f*rise+pulse
@@ -318,6 +333,21 @@ class QatraOverlayService : Service() {
     override fun onDestroy(){cleanup();super.onDestroy()}
 
     private inner class Scene(context:Context):FrameLayout(context){
+        override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+            val panel = card; val like = heart
+            if (event.actionMasked == MotionEvent.ACTION_DOWN && active && panel != null && panel.alpha >= .5f) {
+                val panelRect=Rect(); val heartRect=Rect()
+                panel.getGlobalVisibleRect(panelRect)
+                if (like != null && like.alpha >= .5f) like.getGlobalVisibleRect(heartRect)
+                val x=event.rawX.toInt(); val y=event.rawY.toInt()
+                if (!panelRect.contains(x,y) && !heartRect.contains(x,y)) {
+                    if (scheduledDrop) try { QatraProgressStore.ignore(this@QatraOverlayService,occurrenceId) }
+                    catch(error:Exception) { Log.e(TAG,"Dismissal storage failed",error) }
+                    finish(); return true
+                }
+            }
+            return super.dispatchTouchEvent(event)
+        }
         var elapsed=0L
         var impactY=0f
         var dropWidth=0f

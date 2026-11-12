@@ -1,0 +1,17 @@
+
+/* Package four: small upper-left progress indicators; theme variables inherited from package three. */
+.garden-card{position:relative;padding-top:61px!important}
+.q4-ring{position:absolute;top:10px;left:10px;width:40px;height:40px;color:var(--primary);display:grid;place-items:center;font-size:9px;font-weight:800;direction:ltr}
+.q4-ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.q4-ring circle{fill:none;stroke-width:3}
+.q4-track{stroke:var(--border)}
+.q4-fill{stroke:currentColor;stroke-linecap:round;stroke-dasharray:113.097;stroke-dashoffset:113.097;transition:stroke-dashoffset .35s}
+.q4-heart{display:grid;place-items:center;width:48px;height:48px;padding:10px;margin:10px auto;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);cursor:pointer}
+.q4-heart svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;transition:transform .2s}
+.q4-heart.liked{color:#ef4444;background:#ef444418}
+.q4-heart.liked svg,[data-q4-text].liked svg{fill:#ef4444!important;stroke:#ef4444!important}
+.q4-heart:active svg{transform:scale(1.15)}
+.q4-heart:disabled{opacity:.55}
+.ql-mini-actions .q4-heart{margin:0;width:40px;height:40px}
+.q4-note{font-size:11px;line-height:1.8;color:var(--text-dim);margin:10px 0}
+@media(prefers-reduced-motion:reduce){.q4-fill,.q4-heart svg{transition:none}}

@@ -623,6 +623,7 @@ intSel.value = state.interval;
 }
 
 updateHomeCards(); updateStatsChart(); renderGarden(); renderSchedules();
+window.QatraProgress?.syncGroups().catch(console.error);
 }
 
 safeOn('langSelect', 'change', e => { state.lang = e.target.value; applyState(); renderDaysGrid();
@@ -747,6 +748,7 @@ tEl('treeEmoji_selfDev', getTreeStage(s.selfDev)); tEl('treeEmoji_poetry', getTr
 const tot = s.dhikr + s.culture + s.selfDev + s.poetry;
 const pEl = document.getElementById('totalAwarenessProgress'); if(pEl) pEl.style.width = Math.min((tot/500)*100, 100)+'%';
 tEl('totalDaysActiveText', getTranslation('active_days_summary', {count:s.days}));
+window.QatraProgress?.paintRings();
 }
 
 // --- المكتبة والمجموعات (أيقونات احترافية للقلب والنسخ) ---
@@ -773,20 +775,22 @@ if(content) {
 content.innerHTML = cat.items.slice(0, 50).map(q => {
 return `<div style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 0; border-bottom:1px solid var(--border);"> <div style="font-size:15px; font-weight:700;">${q}</div>
 <div style="display:flex; gap:8px;">
-<button onclick="copyQuote(decodeURIComponent('${encodeURIComponent(q).replace(/'/g, '%27')}'))" style="background:transparent; border:none; color:var(--secondary); cursor:pointer;">
+<button class="q4-legacy-heart" data-q4-text="${encodeURIComponent(q).replace(/'/g, '%27')}" onclick="QatraProgress.toggleLike(decodeURIComponent('${encodeURIComponent(q).replace(/'/g, '%27')}'),'${id}').then(()=>QatraProgress.paint()).catch(e=>alert(e.message))" style="background:transparent; border:none; color:var(--secondary); cursor:pointer;">
 <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
 </button>
 </div>
 </div>`;
 }).join('');
+window.QatraProgress?.paint();
 }
 };
 
-window.copyQuote = (txt) => {
-navigator.clipboard.writeText(txt).then(() => {
+window.copyQuote = async (txt) => {
+try {
+await window.QatraProgress.copy(txt);
 const toast = document.getElementById('copyToast');
 if(toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2000); }
-});
+} catch(error) { alert('تعذر النسخ: '+error.message); }
 };
 
 window.addToFavorites = (txt) => {
@@ -1816,8 +1820,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // تحديث الـ DOM
                 document.getElementById('statActiveDays').textContent = activeDaysCount;
                 document.getElementById('statStreak').textContent = currentStreak;
-                document.getElementById('statSteps').textContent = completedStepsCount;
-                document.getElementById('statQuotes').textContent = savedQuotesCount;
+                document.getElementById('statSteps').textContent = window.QatraProgress?.snapshot?.steps ?? 0;
+                document.getElementById('statQuotes').textContent = window.QatraProgress?.snapshot?.savedUnique ?? 0;
+                window.QatraProgress?.refresh().catch(console.error);
 
                 // عرض النافذة
                 journeySheet.style.display = 'flex';
