@@ -57,13 +57,13 @@ applyState = function() { oldApply();paintHome(); };
 
 function mergeMetrics(snapshot) {
  const baseline=state.homeMetricsOffset;
- state.stats.likes=(Number(baseline.likes)||0)+(Number(snapshot.totalLikes)||0);
+ state.stats.likes=(Number(baseline.likes)||0)+(Number(snapshot.totalLikes)||0)+Object.keys(state.premiumHearts||{}).length;
  const totals={dhikr:0,culture:0,selfDev:0,poetry:0};
  for(const [category,count] of Object.entries(snapshot.categories||{})) {
   const key=category==='quran'?'dhikr':category==='generalCulture'?'culture':category==='myGroups'||category==='favorites'?'selfDev':category;
   if(Object.prototype.hasOwnProperty.call(totals,key))totals[key]+=Number(count)||0;
  }
- for(const key of Object.keys(totals)) state.stats[key]=(Number(baseline.categories[key])||0)+totals[key];
+ for(const key of Object.keys(totals)) state.stats[key]=(Number(baseline.categories[key])||0)+totals[key]+Object.values(state.premiumHearts||{}).filter(item=>item.category===key).reduce((sum,item)=>sum+item.points,0);
 }
 async function refreshHome() {
  if(readPromise)return readPromise;
@@ -183,7 +183,29 @@ function paintImpact(body){
 }
 async function openNext(){const body=openWindow(t('next'),'next');paintNext(body);await refreshHome();}
 async function openImpact(){const body=openWindow(t('impact'),'impact');paintImpact(body);await refreshHome();}
-function openMoment(){const text=byId('currentMomentText')?.textContent||momentText();const body=openWindow(t('moment'),'moment');quoteBlock(body,text);}
+
+// QATRA_VERIFIED_REPAIR: likes live alongside the native ledger, not over it.
+function premiumLike(body,id,category){
+ const labels={ar:['إعجاب','تم الإعجاب · +10 نقاط','تعذر الحفظ'],en:['Like','Liked · +10 points','Unable to save'],fr:['Aimer','Aimé · +10 points','Échec de sauvegarde'],es:['Me gusta','Guardado · +10 puntos','No se pudo guardar'],de:['Gefällt mir','Gespeichert · +10 Punkte','Speichern fehlgeschlagen']};
+ const words=labels[language()]||labels.en;
+ const button=node('button','qh-heart');button.type='button';button.setAttribute('aria-label',words[0]);
+ button.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+ const hint=node('p','qh-heart-hint');
+ function paint(){const liked=!!state.premiumHearts?.[id];button.classList.toggle('liked',liked);button.setAttribute('aria-pressed',String(liked));hint.textContent=liked?words[1]:words[0]+' · +10';}
+ button.addEventListener('click',()=>{
+  if(state.premiumHearts?.[id])return;
+  const previous=JSON.stringify(state);
+  try{
+   state.premiumHearts=state.premiumHearts||{};state.premiumHearts[id]={category,points:10};
+   state.stats[category]=(Number(state.stats[category])||0)+10;
+   state.stats.likes=(Number(state.stats.likes)||0)+1;
+   save();applyState();paint();
+  }catch(error){Object.assign(state,JSON.parse(previous));hint.textContent=words[2];console.error(error);}
+ });
+ body.appendChild(button);body.appendChild(hint);paint();
+}
+
+function openMoment(){const text=byId('currentMomentText')?.textContent||momentText();const body=openWindow(t('moment'),'moment');quoteBlock(body,text);premiumLike(body,'moment:'+text,'selfDev');}
 function openQuote(){
  let next=Math.floor(Math.random()*QUOTES.length);if(next===quoteIndex())next=(next+1)%QUOTES.length;
  state.homeQuoteId=next;save();paintHome();
@@ -194,7 +216,7 @@ function openQuote(){
  const copy=node('button','qh-copy',t('copy'));copy.type='button';copy.addEventListener('click',async()=>{
   try{await navigator.clipboard.writeText('“'+quoteText(q)+'” — '+(q.author[language()]||q.author.en)+', '+(q.source[language()]||q.source.en));copy.textContent=t('copied');}
   catch(_){copy.textContent=t('copyFailed');}
- });body.appendChild(copy);
+ });body.appendChild(copy);premiumLike(body,'quote:'+next,'culture');
 }
 function bindCard(id,handler){
  const card=byId(id)?.closest('.action-card');if(!card)return;

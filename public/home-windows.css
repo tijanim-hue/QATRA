@@ -24,3 +24,18 @@
 @keyframes qh-enter {from {opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.qh-panel{animation:none}}
 @media(min-height:850px){.qh-backdrop{align-items:center}}
+
+
+/* QATRA_VERIFIED_REPAIR */
+#journeySheet{align-items:center!important;justify-content:center!important;padding:18px!important;box-sizing:border-box!important}
+#journeySheetContent{width:100%!important;max-width:440px!important;height:auto!important;max-height:85vh!important;max-height:85dvh!important;overflow-y:auto!important;border-radius:30px!important;padding:24px!important;box-sizing:border-box!important;background:var(--surface)!important;color:var(--text)!important}
+#journeySheetContent>*{flex-shrink:0!important}
+#journeySheetContent>div[style*="flex:1"]{flex:0 0 auto!important}
+.qh-backdrop{align-items:center!important;padding:20px!important}
+.qh-panel{max-width:440px!important;max-height:85vh!important;max-height:85dvh!important;border-radius:32px!important;background:var(--surface)!important;border:1px solid var(--border)!important;box-shadow:0 24px 80px #0006!important}
+.qh-heart{display:grid;place-items:center;margin:20px auto 0;width:64px;height:64px;border-radius:50%;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:transform .2s}
+.qh-heart svg{width:30px;height:30px;fill:none;stroke:var(--text-dim);stroke-width:2}
+.qh-heart.liked{background:#ef44441a;border-color:#ef444455;animation:qh-heart-pop .4s ease}
+.qh-heart.liked svg{fill:#ef4444;stroke:#ef4444}
+.qh-heart-hint{text-align:center;font-size:13px;color:var(--text-dim)}
+@keyframes qh-heart-pop{50%{transform:scale(1.22)}}
