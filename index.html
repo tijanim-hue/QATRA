@@ -1344,5 +1344,156 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 <!-- END CUSTOM FIXES V2 -->
 
+
+<!-- PRO UI FIX V3 -->
+<style>
+/* 1. الإصلاح الجذري لنافذة رحلتك مع قطرة */
+#journeySheet {
+    padding-bottom: 24px !important;
+    align-items: center !important;
+}
+#journeySheetContent, #journeySheet .premium-sheet-content, #journeySheet .sheet-content {
+    width: 92% !important;
+    max-width: 450px !important;
+    max-height: 85vh !important;
+    border-radius: 32px !important;
+    margin: 0 auto !important;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.7) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    overflow-y: auto !important;
+}
+
+/* 2. تصميم النوافذ الطافية الاحترافية الجديدة */
+.pro-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s; padding: 20px; }
+.pro-modal-bg.active { display: flex; opacity: 1; }
+.pro-modal-box { width: 100%; max-width: 380px; background: var(--surface, #1a1a2e); border-radius: 32px; padding: 30px 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255,255,255,0.1); position: relative; text-align: center; }
+.pro-modal-bg.active .pro-modal-box { transform: scale(1); }
+.pro-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+.pro-btn-heart { background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748B; transition: 0.3s; padding: 5px; outline: none; }
+.pro-btn-heart.liked { color: #ef4444; transform: scale(1.15); }
+.pro-btn-heart svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; transition: 0.3s; }
+.pro-btn-heart.liked svg { fill: #ef4444; stroke: #ef4444; }
+.pro-modal-title { font-size: 1.4rem; font-weight: 900; margin: 0; }
+.pro-modal-text { font-size: 1.2rem; line-height: 1.8; color: var(--text, #fff); font-weight: 700; margin: 0 0 10px 0; }
+.pro-btn-close { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 40px; height: 40px; color: var(--text, #fff); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; outline: none; }
+.pro-btn-close:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
+</style>
+
+<script>
+// دالة بناء النافذة الطافية في الذاكرة لتجاوز أي مشاكل في الـ HTML
+function injectProModals() {
+    if(document.getElementById('proModalOverlay')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'proModalOverlay';
+    overlay.className = 'pro-modal-bg';
+    overlay.innerHTML = `
+        <div class="pro-modal-box" id="proModalBox">
+            <div class="pro-modal-header">
+                <button id="proHeartBtn" class="pro-btn-heart" onclick="toggleProLike()">
+                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </button>
+                <h3 id="proModalTitle" class="pro-modal-title">العنوان</h3>
+                <button class="pro-btn-close" onclick="closeProModal()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <p id="proModalText" class="pro-modal-text">النص</p>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if(e.target.id === 'proModalOverlay') closeProModal(); });
+}
+
+let currentModalType = '';
+
+window.openProModal = function(type, title, textElementId) {
+    injectProModals();
+    currentModalType = type;
+    const titleEl = document.getElementById('proModalTitle');
+    titleEl.textContent = title;
+    titleEl.style.color = type === 'quote' ? '#8B5CF6' : '#0EA5E9';
+    
+    const sourceText = document.getElementById(textElementId);
+    document.getElementById('proModalText').textContent = sourceText ? sourceText.textContent : '...';
+    
+    checkProLikeStatus();
+    document.getElementById('proModalOverlay').classList.add('active');
+};
+
+window.closeProModal = function() {
+    const modal = document.getElementById('proModalOverlay');
+    if(modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => { modal.classList.remove('active'); modal.style.opacity = ''; }, 300);
+    }
+};
+
+window.toggleProLike = function() {
+    const btn = document.getElementById('proHeartBtn');
+    const isLiked = btn.classList.contains('liked');
+    const today = new Date().toDateString();
+    const key = 'qatra_liked_' + currentModalType + '_' + today;
+    let stats = JSON.parse(localStorage.getItem('qatra_stats') || '{"likes":0,"dhikr":0,"culture":0,"selfDev":0,"poetry":0,"days":1}');
+    
+    if(!isLiked) {
+        btn.classList.add('liked');
+        localStorage.setItem(key, 'true');
+        stats.likes = (stats.likes || 0) + 1;
+        
+        // ربط الإعجاب بالوعي العام (إضافة 10 نقاط عشوائياً لإحدى الأشجار)
+        const cats = ['dhikr', 'culture', 'selfDev', 'poetry'];
+        const rCat = cats[Math.floor(Math.random() * cats.length)];
+        stats[rCat] = (stats[rCat] || 0) + 10;
+        
+        const toast = document.getElementById('copyToast');
+        if(toast) { 
+            toast.textContent = "تم الإعجاب! ارتفع مستوى وعيك 🌱"; 
+            toast.classList.add('show'); 
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(()=>toast.textContent="تم النسخ بنجاح",300); }, 2000); 
+        }
+    } else {
+        btn.classList.remove('liked');
+        localStorage.removeItem(key);
+        stats.likes = Math.max(0, (stats.likes || 0) - 1);
+    }
+    localStorage.setItem('qatra_stats', JSON.stringify(stats));
+    
+    if(typeof updateStatsChart === 'function') updateStatsChart();
+    if(typeof renderGarden === 'function') renderGarden();
+};
+
+window.checkProLikeStatus = function() {
+    const btn = document.getElementById('proHeartBtn');
+    const today = new Date().toDateString();
+    const key = 'qatra_liked_' + currentModalType + '_' + today;
+    if(localStorage.getItem(key) === 'true') {
+        btn.classList.add('liked');
+    } else {
+        btn.classList.remove('liked');
+    }
+};
+
+// قناص الأحداث: يعترض النقرات على البطاقات كل نصف ثانية ويجبرها على الواجهة الجديدة
+setInterval(() => {
+    document.querySelectorAll('.glass-card.action-card, .card').forEach(card => {
+        const titleEl = card.querySelector('.card-title, .title, span');
+        if(!titleEl) return;
+        const text = titleEl.textContent;
+        
+        if(text.includes('لحظتك الحالية') && !card.dataset.proBound) {
+            card.removeAttribute('onclick'); // إزالة أي أمر قديم
+            card.onclick = (e) => { e.preventDefault(); e.stopPropagation(); openProModal('moment', 'لحظتك الحالية', 'currentMomentText'); };
+            card.dataset.proBound = "true"; // لضمان عدم تكرار البرمجة
+        }
+        if((text.includes('اقتباس اليوم') || text.includes('اقتباس')) && !card.dataset.proBound) {
+            card.removeAttribute('onclick');
+            card.onclick = (e) => { e.preventDefault(); e.stopPropagation(); openProModal('quote', 'اقتباس اليوم', 'dailyQuoteText'); };
+            card.dataset.proBound = "true";
+        }
+    });
+}, 500);
+</script>
+<!-- END PRO UI FIX V3 -->
+
 </body>
 </html>
