@@ -287,6 +287,58 @@ body.glass-active { --qg-panel:rgba(248,251,255,.96); --qg-sheet:rgba(248,251,25
 body.glass-active.dark-mode { --qg-panel:rgba(20,30,51,.96); --qg-sheet:rgba(14,23,43,.98); }
 }
 
+
+
+/* QATRA MINDFUL V1: all rules scoped to the existing container */
+#mindfulSheet{position:fixed!important;inset:0!important;width:100%!important;height:100%!important;height:100dvh!important;z-index:7000!important;align-items:stretch!important;justify-content:flex-start!important;background:#091320!important;color:#eaf2fa;overflow:hidden;opacity:1!important;direction:rtl;font-family:Cairo,sans-serif}
+#mindfulSheetContent{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;background:radial-gradient(ellipse at top right,#16445d66,transparent 50%),#0b1423;padding:0;border-radius:0;transform:none;box-sizing:border-box;overflow:hidden;color:#eaf2fa}
+#mindfulSheet *{box-sizing:border-box}
+#mindfulSheet .mm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(16px + env(safe-area-inset-top,0px)) 20px 14px;border-bottom:1px solid #ffffff12;flex-shrink:0}
+#mindfulSheet h2{font-size:22px;margin:0;color:#f1f7ff}
+#mindfulSheet h3{font-size:19px;line-height:1.8;margin:6px 0 16px;color:#f1f7ff}
+#mindfulSheet p{line-height:1.9;margin:10px 0;color:#bccbdd}
+#mindfulSheet .mm-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:22px 20px calc(30px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+#mindfulSheet .mm-wrap{max-width:680px;width:100%;margin:auto}
+#mindfulSheet .mm-screen{display:none;flex-direction:column;gap:12px;animation:mm-enter .24s ease}
+#mindfulSheet .mm-screen.is-active{display:flex}
+#mindfulSheet .mm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#mindfulSheet button{font-family:inherit;font-size:14px;color:#eaf2fa;cursor:pointer;touch-action:manipulation}
+#mindfulSheet .mm-card{display:flex;flex-direction:column;align-items:flex-start;text-align:right;gap:10px;padding:22px 16px;border-radius:23px;border:1px solid #ffffff16;background:linear-gradient(140deg,#ffffff0d,#ffffff03);backdrop-filter:blur(16px);min-height:150px;transition:background .2s,transform .2s}
+#mindfulSheet .mm-card:hover{background:#ffffff12}
+#mindfulSheet .mm-card:active{transform:scale(.98)}
+#mindfulSheet .mm-card strong{font-size:16px;font-weight:800}
+#mindfulSheet .mm-card small{color:#a8bacd;font-size:12px;line-height:1.8}
+#mindfulSheet .mm-no{color:#6ed4d3;font-size:12px;letter-spacing:2px}
+#mindfulSheet .mm-btn{padding:13px 18px;border-radius:15px;border:1px solid #ffffff20;background:#ffffff09;line-height:1.6}
+#mindfulSheet .mm-primary{background:#83dad0;color:#09252a;border-color:transparent;font-weight:800}
+#mindfulSheet .mm-danger{border-color:#ff9b9b44;color:#ffc7c7}
+#mindfulSheet .mm-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#mindfulSheet .mm-pills{display:flex;flex-wrap:wrap;gap:8px}
+#mindfulSheet .mm-pill{padding:10px 14px;border-radius:99px;border:1px solid #ffffff1c;background:#ffffff06}
+#mindfulSheet .mm-pill[aria-pressed=true]{background:#83dad022;border-color:#83dad0;color:#a9f2e9}
+#mindfulSheet label{display:block;font-size:14px;line-height:1.9;color:#dce8f5}
+#mindfulSheet textarea{display:block;width:100%;min-height:150px;resize:vertical;border-radius:20px;border:1px solid #ffffff20;background:#020b1680;color:#edf5ff;padding:18px;font:inherit;font-size:16px;line-height:1.9;outline:none;direction:rtl}
+#mindfulSheet textarea:focus,#mindfulSheet button:focus-visible{outline:2px solid #83dad0;outline-offset:3px}
+#mindfulSheet textarea::placeholder{color:#8296ae}
+#mindfulSheet input[type=range]{width:100%;accent-color:#83dad0;direction:ltr}
+#mindfulSheet .mm-panel{border:1px solid #ffffff14;background:#ffffff06;border-radius:22px;padding:18px}
+#mindfulSheet .mm-output{white-space:pre-wrap;overflow-wrap:anywhere}
+#mindfulSheet .mm-label{color:#83dad0;font-size:13px;display:block;margin-bottom:6px}
+#mindfulSheet .mm-muted{font-size:12px;color:#9eb1c7}
+#mindfulSheet .mm-status{padding:12px 20px;margin:0;background:#112a30;color:#c1f5e8;flex-shrink:0;font-size:13px}
+#mindfulSheet [hidden]{display:none!important}
+#mindfulSheet button:disabled{opacity:.55;cursor:default}
+#mindfulSheet .mm-drop{width:76px;height:76px;margin:30px auto;border-radius:60% 60% 60% 10%;transform:rotate(-45deg);background:linear-gradient(140deg,#a5ede3,#26879e);box-shadow:0 0 65px #83dad033;animation:mm-pulse 3.4s ease-in-out infinite}
+#mindfulSheet .mm-progress{display:flex;gap:6px;margin-bottom:12px}
+#mindfulSheet .mm-progress span{height:4px;flex:1;background:#ffffff18;border-radius:4px}
+#mindfulSheet .mm-progress span.done{background:#83dad0}
+#mindfulSheet .mm-success{animation:mm-success .5s ease}
+@keyframes mm-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes mm-pulse{50%{transform:rotate(-45deg) scale(1.09);box-shadow:0 0 85px #83dad055}}
+@keyframes mm-success{50%{box-shadow:0 0 0 5px #83dad044}}
+@media(max-width:340px){#mindfulSheet .mm-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){#mindfulSheet *,#mindfulSheet *::before{animation:none!important;transition:none!important}}
+
 </style>
 <link rel="stylesheet" href="home-windows.css">
 <link rel="stylesheet" href="library-cards.css">
@@ -654,9 +706,7 @@ body.glass-active.dark-mode { --qg-panel:rgba(20,30,51,.96); --qg-sheet:rgba(14,
 <button class="nav-home-btn active" data-view="homeView">
 <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
 </button>
-<button class="nav-item" data-view="meditationView">
-<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-</button>
+<button class="nav-item" data-sheet="mindfulSheet" aria-label="دقيقة وعي"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg></button>
 <button class="nav-item" data-view="gardenView">
 <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 1 8.3C19.2 15.66 15.14 20 11 20z"/><path d="M11 20v-5c0-1.42 1.13-2.61 2.5-2.84"/></svg>
 </button>
@@ -730,18 +780,67 @@ body.glass-active.dark-mode { --qg-panel:rgba(20,30,51,.96); --qg-sheet:rgba(14,
 
 
 <!-- MINDFUL MINUTE SHEET -->
-<div id="mindfulSheet" class="sheet-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:2000; justify-content:center; align-items:flex-end; opacity:0; transition:opacity 0.3s ease;">
-    <div id="mindfulSheetContent" class="sheet-content" style="width:100%; height:80vh; background:var(--t-card, #ffffff); border-radius:24px 24px 0 0; padding:20px; box-shadow:0 -10px 40px rgba(0,0,0,0.2); transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display:flex; flex-direction:column; overflow:hidden;">
-        <div style="width:45px; height:6px; background:rgba(128,128,128,0.2); border-radius:10px; margin:0 auto 15px auto;"></div>
-        
-        <!-- الحاوية الديناميكية التي ستتغير محتوياتها -->
-        <div id="mindfulDynamicArea" style="flex:1; display:flex; flex-direction:column; overflow-y:auto; padding-bottom:20px;">
-            <!-- يتم حقن المحتوى بواسطة JS -->
-        </div>
-        
-        <button id="closeMindfulSheet" style="margin-top:10px; width:100%; padding:15px; border-radius:16px; border:none; background:rgba(128,128,128,0.1); color:var(--t-text, #333); font-size:1.1rem; font-weight:bold; cursor:pointer;">إغلاق دقيقة وعي</button>
+
+<div id="mindfulSheet" class="sheet-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="mmTitle" lang="ar" dir="rtl">
+ <div id="mindfulSheetContent">
+  <header class="mm-head"><button type="button" class="mm-btn" id="mmBack" hidden>القائمة</button><h2 id="mmTitle" tabindex="-1">دقيقة وعي</h2><button type="button" class="mm-btn" id="closeMindfulSheet" aria-label="إغلاق دقيقة وعي">إغلاق</button></header>
+  <p class="mm-status" id="mmStatus" role="status" aria-live="polite" hidden></p>
+  <div class="mm-scroll" id="mindfulDynamicArea"><div class="mm-wrap">
+   <section class="mm-screen is-active" data-mm-screen="menu">
+    <p>مساحة صغيرة لتسمع نفسك، دون استعجال أو أحكام.</p>
+    <div class="mm-grid" id="mmMenu"></div>
+    <p class="mm-muted">هذه أدوات للتأمل الذاتي وليست تشخيصًا أو علاجًا. لا يرسل هذا القسم كتاباتك إلى خدمة خارجية. ما تختار حفظه يبقى في تخزين التطبيق المحلي دون تشفير إضافي.</p>
+    <button type="button" class="mm-btn" id="mmSakeena">الانتقال إلى مساحة سكينة والأصوات</button>
+   </section>
+   <section class="mm-screen" data-mm-screen="feelings">
+    <h3>كيف تشعر الآن؟</h3><div class="mm-pills" id="mmFeelings"></div>
+    <div id="mmFeelingFields" hidden>
+     <label for="mmIntensity">شدة الشعور: <output id="mmIntensityValue" for="mmIntensity">5</output> من 10</label>
+     <input id="mmIntensity" type="range" min="1" max="10" value="5">
+     <label for="mmReason">ما الذي قد يكون وراءه؟ (اختياري)</label><textarea id="mmReason" maxlength="4000" placeholder="يمكنك ترك هذه المساحة فارغة."></textarea>
+     <div class="mm-panel" id="mmFeelingResponse" aria-live="polite"></div>
+     <div class="mm-row"><button type="button" class="mm-btn mm-primary" id="mmSaveFeeling">حفظ الشعور</button><button type="button" class="mm-btn" id="mmRouteGround" hidden>لنعد إلى اللحظة أولًا</button></div>
     </div>
+   </section>
+   <section class="mm-screen" data-mm-screen="thought">
+    <h3>ما الفكرة التي تشغل بالك؟</h3>
+    <label for="mmThought">اكتب الفكرة كما تأتيك</label><textarea id="mmThought" maxlength="8000" placeholder="لا تحتاج إلى صياغة مثالية."></textarea>
+    <button type="button" class="mm-btn mm-primary" id="mmAnalyze">ترتيب الفكرة محليًا</button>
+    <div id="mmThoughtResult" hidden>
+     <p class="mm-muted">هذه قراءة احتمالية تعتمد على كلمات وقواعد بسيطة، وقد لا تطابق قصدك. اختر زاوية أخرى إذا كانت أقرب لتجربتك.</p>
+     <div class="mm-pills" id="mmPatterns"></div>
+     <div class="mm-panel"><span class="mm-label">ما فهمته منك</span><p class="mm-output" id="mmUnderstood"></p></div>
+     <div class="mm-panel"><span class="mm-label">إعادة نظر</span><p id="mmReconsider"></p></div>
+     <div class="mm-panel"><span class="mm-label">الفكرة بعد الترتيب</span><p id="mmReframed"></p></div>
+     <div class="mm-panel"><span class="mm-label">رسالة وخطوة عملية</span><p id="mmAction"></p></div>
+     <button type="button" class="mm-btn mm-primary" id="mmSaveThought">حفظ النتيجة في دفتر قطرة</button>
+    </div>
+    <div class="mm-panel" id="mmSupport" hidden><p>إذا كنت تفكر في إيذاء نفسك أو تشعر أنك غير آمن الآن، لا تعتمد على ترتيب الأفكار وحده. تواصل فورًا مع شخص تثق به، واطلب مساعدة الطوارئ المحلية عند وجود خطر مباشر.</p></div>
+   </section>
+   <section class="mm-screen" data-mm-screen="ground">
+    <div class="mm-progress" id="mmGroundProgress" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <div class="mm-drop" aria-hidden="true"></div><h3 id="mmGroundTitle" tabindex="-1"></h3><p id="mmGroundPrompt"></p>
+    <div class="mm-pills" id="mmSounds" hidden></div>
+    <label for="mmGroundAnswer" id="mmGroundLabel">ملاحظتك (اختيارية)</label><textarea id="mmGroundAnswer" maxlength="2000" placeholder="يمكنك الملاحظة بصمت ثم الضغط على التالي."></textarea>
+    <button type="button" class="mm-btn mm-primary" id="mmGroundNext">التالي</button>
+   </section>
+   <section class="mm-screen" data-mm-screen="gratitude">
+    <h3>ما الشيء الصغير الذي تود تقديره اليوم؟</h3><div class="mm-pills" id="mmGratitudeSuggestions"></div>
+    <label for="mmGratitude">لحظة امتنانك</label><textarea id="mmGratitude" maxlength="6000" placeholder="أنا ممتن اليوم لـ..."></textarea><button type="button" class="mm-btn mm-primary" id="mmSaveGratitude">حفظ لحظة الامتنان</button>
+   </section>
+   <section class="mm-screen" data-mm-screen="intention">
+    <h3>نية صغيرة للساعات القادمة</h3><div class="mm-pills" id="mmIntentionSuggestions"></div>
+    <label for="mmIntention">ما الخطوة التي تنوي القيام بها؟</label><textarea id="mmIntention" maxlength="4000" placeholder="اختر خطوة صغيرة يمكن تنفيذها."></textarea><button type="button" class="mm-btn mm-primary" id="mmSaveIntention">حفظ النية</button>
+   </section>
+   <section class="mm-screen" data-mm-screen="unload">
+    <h3>اكتب ما يشغلك، دون أن ترتبه</h3><label for="mmUnload">مساحتك الحرة</label><textarea id="mmUnload" maxlength="12000" style="min-height:260px" placeholder="هذه الكتابة لا تُحفظ إلا إذا اخترت الحفظ."></textarea>
+    <div class="mm-row"><button type="button" class="mm-btn mm-primary" id="mmSaveUnload">حفظ في الدفتر</button><button type="button" class="mm-btn" id="mmRouteThought">ترتيب الفكرة</button><button type="button" class="mm-btn mm-danger" id="mmClearUnload">حذف للتحرر</button></div>
+    <p class="mm-muted">الحذف هنا يمسح المسودة الحالية فقط، ولا يحذف إدخالات سبق حفظها في الدفتر.</p>
+   </section>
+  </div></div>
+ </div>
 </div>
+
 
 
 
