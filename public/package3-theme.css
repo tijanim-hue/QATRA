@@ -1,0 +1,39 @@
+/* QATRA PACKAGE THREE: shared palette; no layout or SVG path changes. */
+body.q3-themed{background:var(--bg)!important;color:var(--text)!important}
+body.q3-themed .app-container:not(.q2-home){background:var(--bg)!important}
+body.q3-themed .header{color:var(--text)}
+body.q3-themed .header-btn{color:var(--text)}
+body.q3-themed .floating-nav{background:var(--q3-panel)!important;border-color:var(--border)!important;box-shadow:var(--shadow)!important}
+body.q3-themed .nav-item{color:var(--text-dim)}
+body.q3-themed .nav-item.active{color:var(--primary)}
+body.q3-themed .nav-home-btn{background:var(--primary)!important;color:var(--q3-on-accent)!important}
+body.q3-themed .btn-solid{background:var(--primary);color:var(--q3-on-accent)}
+body.q3-themed .sheet-content,body.q3-themed .qh-panel,body.q3-themed .qe-panel{background:var(--q3-panel)!important;color:var(--text)!important;border-color:var(--border)!important}
+body.q3-themed #journeySheetContent{background:var(--q3-panel)!important;color:var(--text)!important;border-color:var(--border)!important}
+body.q3-themed #journeySheetContent .metric-card{background:var(--surface)!important;border-color:var(--border)!important}
+body.q3-themed .qh-quote{background:var(--q3-soft)!important;border-color:var(--border)!important;color:var(--text)!important}
+body.q3-themed .qh-title,body.q3-themed .qe-title{color:var(--text)!important}
+body.q3-themed .ql-card,body.q3-themed .ql-ghost,body.q3-themed .ql-sheet .sheet-content{background:var(--q3-panel)!important;color:var(--text)!important;border-color:var(--border)!important}
+body.q3-themed .ql-text{color:var(--text)!important}
+body.q3-themed .ql-source,body.q3-themed .ql-hint{color:var(--text-dim)!important}
+body.q3-themed .ql-tab.active,body.q3-themed .ql-use{background:var(--primary)!important;color:var(--q3-on-accent)!important}
+/* Original mindful minute has explicit dark colors; map them to the same palette. */
+body.q3-themed #mindfulSheet{background:var(--bg)!important;color:var(--text)!important}
+body.q3-themed #mindfulSheetContent{background:var(--q3-screen)!important;color:var(--text)!important}
+body.q3-themed #mindfulSheet .mm-head{border-color:var(--border)!important}
+body.q3-themed #mindfulSheet h2,body.q3-themed #mindfulSheet h3,body.q3-themed #mindfulSheet label{color:var(--text)!important}
+body.q3-themed #mindfulSheet p,body.q3-themed #mindfulSheet .mm-card small{color:var(--text-dim)}
+body.q3-themed #mindfulSheet .mm-card,body.q3-themed #mindfulSheet .mm-panel{background:var(--q3-soft)!important;border-color:var(--border)!important;color:var(--text)!important}
+body.q3-themed #mindfulSheet .mm-btn,body.q3-themed #mindfulSheet .mm-pill{background:var(--surface);border-color:var(--border);color:var(--text)}
+body.q3-themed #mindfulSheet .mm-primary{background:var(--primary)!important;color:var(--q3-on-accent)!important}
+body.q3-themed #mindfulSheet .mm-pill[aria-pressed=true]{border-color:var(--primary)!important;background:var(--q3-soft)!important;color:var(--text)!important}
+body.q3-themed #mindfulSheet .mm-no,body.q3-themed #mindfulSheet .mm-label{color:var(--primary)!important}
+body.q3-themed #mindfulSheet textarea{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
+body.q3-themed #mindfulSheet textarea::placeholder{color:var(--text-dim)}
+body.q3-themed #mindfulSheet input[type=range]{accent-color:var(--primary)!important}
+body.q3-themed #mindfulSheet .mm-drop{background:var(--q3-drop)!important;box-shadow:0 0 55px var(--q3-glow)!important}
+body.q3-themed #mindfulSheet .mm-progress span{background:var(--border)}
+body.q3-themed #mindfulSheet .mm-progress span.done{background:var(--primary)!important}
+body.q3-themed #mindfulSheet .mm-danger{color:var(--q3-danger)!important;border-color:var(--q3-danger)!important}
+body.q3-themed #mindfulSheet .mm-status{background:var(--q3-soft);color:var(--text)}
+/* Heart liked-state colors, tree artwork and warning states intentionally retain their meaning. */
