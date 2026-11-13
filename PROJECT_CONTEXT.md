@@ -1,30 +1,31 @@
 # QATRA — Project context
 
-## Baseline and scope
-- Last user-confirmed working main: `79d16097b9983212a68be866c9f3ad550dc4785f`.
-- Branch: `mindful/phase-1-persistence`; draft PR #1. Main is not merged or modified.
-- Phase 1 foundation commit: `f8d0c86c8c3b39c8b7938c72fac1f8b6b1dd186b`.
-- Phase 1 is incomplete. The Room database is dormant: no UI bridge or automatic import is enabled.
+## Baseline and branch
+- Working main remains `79d16097b9983212a68be866c9f3ad550dc4785f`.
+- Development branch: `mindful/phase-1-persistence`; draft PR #1. No merge authorized/performed.
+- Foundation commit: `f8d0c86c8c3b39c8b7938c72fac1f8b6b1dd186b`.
+- APK-only CI commit: `bf3fbefaab13586a35f1225c6d30b391035e3108`.
 
-## Existing foundation
-Room 2.8.4, Java annotationProcessor, logically separated record kinds, composite identity, revision checks, transactional links and imports, versioned export and scoped erasure. Unknown legacy dates remain null. Exact supplied legacy snapshots are archived locally; changed snapshots under the same import id are refused. No destructive migration fallback.
+## Verified evidence
+GitHub Actions run 43431488973 completed its build job successfully on 2026-11-13 at 13:13:22 UTC, with check `Result - APK compiled`. This verifies APK compilation of the foundation, NOT functional behavior. Initial instrumentation runs failed; their precise root cause was not established. Emulator/phone tests are disabled by user request, not relabeled as passed.
 
-## User decision — 2026-11-13
-The user requests direct incremental implementation without emulator or phone testing. Stop launching emulator tests. Retain test source files without claiming they passed. Keep APK compilation because a failed build cannot produce a usable application. Do not bypass a compiler error or mark a failed build successful.
-
-## Actual evidence
-Both initial persistence-tests runs failed (43429507099 and 43429699505). The provided log tail shows BUILD FAILED, not its underlying cause. Compilation and functional correctness are NOT validated. The replacement workflow runs assembleDebug only, retains its failure result, archives build logs/schema output and exposes a short diagnostic in a separate check name. No emulator is started. No APK is distributed by this branch workflow; persistent signing and the main release/build workflow are unchanged.
+## This bridge increment
+- Register QatraAwareness separately from the existing QatraNative plugin.
+- Run Room calls on a single worker; reject malformed inputs and never expose raw personal JSON in error messages.
+- Add explicit CRUD, revision checks, links, legacy batch import and JSON export bridge actions.
+- Add an unloaded JavaScript repository with serialized requests and explicit migration permission.
+- No automatic migration, screen event changes, script loading, data deletion or AI/network calls.
+- The existing UI still uses its previous stores. Do NOT enable the new repository before backup policy and all legacy readers/writers are integrated.
 
 ## Remaining within phase 1
-1. Resolve the actual compilation error before enabling storage.
-2. Add the separate asynchronous Awareness bridge and complete legacy adapters.
-3. Route all existing notebook readers/writers before changing the source of truth.
-4. Add export, restore, deletion and optional record links without redesigning existing screens.
-5. Define backup rules before storing personal data in the new database.
-6. Preserve schema history and document untested behavior.
+1. Adopt a no-cloud-backup policy for the new database before the UI writes personal records.
+2. Add/review the legacy adapter and map every notebook/awareness reader and writer.
+3. Integrate the repository without changing names, icons, layout, theme or activity order.
+4. Complete versioned restore and explicit export/delete UI actions, including avoiding re-import after erasure.
+5. Preserve migration schema history and publish actual build results.
 
-## Privacy and regression boundaries
-No AI, keys, remote uploads of personal data, analytics or fake UI records. No extra database encryption is implemented or claimed. Keep all existing names, icons, layout, themes and native progress ledger. This CI change does not alter app code, existing user data or the working main branch.
+## Boundaries
+Room 2.8.4 remains app-private storage with logical kind separation, nullable unknown timestamps, transactional imports/links and no destructive migration fallback. Additional database encryption is not implemented. Existing progress ledger, themes, signing identity and main workflow are unchanged. New APIs are dormant to normal UI use; APIs existing does not mean the complete user feature has shipped.
 
-## Rollback
-Discard/revert the feature branch commits. No production data migration has been enabled.
+## Status and rollback
+Phase 1 is NOT complete. The bridge increment must compile before further integration. Restore/reboot/update/physical-device behavior is untested. Discard or revert branch commits to return to the baseline; no UI migration has run.
