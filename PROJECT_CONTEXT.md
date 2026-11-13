@@ -1,36 +1,28 @@
 # QATRA — Project context
 
-## Baseline
-Main remains `79d16097b9983212a68be866c9f3ad550dc4785f`. Development branch: `mindful/phase-1-persistence`, draft PR #1. Phase 1 is NOT complete and no merge is performed.
+## Baseline and review
+- Main baseline: `79d16097b9983212a68be866c9f3ad550dc4785f`.
+- Work branch: `mindful/phase-1-persistence`; PR #1 remains separate from main.
+- Integrated implementation: `abc806fc6218e06137f7fb7f55ee4e7dd92067e1`.
+- Phase 1 implementation is integrated and its APK compiles. User acceptance and merge remain pending. Phase 2 has not started.
 
-## Verified builds
-- Foundation: Actions run 43431488973, build success.
-- Registered data bridge: Actions run 43432476943, build success at 2026-11-13 13:24:57 UTC.
-- These establish APK compilation only. Initial instrumentation runs failed; functional, migration, device update and reboot behavior remain untested. Emulator/phone tests were waived by the user.
+## Verified build evidence
+GitHub Actions run 43445700521: build job 131954515604 succeeded on 2026-11-13 at 14:47:31 UTC. The separate summary check reports APK compiled. Earlier successful foundation/bridge builds: 43431488973 and 43432476943. An older cancelled run is not a compilation failure.
+Initial instrumentation jobs failed; no functional test success is claimed. Emulator and physical-phone tests were waived by the user. Compilation does not validate actual Android file-picker behavior, process-death recovery, user-data migration, upgrade, reboot or visual regressions.
 
-## This increment (pending build)
-Production bridge opens a Room database under noBackupFilesDir/qatra-awareness. It refuses an existing database at the prior standard path rather than deleting it or silently opening a different store. Android Auto Backup excludes the new location; no additional database encryption is claimed. Legacy WebView storage and unrelated app backup behavior are not changed.
+## Implemented scope
+- Room 2.8.4 with logical record kinds, nullable unknown timestamps, revisions and transactional links/imports. No destructive fallback.
+- Separate QatraAwareness plugin, serialized background database work and asynchronous JS repository.
+- On Android, existing mindful saves and notebook reads/writes use Room; pure-browser behavior retains its existing LocalStorage backend. Native errors do not silently use a second backend.
+- Legacy migration starts on the first awareness data operation and runs once. The five sources are feelings, moments, gratitude, intentions and notebook keys. Original snapshots are preserved and malformed or duplicate-id input is rejected, not silently dropped. Legacy import limits: 2000 records, 10 MiB snapshot, 64 KiB per payload.
+- Production database lives under noBackupFilesDir/qatra-awareness, excluded from Android Auto Backup. Existing standard-path database files cause a refusal pending explicit migration. Legacy WebView backup behavior is unchanged. No extra database encryption is implemented.
+- Notebook-only export is preserved. Settings add all-awareness export, restore and confirmed erasure. Android document pickers handle file selection; no broad storage permission is requested. Portable JSON files are unencrypted personal data.
+- Restore accepts versioned qatra-awareness JSON, up to 20 MiB. It merges missing rows and refuses conflicting existing content transactionally. Imported consent requires renewal; existing consent is not overwritten by a backup. Notebook-only legacy array exports are not the all-awareness restore format.
+- Erasure includes awareness records, notebook content, links and archived imports. A non-personal tombstone blocks old LocalStorage re-import. Legacy keys and in-memory drafts are cleared; cleanup failures are disclosed. Exported external files and the quote/progress ledger are not deleted.
+- Existing optional transfers are preserved and native link APIs exist. Expanded cross-tool features remain in their planned later phases.
 
-Adds a pure legacy planner for the five known source keys, stable hashed identities, preserved raw snapshots, nullable unknown dates and fail-closed format/duplicate/size checks. Planning neither writes nor deletes data. Native legacy import remains transactional and explicit.
+## Preserved boundaries
+Existing mindful names, element order, SVG icons, theme styles, scheduled drops, garden progress, signing identity and main build workflow are not redesigned. No cloud AI, keys, analytics or external history sharing is introduced. Room schema generation remains configured in the branch build.
 
-Restore validates version, records and links in one transaction. It merges missing records, keeps identical current records and refuses conflicts rather than overwriting user edits. Restored consent is revoked and requires renewal; existing consent is not altered by a backup. Backups over 20 MiB and malformed records are rejected without partial changes. Portable JSON exports are not encrypted and must be handled as personal data.
-
-Explicit native erasure clears entries, links and archived imports, then writes a non-personal tombstone in the same transaction to prevent old LocalStorage records being automatically re-imported. Bridge restore and erase actions require explicit confirmation. A manual restore may add records after erasure but does not remove the anti-reimport tombstone.
-
-## Integration gate
-The new JS modules are NOT loaded in index.html. Existing screens still use their old storage. No migration, restore or erasure is automatically invoked. The next increment must route ALL existing notebook and mindful readers/writers, clear legacy sources on user erasure, and add working export/restore/delete actions without changing existing layout or names. Partial integrations must not be merged.
-
-## Still pending
-Actual UI integration, complete export/restore file handling, optional cross-tool links, schema history, final APK compilation and honest documentation of untested behavior. No AI keys, AI requests, analytics, model calls or new permissions. Existing themes, drops, progress, signing identity and main workflow remain untouched.
-
-## Rollback
-Discard/revert branch commits. No UI data migration has been enabled in this increment.
-
-## UI integration increment — awaiting APK build
-- Existing mindful save actions and notebook reads/writes are routed to Room on Android. Browser behavior retains LocalStorage. A native failure never silently writes to the browser backend.
-- Initial local migration runs once when an awareness data action is first used. The source snapshot remains intact; unsupported/duplicate/oversize input stops without dropping records. After native erasure, the tombstone prevents re-import.
-- Existing notebook export still exports notebook records; new all-awareness export/restore uses Android document pickers. No broad storage permission is requested.
-- Data actions are appended to settings. Existing mindful names, order, SVGs and styles are not replaced. Erasure explicitly includes the notebook, clears old source keys and clears in-memory drafts. Externally exported backups and the quote/progress ledger are not deleted.
-- Pure browser mode retains old local functionality. New Android file actions and persistence are not claimed to be device-tested.
-- New source patch and JS syntax checks were reviewed before delivery. Kotlin/Android compilation must be read from the feature branch CI after push. No functional/device test success is claimed.
-- No phase-2 work or main merge is included.
+## Release gate and rollback
+No main merge or phase-2 work is included. Review/acceptance must distinguish source review and compilation from unperformed runtime testing. Main remains the prior working version until an explicitly approved merge. Before deploying a data migration, keep the prior APK and a user-controlled data export where possible. Reverting code after an installed migration is not a guarantee that new-format data will be usable by an older APK; do not delete the database to force rollback.
