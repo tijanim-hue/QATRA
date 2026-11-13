@@ -64,3 +64,14 @@ function initPanel(){
 root.QatraMindfulData=Object.freeze({enabled:nativeMode,ready,add,notebook,removeNote,cleanNote});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initPanel);else initPanel();
 })(globalThis);
+
+/* Optional bundled client: this loader does not contact an external service. */
+(function(root){
+ function load(){
+  if(!root.QatraMindfulData?.enabled||document.getElementById('qatraMindfulAIScript'))return;
+  const script=document.createElement('script');script.id='qatraMindfulAIScript';script.src='./mindful-ai.js';
+  script.onerror=()=>{const host=document.getElementById('mindfulDataPanel');if(host){const p=document.createElement('p');p.textContent='تعذر تحميل المساعد الاختياري؛ الأنشطة المحلية متاحة.';host.appendChild(p);}};
+  document.head.appendChild(script);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);else load();
+})(globalThis);

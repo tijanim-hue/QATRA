@@ -1,28 +1,14 @@
-# QATRA — Project context
+# QATRA - current phase 2 candidate
 
-## Baseline and review
-- Main baseline: `79d16097b9983212a68be866c9f3ad550dc4785f`.
-- Work branch: `mindful/phase-1-persistence`; PR #1 remains separate from main.
-- Integrated implementation: `abc806fc6218e06137f7fb7f55ee4e7dd92067e1`.
-- Phase 1 implementation is integrated and its APK compiles. User acceptance and merge remain pending. Phase 2 has not started.
+Work branch: mindful/phase-2-ai. No main merge or cloud activation is authorized by this patch. Existing server: https://qatra-ai.vercel.app; Firebase identity project: qatra-7f579. Git auto-deployment is disconnected. The user verified health 200, mindful 503 CLOUD_AI_DISABLED, and client-config 200 cloudEnabled:false with Origin https://localhost. These checks do not verify real identity, Redis or Groq calls. Keep AI_ENABLED=false pending separate approval and verification.
 
-## Verified build evidence
-GitHub Actions run 43445700521: build job 131954515604 succeeded on 2026-11-13 at 14:47:31 UTC. The separate summary check reports APK compiled. Earlier successful foundation/bridge builds: 43431488973 and 43432476943. An older cancelled run is not a compilation failure.
-Initial instrumentation jobs failed; no functional test success is claimed. Emulator and physical-phone tests were waived by the user. Compilation does not validate actual Android file-picker behavior, process-death recovery, user-data migration, upgrade, reboot or visual regressions.
+## Client increment
+public/mindful-ai.js adds optional native-only panels inside the existing feelings/thought screens; mindful-runtime.js loads the bundled module. No app.js rewrite, SDK dependency, startup external network, secret in the APK, or second journal storage backend. Existing order, icons, local analysis/save controls, Room schema, schedules, signing identity and progress remain unchanged.
+Cloud requests need fresh session consent. History requires a separate checkbox and at most three explicitly selected excerpts (1000 characters each) from locally listed feeling/thought/note records. Follow-ups send the original text and six abbreviated messages at most. Input/context limits reject excess rather than silently dropping selected context. Firebase sign-up/refresh uses public client configuration, unlike private Groq/Redis credentials. Tokens are memory-only; reopening the app may create another anonymous account. This is not a stable person/device identity. IP/global quotas remain mandatory. No attestation, revocation or automatic Firebase account cleanup is added.
+Replies use textContent and explicit local Room saves with stable request IDs. Input changes, navigation, panel closing, consent withdrawal, data restore/erase and reset clear the cloud session and abort local waiting. This cannot retract received data or delete provider logs/accounts. No automatic retry or paid-provider fallback.
 
-## Implemented scope
-- Room 2.8.4 with logical record kinds, nullable unknown timestamps, revisions and transactional links/imports. No destructive fallback.
-- Separate QatraAwareness plugin, serialized background database work and asynchronous JS repository.
-- On Android, existing mindful saves and notebook reads/writes use Room; pure-browser behavior retains its existing LocalStorage backend. Native errors do not silently use a second backend.
-- Legacy migration starts on the first awareness data operation and runs once. The five sources are feelings, moments, gratitude, intentions and notebook keys. Original snapshots are preserved and malformed or duplicate-id input is rejected, not silently dropped. Legacy import limits: 2000 records, 10 MiB snapshot, 64 KiB per payload.
-- Production database lives under noBackupFilesDir/qatra-awareness, excluded from Android Auto Backup. Existing standard-path database files cause a refusal pending explicit migration. Legacy WebView backup behavior is unchanged. No extra database encryption is implemented.
-- Notebook-only export is preserved. Settings add all-awareness export, restore and confirmed erasure. Android document pickers handle file selection; no broad storage permission is requested. Portable JSON files are unencrypted personal data.
-- Restore accepts versioned qatra-awareness JSON, up to 20 MiB. It merges missing rows and refuses conflicting existing content transactionally. Imported consent requires renewal; existing consent is not overwritten by a backup. Notebook-only legacy array exports are not the all-awareness restore format.
-- Erasure includes awareness records, notebook content, links and archived imports. A non-personal tombstone blocks old LocalStorage re-import. Legacy keys and in-memory drafts are cleared; cleanup failures are disclosed. Exported external files and the quote/progress ledger are not deleted.
-- Existing optional transfers are preserved and native link APIs exist. Expanded cross-tool features remain in their planned later phases.
+## Evidence and retained phase 1 boundaries
+Historical baseline 79d1609, integrated phase 1 abc806f. Run 43445700521 / job 131954515604 compiled the phase-1 APK on 2026-11-13; this is not evidence for this patch. Functional/emulator/device tests were waived by the user; none are claimed successful. Room 2.8.4 under noBackupFilesDir/qatra-awareness, no destructive fallback or extra database encryption. Legacy migration preserves snapshots and refuses malformed/duplicate inputs (2000 records, 10 MiB snapshot, 64 KiB payload). Native errors never silently switch to LocalStorage; browser local behavior is unchanged. Versioned restore merges missing rows and rejects conflicts; imported consent needs renewal. Erasure retains the tombstone blocking legacy re-import. Portable JSON exports are unencrypted; existing legacy WebView backup caveats remain. Keep the previous APK and a user-controlled export before upgrades. Reverting code does not guarantee older APK compatibility with changed stored data; never delete the database to force rollback.
 
-## Preserved boundaries
-Existing mindful names, element order, SVG icons, theme styles, scheduled drops, garden progress, signing identity and main build workflow are not redesigned. No cloud AI, keys, analytics or external history sharing is introduced. Room schema generation remains configured in the branch build.
-
-## Release gate and rollback
-No main merge or phase-2 work is included. Review/acceptance must distinguish source review and compilation from unperformed runtime testing. Main remains the prior working version until an explicitly approved merge. Before deploying a data migration, keep the prior APK and a user-controlled data export where possible. Reverting code after an installed migration is not a guarantee that new-format data will be usable by an older APK; do not delete the database to force rollback.
+## Remaining gates
+Only JS syntax is checked locally for this increment. Real Firebase verification, Redis execution, Groq quality, APK compilation and UI/CORS/abort behavior remain unverified. The existing Build Android APK workflow supports manual dispatch on this branch and restores QATRA_DEBUG_KEYSTORE_B64; pushes here do not automatically run that main-only workflow. No build or signing-key change is included. A new APK build is needed before this client appears on the phone. Do not mark phase 2 complete based on source push. All resources must stay on free plans, with no card/paid upgrade without separate approval.
