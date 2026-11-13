@@ -8,3 +8,10 @@
 - Preserve current consent on restore and require renewal for imported consent records.
 - Keep UI integration disabled pending complete reader/writer and data-action wiring.
 - New increment awaits compilation. Functional/device tests remain unperformed by user request; phase 1 is incomplete.
+
+## UI integration increment — pending build
+- Wire existing mindful and notebook persistence to Room on Android, preserving the browser fallback.
+- Add Android-native document export/import and a settings data-management panel.
+- Preserve notebook-only export; add explicit all-awareness restore/erase actions.
+- Keep all existing icons, screen arrangement, themes, scheduled drops and progress unchanged.
+- Compilation and final phase acceptance remain pending.

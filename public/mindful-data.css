@@ -1,0 +1,7 @@
+/* Data controls only: existing mindful screens and icons are not restyled. */
+.mindful-data-panel{margin-top:20px;padding:16px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);font:inherit}
+.mindful-data-panel summary{cursor:pointer;font-weight:800;line-height:1.8}
+.mindful-data-panel p{font-size:12px;line-height:1.9;color:var(--text-dim)}
+.mindful-data-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mindful-data-actions button{font:inherit;font-size:12px;border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--surface);color:var(--primary);cursor:pointer}
+.mindful-data-actions button:disabled{opacity:.5;cursor:wait}

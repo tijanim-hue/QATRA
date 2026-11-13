@@ -25,3 +25,12 @@ Actual UI integration, complete export/restore file handling, optional cross-too
 
 ## Rollback
 Discard/revert branch commits. No UI data migration has been enabled in this increment.
+
+## UI integration increment — awaiting APK build
+- Existing mindful save actions and notebook reads/writes are routed to Room on Android. Browser behavior retains LocalStorage. A native failure never silently writes to the browser backend.
+- Initial local migration runs once when an awareness data action is first used. The source snapshot remains intact; unsupported/duplicate/oversize input stops without dropping records. After native erasure, the tombstone prevents re-import.
+- Existing notebook export still exports notebook records; new all-awareness export/restore uses Android document pickers. No broad storage permission is requested.
+- Data actions are appended to settings. Existing mindful names, order, SVGs and styles are not replaced. Erasure explicitly includes the notebook, clears old source keys and clears in-memory drafts. Externally exported backups and the quote/progress ledger are not deleted.
+- Pure browser mode retains old local functionality. New Android file actions and persistence are not claimed to be device-tested.
+- New source patch and JS syntax checks were reviewed before delivery. Kotlin/Android compilation must be read from the feature branch CI after push. No functional/device test success is claimed.
+- No phase-2 work or main merge is included.

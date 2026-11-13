@@ -1533,22 +1533,26 @@ function readLog(key,notebook=false){
  if(value&&value.schemaVersion===1&&Array.isArray(value.entries))return value;
  throw new Error('صيغة السجل غير مدعومة. لم تُحذف بياناتك.');
 }
-function persist(key,entry,notebook=false){
+async function persist(key,entry,notebook=false){
+ if(window.QatraMindfulData?.enabled){await window.QatraMindfulData.add(key,entry);return;}
  const log=readLog(key,notebook),list=notebook?log:log.entries;
  if(!list.some(x=>x.id===entry.id))list.push(entry);
  localStorage.setItem(key,JSON.stringify(log));
 }
-function storeOnce(button,key,payload,category){
+async function storeOnce(button,key,payload,category){
+ if(button.disabled)return;
  const signature=JSON.stringify(payload),previous=S.saved.get(button.id);
  if(previous===signature){notice('سبق حفظ هذا الإدخال خلال هذه الجلسة.');return;}
+ button.disabled=true;
  const entry={schemaVersion:1,id:uid(),createdAt:new Date().toISOString(),source:'mindful-minute',...payload};
  try{
   if(key==='qatra_notebook'){
    entry.category=category;entry.date=new Date(entry.createdAt).toLocaleString('ar');
   }
-  persist(key,entry,key==='qatra_notebook');S.saved.set(button.id,signature);
+  await persist(key,entry,key==='qatra_notebook');S.saved.set(button.id,signature);
   notice('تم الحفظ على هذا الجهاز.');button.classList.remove('mm-success');void button.offsetWidth;button.classList.add('mm-success');
  }catch(e){notice('تعذر الحفظ: '+(e.message||'قد تكون مساحة التخزين ممتلئة.'),true);}
+ finally{button.disabled=false;}
 }
 function textRequired(id){const value=$(id).value.trim();if(!value){notice('اكتب بضع كلمات أولًا.',true);$(id).focus();return null;}return value;}
 function show(screen){
@@ -1613,10 +1617,11 @@ function init(){
  $('mmSaveThought').addEventListener('click',()=>{const r=S.result;if(!r)return;storeOnce($('mmSaveThought'),'qatra_notebook',{text:'الفكرة الأصلية: '+r.input+'\n\nما فهمته: '+r.understood+'\n\nإعادة نظر: '+r.reconsider+'\n\nبعد الترتيب: '+r.reframed+'\n\nالخطوة: '+r.action,activity:'thought',analysis:r},'ترتيب فكرة');});
  resetGround();
  pills('mmSounds',['صوت قريب','صوت بعيد','أصوات طبيعة','هدوء'],(label,button,parent)=>{choose(button,parent);$('mmGroundAnswer').value=label;});
- $('mmGroundNext').addEventListener('click',()=>{
+ $('mmGroundNext').addEventListener('click',async()=>{
   if(S.groundStep<3){S.groundAnswers[S.groundStep]={step:S.groundStep+1,text:$('mmGroundAnswer').value.trim()};S.groundStep++;paintGround();$('mmGroundTitle').focus();return;}
-  if(S.groundDone)return;
-  try{persist('qatra_moments_log',{schemaVersion:1,id:S.groundId,createdAt:new Date().toISOString(),source:'mindful-minute',exercise:'grounding-3-step',completed:true,answers:S.groundAnswers});S.groundDone=true;paintGround();notice('تم تسجيل إنجاز تمرين العودة إلى اللحظة.');}catch(e){notice('تعذر تسجيل الإنجاز: '+e.message,true);}
+  if(S.groundDone||$('mmGroundNext').disabled)return;
+  $('mmGroundNext').disabled=true;
+  try{await persist('qatra_moments_log',{schemaVersion:1,id:S.groundId,createdAt:new Date().toISOString(),source:'mindful-minute',exercise:'grounding-3-step',completed:true,answers:S.groundAnswers});S.groundDone=true;paintGround();notice('تم تسجيل إنجاز تمرين العودة إلى اللحظة.');}catch(e){notice('تعذر تسجيل الإنجاز: '+e.message,true);$('mmGroundNext').disabled=false;}
  });
  pills('mmGratitudeSuggestions',['شخص عزيز','نعمة معتادة','موقف أسعدك'],(label)=>{const prompts={'شخص عزيز':'أنا ممتن لشخص في حياتي لأنه…','نعمة معتادة':'نعمة اعتدت عليها وأريد تقديرها هي…','موقف أسعدك':'موقف صغير أسعدني اليوم هو…'};const el=$('mmGratitude');el.value+=(el.value?'\n':'')+prompts[label];el.focus();});
  $('mmSaveGratitude').addEventListener('click',()=>{const text=textRequired('mmGratitude');if(text)storeOnce($('mmSaveGratitude'),'qatra_gratitude_log',{text});});
@@ -1625,6 +1630,18 @@ function init(){
  $('mmSaveUnload').addEventListener('click',()=>{const text=textRequired('mmUnload');if(text)storeOnce($('mmSaveUnload'),'qatra_notebook',{text,activity:'unload'},'تفريغ ذهني');});
  $('mmRouteThought').addEventListener('click',()=>{const text=textRequired('mmUnload');if(!text)return;$('mmThought').value=text;S.result=analyze(text);show('thought');renderThought();});
  $('mmClearUnload').addEventListener('click',()=>{if(!$('mmUnload').value)return;if(window.confirm('مسح المسودة الحالية؟ لن تتغير الملاحظات المحفوظة سابقًا.')){$('mmUnload').value='';notice('تم مسح المسودة الحالية.');}});
+
+ window.addEventListener('qatra-awareness-data-changed',event=>{
+  S.saved.clear();
+  if(event.detail?.erased){
+   S.result=null;S.feeling=null;resetGround();
+   document.querySelectorAll('#mindfulSheet textarea,#notebookSheet textarea').forEach(el=>el.value='');
+   for(const id of ['mmUnderstood','mmReconsider','mmReframed','mmAction'])$(id).textContent='';
+   $('mmThoughtResult').hidden=true;$('mmSupport').hidden=true;$('mmFeelingFields').hidden=true;
+   document.querySelectorAll('#mmFeelings button').forEach(el=>el.setAttribute('aria-pressed','false'));
+   if(S.screen==='ground')paintGround();
+  }
+ });
  $('mmBack').addEventListener('click',()=>show('menu'));$('closeMindfulSheet').addEventListener('click',close);
  $('mmSakeena').addEventListener('click',()=>{close();document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='meditationView'));document.querySelectorAll('.nav-item,.nav-home-btn').forEach(el=>el.classList.remove('active'));});
  $('mindfulSheet').addEventListener('keydown',event=>{
@@ -1887,8 +1904,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 3. عرض التدوينات من الذاكرة المحلية
-        function renderNotes() {
-            const notes = JSON.parse(localStorage.getItem('qatra_notebook') || '[]');
+        async function renderNotes() {
+          try {
+            const notes = window.QatraMindfulData?.enabled ? await window.QatraMindfulData.notebook() : JSON.parse(localStorage.getItem('qatra_notebook') || '[]');
             if (notes.length === 0) {
                 historyContainer.innerHTML = '<div style="text-align:center; margin-top:30px;"><svg viewBox="0 0 24 24" style="width:50px;height:50px;stroke:var(--t-sub);fill:none;stroke-width:1;margin-bottom:10px;"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><p style="color:var(--t-sub, #666); font-weight:600;">دفترك فارغ حالياً. المساحة لك لتبدأ التدوين.</p></div>';
                 return;
@@ -1921,45 +1939,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // تفعيل أزرار الحذف
             document.querySelectorAll('.delete-note-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    const idx = parseInt(e.target.closest('button').dataset.index);
-                    notes.splice(idx, 1);
-                    localStorage.setItem('qatra_notebook', JSON.stringify(notes));
-                    renderNotes();
+                btn.onclick = async (e) => {
+                    btn.disabled=true;
+                    try {
+                        const idx = parseInt(e.target.closest('button').dataset.index);
+                        if(window.QatraMindfulData?.enabled) await window.QatraMindfulData.removeNote(notes[idx]);
+                        else { notes.splice(idx,1);localStorage.setItem('qatra_notebook',JSON.stringify(notes)); }
+                        await renderNotes();
+                    } catch(error) { alert('تعذر الحذف: '+error.message); }
+                    finally { btn.disabled=false; }
                 };
             });
+          } catch(error) { historyContainer.textContent='تعذر قراءة الدفتر: '+error.message; }
         }
+        window.addEventListener('qatra-awareness-data-changed',()=>{renderNotes();});
 
         // 4. حفظ تدوينة جديدة
-        saveBtn.onclick = () => {
-            const text = noteInput.value.trim();
-            if (text) {
-                const notes = JSON.parse(localStorage.getItem('qatra_notebook') || '[]');
-                const dateObj = new Date();
-                const timeStr = dateObj.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
-                const dateStr = dateObj.toLocaleDateString('ar-EG');
-                
-                notes.push({
-                    category: currentCategory,
-                    text: text,
-                    date: dateStr + ' - ' + timeStr
-                });
-                
-                localStorage.setItem('qatra_notebook', JSON.stringify(notes));
-                noteInput.value = '';
-                saveBtn.textContent = 'تم الحفظ بنجاح!';
-                saveBtn.style.background = '#10B981';
-                renderNotes();
-                
-                setTimeout(() => {
-                    saveBtn.textContent = 'حفظ في الدفتر';
-                    saveBtn.style.background = 'var(--t-text, #111)';
-                }, 2000);
-            }
+        saveBtn.onclick = async () => {
+            const text=noteInput.value.trim();if(!text||saveBtn.disabled)return;
+            saveBtn.disabled=true;
+            try {
+                const dateObj=new Date();
+                const note={schemaVersion:1,source:'notebook',activity:'note',category:currentCategory,text,
+                    createdAt:dateObj.toISOString(),date:dateObj.toLocaleDateString('ar-EG')+' - '+dateObj.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})};
+                if(window.QatraMindfulData?.enabled) await window.QatraMindfulData.add('qatra_notebook',note);
+                else {const notes=JSON.parse(localStorage.getItem('qatra_notebook')||'[]');notes.push(note);localStorage.setItem('qatra_notebook',JSON.stringify(notes));}
+                noteInput.value='';saveBtn.textContent='تم الحفظ بنجاح!';saveBtn.style.background='#10B981';
+                await renderNotes();
+                setTimeout(()=>{saveBtn.textContent='حفظ في الدفتر';saveBtn.style.background='var(--t-text, #111)';},2000);
+            } catch(error) { alert('تعذر الحفظ: '+error.message); }
+            finally {saveBtn.disabled=false;}
         };
 
         // 5. تصدير الخواطر كنسخة احتياطية (ملف JSON محلي)
-        exportBtn.onclick = () => {
+        exportBtn.onclick = async () => {
+            if(window.QatraMindfulData?.enabled){
+                try {await window.QatraMindfulData.ready();await window.Capacitor.Plugins.QatraAwareness.exportDocument({scope:'notebook'});}
+                catch(error){alert('تعذر التصدير: '+error.message);}return;
+            }
             const notes = localStorage.getItem('qatra_notebook') || '[]';
             const blob = new Blob([notes], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
