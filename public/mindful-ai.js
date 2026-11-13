@@ -70,7 +70,7 @@ function mount(activity){
   const text=current.text+(extra?'\n\nمتابعة المستخدم: '+extra:''),records=historyPermission.checked?[...s.selected.values()]:[];
   const body=JSON.stringify({...current,text,turns:s.turns,records:records.map(r=>({kind:r.kind,text:r.text})),consent:{cloud:true,history:historyPermission.checked,policyVersion:POLICY}});
   if(text.length>6000||text.length+s.turns.reduce((n,t)=>n+t.text.length,0)+records.reduce((n,r)=>n+r.text.length,0)>14000||new TextEncoder().encode(body).length>32768){status.textContent='السياق طويل؛ قلّله أو امسح الجلسة. لم نحذفه بصمت.';return;}
-  if(root.location.origin!=='https://localhost'){status.textContent='عنوان التطبيق يختلف عن الإعداد المتوقع؛ أوقفنا الاتصال للمراجعة.';return;}
+  if(!['https://localhost','capacitor://localhost','http://localhost'].includes(root.location.origin)){status.textContent='عنوان التطبيق يختلف عن الإعداد المتوقع؛ أوقفنا الاتصال للمراجعة.';return;}
   const signature=JSON.stringify(current),epoch=++s.epoch,c=new AbortController();s.controller=c;busy=true;send.disabled=save.disabled=true;cancel.disabled=false;s.reply=s.entry=null;output.textContent='';status.textContent='جارٍ التحقق من توفر القطرة الذكية…';
   try{
    const config=await read(BASE+'/api/client-config',{method:'GET'},c.signal);if(config.cloudEnabled!==true)throw Error('CLOUD_AI_DISABLED');
