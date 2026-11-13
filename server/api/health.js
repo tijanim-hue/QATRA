@@ -1,0 +1,1 @@
+export default {fetch(){return Response.json({service:'qatra-ai',status:'ok',cloudEnabled:process.env.AI_ENABLED==='true'},{headers:{'cache-control':'no-store','x-content-type-options':'nosniff'}});}};
