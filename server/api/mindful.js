@@ -3,7 +3,7 @@ import {HttpError,configuration,origins,boundedJSON} from '../lib/config.js';
 import {authenticate} from '../lib/auth.js';
 import {reserveQuota} from '../lib/quota.js';
 import {validateInput} from '../lib/validation.js';
-import {generate} from '../lib/providers/openai.js';
+import {generate} from '../lib/providers/groq.js';
 export default {async fetch(request){
   const requestId=randomUUID(),headers={'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-request-id':requestId,'vary':'Origin'};
   const origin=request.headers.get('origin');

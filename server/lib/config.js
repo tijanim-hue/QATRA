@@ -6,10 +6,11 @@ export function https(value){
 }
 export function configuration(env=process.env){
   if(env.AI_ENABLED!=='true')throw new HttpError(503,'CLOUD_AI_DISABLED');
-  for(const key of ['OPENAI_API_KEY','OPENAI_MODEL','OIDC_ISSUER','OIDC_AUDIENCE','OIDC_JWKS_URL','UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','RATE_LIMIT_HMAC_KEY','ALLOWED_ORIGINS'])if(!env[key]?.trim())throw new HttpError(503,'CONFIGURATION_REQUIRED');
+  if(env.AI_PROVIDER!=='groq')throw new HttpError(503,'CONFIGURATION_REQUIRED');
+  for(const key of ['GROQ_API_KEY','GROQ_MODEL','OIDC_ISSUER','OIDC_AUDIENCE','OIDC_JWKS_URL','UPSTASH_REDIS_REST_URL','UPSTASH_REDIS_REST_TOKEN','RATE_LIMIT_HMAC_KEY','ALLOWED_ORIGINS'])if(!env[key]?.trim())throw new HttpError(503,'CONFIGURATION_REQUIRED');
   if(env.RATE_LIMIT_HMAC_KEY.length<32)throw new HttpError(503,'CONFIGURATION_REQUIRED');
   https(env.OIDC_ISSUER);https(env.OIDC_JWKS_URL);https(env.UPSTASH_REDIS_REST_URL);
-  if(!/^[a-zA-Z0-9._:-]{1,120}$/.test(env.OPENAI_MODEL))throw new HttpError(503,'CONFIGURATION_REQUIRED');
+  if(!['openai/gpt-oss-20b','openai/gpt-oss-120b'].includes(env.GROQ_MODEL))throw new HttpError(503,'CONFIGURATION_REQUIRED');
   const integer=(name,fallback,max)=>{const n=Number(env[name]||fallback);if(!Number.isSafeInteger(n)||n<1||n>max)throw new HttpError(503,'CONFIGURATION_REQUIRED');return n;};
   return {env,userMinute:integer('USER_REQUESTS_PER_MINUTE',10,100),ipMinute:integer('IP_REQUESTS_PER_MINUTE',20,200),globalDay:integer('GLOBAL_REQUESTS_PER_DAY',100,10000)};
 }

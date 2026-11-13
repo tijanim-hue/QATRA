@@ -1,23 +1,21 @@
-# QATRA AI backend — phase 2, not yet deployed
+# QATRA AI backend - Groq source preparation, not deployed
 
-Deploy this directory as a separate Vercel project (Root Directory: server), not as the Android public directory. Main/app code is unchanged. Node 22 and pinned jose 6.2.17 are used. No shared secret belongs in the APK.
+Use tijanim-hue/QATRA, branch mindful/phase-2-ai, Root Directory server. This folder is not on main. Do not merge the entire branch merely to deploy the server. Android/app files are unchanged. Node 22; existing pinned jose 6.2.17; no new SDK dependency.
 
-## Routes
-- GET /api/health: process health only, not proof that AI/auth/Redis work.
-- POST /api/mindful: activities feelings or thought only. Requires a verified RS256 OIDC JWT, explicit cloud consent policy qatra-ai-v1, separate history permission when records are included, and a successful shared Redis quota reservation.
+## Provider and budget
+/api/mindful now imports groq.js only. No automatic OpenAI or paid-provider fallback; openai.js remains inactive legacy source. Configure AI_PROVIDER=groq and GROQ_MODEL=openai/gpt-oss-20b. The allowlist also permits openai/gpt-oss-120b. The openai/ prefix names the open-weight model, not the API provider.
+Strict JSON Schema: https://console.groq.com/docs/structured-outputs
+Free quotas: https://console.groq.com/docs/rate-limits
+Keep Groq on Free; do not add a payment method or upgrade. The server cannot verify billing tier. Request-count quotas do NOT guarantee zero spending if a service plan changes. Do not provision paid hosting, identity or Redis without separate approval. No automatic retries are added. Enable ZDR in Groq account settings; the code does not configure or verify provider retention. No live personal journal data during setup.
 
-## Activation requirements
-Set secrets in hosting settings, never in Git, chat or public files. .env.example contains names only. Keep AI_ENABLED=false until all requirements are provisioned:
-1. Choose and provision an OIDC identity project; configure issuer, audience and JWKS. The app still needs a real sign-in/token flow; a bundled bearer key is not acceptable. Revocation/attestation are not implemented here; tokens expire and quotas are a separate abuse control.
-2. Provision a durable Upstash Redis database and server-only REST credentials. No temporary database is created. Counters store rotating HMAC pseudonyms and counts, not journal text. Reservations are atomic and failures block model calls. Limits are request counts, NOT a monetary billing guarantee; configure provider spending controls separately.
-3. Configure an OpenAI project key and a compatible Responses/structured-output model via OPENAI_MODEL. Model selection and cost approval remain pending. No live API calls have been made.
-4. Set a random RATE_LIMIT_HMAC_KEY of at least 32 characters and exact ALLOWED_ORIGINS, including the actual Capacitor origin. CORS is not authentication. IP quotas trust Vercel forwarding headers and require the Vercel environment.
-5. Deploy disabled, verify the routes, then integrate explicit consent and identity in the app before activation. Separate preview/production credentials and quotas where appropriate.
+## Mandatory activation gates
+Keep AI_ENABLED=false. Adding GROQ_API_KEY alone is NOT sufficient. Secrets belong only in hosting settings, never Git, chat, logs or the APK.
+- OIDC issuer/audience/JWKS and real app sign-in with verified RS256 JWTs. No bundled bearer secret. Revocation/attestation remain unimplemented.
+- Durable Upstash Redis REST credentials and shared atomic quotas that fail closed. Counters store rotating HMAC pseudonyms/counts, not journal text. Redis provisioning and free-plan suitability remain unverified.
+- Groq Free account with ZDR, server-only key and allowed model.
+- Random RATE_LIMIT_HMAC_KEY of at least 32 characters and exact ALLOWED_ORIGINS including the actual Capacitor origin. CORS is not authentication. IP quotas require Vercel forwarding headers.
+- App implementation of cloud consent qatra-ai-v1 and separate selected-history permission. The server cannot prove UI consent. Separate preview/production secrets and quotas as appropriate.
 
-## Privacy and limits
-Only the submitted text, at most six current-session turns and three selected records are forwarded. The server cannot prove the UI collected consent; the client implementation is a remaining mandatory gate. No database of personal conversations, request-body logging or automatic retries is added. Platforms/providers have their own logging and retention policies: store:false is NOT a zero-retention guarantee. Responses are JSON and must be rendered with textContent, never innerHTML.
-
-Input: 32 KiB JSON, text at most 6000 characters, combined context at most 14000 characters. Output is bounded and validated. Timeout/provider refusal/incomplete output produces an explicit error; the client must offer the existing local mode, not pretend a remote reply succeeded. No tools or remote journal access are enabled.
-
-## Evidence / remaining phase 2 work
-JS syntax was checked locally only. Dependency install, deployment, actual OIDC verification, Redis execution, live model behavior and mobile integration are NOT verified. CI performs dependency install and syntax/import checks, not functional tests, following the user decision. Backend source readiness is not completion of phase 2: existing feelings/thought UI and local fallback are unchanged and not connected to this endpoint yet.
+## Verification and limits
+GET /api/health checks process health only. POST /api/mindful accepts feelings or thought. Existing input limits and reply validation remain; Groq reads at most 128 KiB with a 20-second timeout. Incomplete, refused, rate-limited or malformed responses fail explicitly. No tools, remote journal access, body logging or conversation database are added. Render strings with textContent, not innerHTML. Keep the existing local fallback.
+Dependency installation, CI results, deployment, real OIDC, Redis, live Groq quality and mobile integration remain unverified. npm run check performs syntax checks, not functional tests. No live model calls have been made in this migration. This commit does not connect the Android UI or complete phase 2.
