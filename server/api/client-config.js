@@ -25,6 +25,7 @@ export default {async fetch(request){
     if(!/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/.test(projectId)||env.OIDC_ISSUER!=='https://securetoken.google.com/'+projectId||!apiKey||!/^[A-Za-z0-9_-]{20,200}$/.test(apiKey))throw new HttpError(503,'CONFIGURATION_REQUIRED');
     return send(200,{cloudEnabled:true,policyVersion:'qatra-ai-v1',identity:{provider:'firebase-anonymous',projectId,apiKey},requestId});
   }catch(error){
+    console.error('client-config configuration error:',error&&error.name,error&&error.message);
     return send(503,{error:error instanceof HttpError?error.code:'SERVICE_UNAVAILABLE',requestId});
   }
 }};
