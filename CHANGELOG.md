@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased — Mindful phase 1, part A
-- Add dormant Room storage foundation; no UI or legacy data switch.
-- Add transaction-safe imports, revision checks, links, versioned export and database-scoped deletion.
-- Add instrumentation tests and a dedicated branch CI workflow.
-- Preserve main, all four successful packages and existing signing/build workflow.
-- Pending: bridge, complete legacy adapters, user actions, backup policy, restore and integration tests. This is not a completed phase-1 release.
+## Unreleased — Mindful phase 1
+- Foundation: dormant Room storage, revision checks, transactional imports/links, export and scoped erasure.
+- Added instrumentation test sources; their initial CI runs failed, not passed.
+- Per user request, replace emulator CI with assembleDebug-only builds and explicit failure diagnostics.
+- Keep test sources, main build/signing workflow, existing UI and four successful packages unchanged.
+- Pending: compilation repair, bridge, complete legacy migration, export/restore UI, backup policy and integration. Phase 1 is not complete and functional behavior remains untested.

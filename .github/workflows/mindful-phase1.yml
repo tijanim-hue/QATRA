@@ -1,4 +1,4 @@
-name: Mindful phase 1 storage checks
+name: Mindful phase 1 APK build
 on:
   push:
     branches: ["mindful/phase-1-persistence"]
@@ -7,10 +7,15 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: mindful-phase1-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
-  persistence-tests:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 25
+    outputs:
+      diagnostic: ${{ steps.summary.outputs.diagnostic }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,29 +29,54 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Install locked dependencies
         run: npm ci
-      - name: Validate existing JavaScript
-        run: for f in public/*.js; do node --check "$f"; done
       - name: Sync Android project
         run: npx cap sync android
-      - name: Enable emulator acceleration
+      - name: Assemble APK without emulator or tests
+        id: compile
+        continue-on-error: true
+        shell: bash
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-      - name: Test Room on an Android emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 29
-          arch: x86_64
-          disable-animations: true
-          script: cd android && chmod +x gradlew && ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.qatra.app.awareness.AwarenessStoreTest assembleDebug --stacktrace
-      - name: Upload test evidence and schemas
+          set -o pipefail
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace --console=plain 2>&1 | tee ../mindful-build.log
+      - name: Summarize build result
+        id: summary
+        if: always()
+        env:
+          COMPILE_OUTCOME: ${{ steps.compile.outcome }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, pathlib, re
+          log = pathlib.Path('mindful-build.log')
+          lines = log.read_text(errors='replace').splitlines() if log.exists() else []
+          diagnostic = 'APK compiled' if os.environ.get('COMPILE_OUTCOME') == 'success' else 'Build/setup failed; see log'
+          for line in lines:
+              if re.search(r'^e: |\berror:|^> (Could not|Cannot|Failed|Compilation)', line):
+                  diagnostic = re.sub(r'[^\x20-\x7e]', '?', line.strip())[:180]
+                  break
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+              stream.write('diagnostic=' + diagnostic + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
+              stream.write('## Build result\n\n' + diagnostic + '\n\nEmulator tests are disabled by user request. This is not functional validation.\n')
+          PY
+      - name: Keep build log and schema evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mindful-phase1-test-evidence
+          name: mindful-phase1-build-evidence
           path: |
-            android/app/build/reports/androidTests/
-            android/app/build/outputs/androidTest-results/
+            mindful-build.log
             android/app/schemas/
           if-no-files-found: warn
+      - name: Preserve compilation failure
+        if: steps.compile.outcome != 'success'
+        run: exit 1
+  build-summary:
+    needs: build
+    if: always()
+    name: "Result - ${{ needs.build.outputs.diagnostic || 'Setup failed; see build job' }}"
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Build result is ${{ needs.build.result }}; emulator tests were not run."
