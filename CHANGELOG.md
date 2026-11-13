@@ -1,9 +1,10 @@
 # Changelog
 
 ## Unreleased — Mindful phase 1
-- Added dormant Room foundation and retained instrumentation test sources.
-- Replaced emulator CI with assembleDebug-only builds per user request.
-- Verified foundation APK compilation in run 43431488973; no claim of functional test success.
-- Register a separate asynchronous Awareness plugin and add an unloaded JavaScript repository.
-- Keep existing screens, legacy data, progress, themes and main unchanged.
-- Pending: backup policy, complete legacy adapter/integration, restore, user data actions and final build. Phase 1 remains incomplete.
+- Foundation and separate native bridge compiled successfully (Actions 43431488973 and 43432476943).
+- Add private no-Auto-Backup storage policy and refuse unplanned old-path migration.
+- Add a pure legacy import planner without automatic writes or source deletion.
+- Add transactional, non-overwriting restore and confirmed erasure with an anti-reimport tombstone.
+- Preserve current consent on restore and require renewal for imported consent records.
+- Keep UI integration disabled pending complete reader/writer and data-action wiring.
+- New increment awaits compilation. Functional/device tests remain unperformed by user request; phase 1 is incomplete.

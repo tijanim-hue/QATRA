@@ -7,19 +7,20 @@ import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import com.qatra.app.awareness.AwarenessDatabase
 import com.qatra.app.awareness.AwarenessStore
+import com.qatra.app.awareness.AwarenessDataPolicy
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 
-/** Draft integration boundary. Not registered or called by the current UI yet. */
+/** Registered native boundary; current screens do not call it until repository integration. */
 @CapacitorPlugin(name = "QatraAwareness")
 class QatraAwarenessPlugin : Plugin() {
     private val worker = Executors.newSingleThreadExecutor()
     @Volatile private var closed = false
     private var database: AwarenessDatabase? = null
     private fun repository(): AwarenessStore {
-        val db = database ?: AwarenessStore.open(context).also { database = it }
+        val db = database ?: AwarenessDataPolicy.open(context).also { database = it }
         return AwarenessStore(db)
     }
     private fun number(value: Any?): Long {
@@ -49,6 +50,7 @@ class QatraAwarenessPlugin : Plugin() {
             try {
                 val input = call.data; val store = repository()
                 val result = when (text(input, "action")) {
+                    "status" -> AwarenessDataPolicy.state(database!!)
                     "get" -> JSONObject().put("entry", store.get(text(input, "kind"), text(input, "id"))?.let { encode(it) } ?: JSONObject.NULL)
                     "list" -> {
                         val offset = if (input.has("offset")) number(input.get("offset")) else 0L
@@ -61,16 +63,25 @@ class QatraAwarenessPlugin : Plugin() {
                     "delete" -> JSONObject().put("deleted", store.delete(text(input, "kind"), text(input, "id"), number(input.get("expectedRevision"))))
                     "link" -> JSONObject().put("id", store.link(text(input, "fromKind"), text(input, "fromId"), text(input, "toKind"), text(input, "toId")))
                     "importLegacy" -> {
+                        AwarenessDataPolicy.requireImportAllowed(database!!)
                         val values = input.getJSONArray("entries"); require(values.length() <= 2000)
                         val entries = (0 until values.length()).map { entry(values.getJSONObject(it)) }
                         JSONObject().put("count", store.importLegacy(text(input, "batchId"), text(input, "originalJson"), entries))
                     }
                     "export" -> JSONObject().put("data", JSONObject(store.exportData()))
+                    "restore" -> {
+                        require(input.opt("confirmed") == true)
+                        AwarenessDataPolicy.restore(database!!, text(input, "backup"))
+                    }
+                    "erase" -> {
+                        require(input.opt("confirmed") == true)
+                        AwarenessDataPolicy.erase(database!!)
+                        JSONObject().put("erased", true).put("legacyImportDisabled", true)
+                    }
                     else -> throw IllegalArgumentException("Unknown action")
                 }
                 call.resolve(JSObject(result.toString()))
             } catch (_: Exception) {
-                // Never include user text or the raw JSON parser message in logs or bridge errors.
                 call.reject("تعذر تنفيذ عملية البيانات؛ لم نُسقط السجلات أو نتجاوز الخطأ.", "AWARENESS_STORAGE")
             }
         } } catch (_: RejectedExecutionException) { call.reject("خدمة البيانات غير متاحة.", "AWARENESS_CLOSED") }
