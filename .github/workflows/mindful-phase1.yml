@@ -1,0 +1,82 @@
+name: Mindful phase 1 APK build
+on:
+  push:
+    branches: ["mindful/phase-1-persistence"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mindful-phase1-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      diagnostic: ${{ steps.summary.outputs.diagnostic }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Sync Android project
+        run: npx cap sync android
+      - name: Assemble APK without emulator or tests
+        id: compile
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace --console=plain 2>&1 | tee ../mindful-build.log
+      - name: Summarize build result
+        id: summary
+        if: always()
+        env:
+          COMPILE_OUTCOME: ${{ steps.compile.outcome }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, pathlib, re
+          log = pathlib.Path('mindful-build.log')
+          lines = log.read_text(errors='replace').splitlines() if log.exists() else []
+          diagnostic = 'APK compiled' if os.environ.get('COMPILE_OUTCOME') == 'success' else 'Build/setup failed; see log'
+          for line in lines:
+              if re.search(r'^e: |\berror:|^> (Could not|Cannot|Failed|Compilation)', line):
+                  diagnostic = re.sub(r'[^\x20-\x7e]', '?', line.strip())[:180]
+                  break
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+              stream.write('diagnostic=' + diagnostic + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
+              stream.write('## Build result\n\n' + diagnostic + '\n\nEmulator tests are disabled by user request. This is not functional validation.\n')
+          PY
+      - name: Keep build log and schema evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mindful-phase1-build-evidence
+          path: |
+            mindful-build.log
+            android/app/schemas/
+          if-no-files-found: warn
+      - name: Preserve compilation failure
+        if: steps.compile.outcome != 'success'
+        run: exit 1
+  build-summary:
+    needs: build
+    if: always()
+    name: "Result - ${{ needs.build.outputs.diagnostic || 'Setup failed; see build job' }}"
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Build result is ${{ needs.build.result }}; emulator tests were not run."
