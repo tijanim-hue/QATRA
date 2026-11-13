@@ -70,7 +70,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function load(){
   if(!root.QatraMindfulData?.enabled||document.getElementById('qatraMindfulAIScript'))return;
   const script=document.createElement('script');script.id='qatraMindfulAIScript';script.src='./mindful-ai.js';
-  script.onerror=()=>{const host=document.getElementById('mindfulDataPanel');if(host){const p=document.createElement('p');p.textContent='تعذر تحميل المساعد الاختياري؛ الأنشطة المحلية متاحة.';host.appendChild(p);}};
+  script.onerror=()=>{const host=document.getElementById('mindfulDataPanel');if(host){const p=document.createElement('p');p.textContent='تعذر تحميل القطرة الذكية؛ الأنشطة المحلية متاحة.';host.appendChild(p);}};
   document.head.appendChild(script);
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);else load();
