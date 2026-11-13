@@ -1,0 +1,52 @@
+name: Mindful phase 1 storage checks
+on:
+  push:
+    branches: ["mindful/phase-1-persistence"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  persistence-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Validate existing JavaScript
+        run: for f in public/*.js; do node --check "$f"; done
+      - name: Sync Android project
+        run: npx cap sync android
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Test Room on an Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          disable-animations: true
+          script: cd android && chmod +x gradlew && ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.qatra.app.awareness.AwarenessStoreTest assembleDebug --stacktrace
+      - name: Upload test evidence and schemas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mindful-phase1-test-evidence
+          path: |
+            android/app/build/reports/androidTests/
+            android/app/build/outputs/androidTest-results/
+            android/app/schemas/
+          if-no-files-found: warn
