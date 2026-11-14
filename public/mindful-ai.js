@@ -1,4 +1,4 @@
-/* Cloud-only mindful AI and QATRA notebook. */
+/* Cloud-only mindful AI, premium dialogs, and QATRA notebook. */
 (function(root){
 'use strict';
 if(!root.Capacitor?.isNativePlatform?.()||root.QatraMindfulAI)return;
@@ -39,37 +39,26 @@ function validate(value){
 function format(r){return [['ما فهمته',r.understanding],['وقائع مبلّغ عنها',r.facts.join('\n')],['تفسيرات أو توقعات',r.assumptions.join('\n')],['زوايا أخرى',r.perspectives.join('\n')],['منظور متوازن',r.reframe],['خطوة اختيارية',r.step],['سؤال متابعة',r.question]].filter(x=>x[1]).map(x=>x.join(':\n')).join('\n\n');}
 function mount(activity){
  const screen=document.querySelector('[data-mm-screen="'+activity+'"]');if(!screen)return;
- const panel=el('details');panel.className='qatra-ai-panel';panel.appendChild(el('summary','القطرة الذكية'));panel.appendChild(el('p','مساعدة اختيارية لفهم الشعور أو إعادة ترتيب الفكرة، مع تحكمك الكامل فيما يُرسل.'));
- const permission=el('input'),historyPermission=el('input');permission.type=historyPermission.type='checkbox';
+ const panel=el('details');panel.className='qatra-ai-panel';panel.appendChild(el('summary','القطرة الذكية'));panel.appendChild(el('p','اكتب ما يحيّر أو يثقل ذهنك، وستتولى القطرة الذكية فهمه وإعادة ترتيبه بمنظور أهدأ.'));
+ const permission=el('input');permission.type='checkbox';
  function checkbox(input,text){const label=el('label');label.append(input,document.createTextNode(text));return label;}
  function button(text){const node=el('button',text);node.type='button';return node;}
- const pick=button('اختيار مقتطفات'),send=button('إرسال النص الحالي'),cancel=button('إلغاء الطلب'),clear=button('مسح الجلسة'),save=button('حفظ هذا الرد في دفتر قطرة'),history=el('div'),output=el('p'),status=el('p'),follow=el('textarea');
+ const send=button('اطلب من القطرة الذكية'),cancel=button('إلغاء الطلب'),clear=button('مسح الجلسة'),save=button('حفظ هذا الرد في دفتر قطرة'),output=el('p'),status=el('p'),follow=el('textarea');
  follow.id='qatra-ai-follow-'+activity;follow.maxLength=2000;follow.rows=3;const followLabel=el('label','متابعة أو توضيح للرد الأخير');followLabel.htmlFor=follow.id;
  status.setAttribute('role','status');status.setAttribute('aria-live','polite');cancel.disabled=save.disabled=true;
- panel.append(el('p','للتأمل لا للتشخيص أو العلاج. بعد الموافقة والإرسال يتصل التطبيق بخادم قطرة وبـ Firebase لهوية مؤقتة؛ ويُرسل النص والشعور والشدة وسياق الجلسة المختصر إلى Groq عبر الخادم. لا تكتب أسرارًا.'),checkbox(permission,' أوافق على الاتصال وإرسال النص الحالي وسياق الجلسة.'),checkbox(historyPermission,' أوافق على إرسال المقتطفات التي أحددها، حتى ثلاثة.'),pick,history,el('p','المتابعة تتضمن النص الأصلي وآخر ست رسائل مختصرة حتى 1000 حرف للرسالة. رموز الهوية في الذاكرة فقط؛ إعادة فتح التطبيق قد تنشئ حسابًا مجهولًا جديدًا. الإلغاء لا يسحب ما وصل إلى الخدمة.'),send,cancel,clear,status,output,followLabel,follow,save);screen.appendChild(panel);
- const s={epoch:0,controller:null,turns:[],reply:null,entry:null,selected:new Map(),saving:false};
- function reset(){s.epoch++;s.controller?.abort();s.controller=null;s.turns=[];s.reply=s.entry=null;s.selected.clear();history.replaceChildren();output.textContent=follow.value='';permission.checked=historyPermission.checked=false;send.disabled=false;cancel.disabled=save.disabled=true;status.textContent='جاهز للاتصال بالقطرة الذكية.';if(!panels.some(p=>p.permission.checked))identity=null;}
+ panel.append(el('p','للتأمل لا للتشخيص أو العلاج. بعد الموافقة والإرسال يتصل التطبيق بخادم قطرة وبـ Firebase لهوية مؤقتة؛ ويُرسل النص والشعور والشدة وسياق الجلسة المختصر إلى Groq عبر الخادم. لا تكتب أسرارًا.'),checkbox(permission,' أوافق على الاتصال وإرسال النص الحالي وسياق الجلسة.'),send,cancel,clear,status,output,followLabel,follow,save);screen.appendChild(panel);
+ const s={epoch:0,controller:null,turns:[],reply:null,entry:null,saving:false};
+ function reset(){s.epoch++;s.controller?.abort();s.controller=null;s.turns=[];s.reply=s.entry=null;output.textContent=follow.value='';permission.checked=false;send.disabled=false;cancel.disabled=save.disabled=true;status.textContent='جاهز للاتصال بالقطرة الذكية.';if(!panels.some(p=>p.permission.checked))identity=null;}
  function input(){const text=$(activity==='feelings'?'mmReason':'mmThought').value.trim(),feeling=activity==='feelings'?document.querySelector('#mmFeelings button[aria-pressed="true"]')?.textContent.trim():'',intensity=activity==='feelings'?Number($('mmIntensity').value):null;if(!text||text.length>6000||activity==='feelings'&&(!feeling||!Number.isInteger(intensity)||intensity<1||intensity>10))throw Error('INPUT');return {activity,text,feeling:feeling||'',intensity};}
- pick.addEventListener('click',async()=>{
-  if(s.controller)return;const epoch=s.epoch;pick.disabled=true;
-  try{
-   await root.QatraMindfulData.ready();const records=[];
-   for(const kind of ['feeling','thought','note']){const page=await root.QatraMindfulStore.list(kind,{limit:20});for(const entry of page.entries){const text=entry.payload?.text||entry.payload?.reason||entry.payload?.feeling;if(typeof text==='string'&&text.trim())records.push({kind,id:entry.id,revision:entry.revision,text:text.slice(0,1000)});}}
-   if(epoch!==s.epoch)return;s.selected.clear();history.replaceChildren();history.appendChild(el('p','حتى 20 سجلًا لكل نوع. راجع المقتطف المعروض (حتى 1000 حرف) قبل تحديده. لا إرسال دون موافقة السجلات.'));
-   if(!records.length)history.appendChild(el('p','لا توجد سجلات نصية للاختيار.'));
-   records.forEach((record,index)=>{const check=el('input');check.type='checkbox';history.appendChild(checkbox(check,({feeling:'شعور',thought:'فكرة',note:'تدوينة'})[record.kind]+': '+record.text));check.addEventListener('change',()=>{if(s.controller){check.checked=s.selected.has(index);return;}if(check.checked&&s.selected.size>=3){check.checked=false;status.textContent='الحد ثلاثة مقتطفات.';return;}if(check.checked)s.selected.set(index,record);else s.selected.delete(index);});});
-  }catch(error){if(epoch===s.epoch)status.textContent='تعذرت قراءة السجلات.';}finally{pick.disabled=false;}
- });
  permission.addEventListener('change',()=>{if(!permission.checked)reset();});
- historyPermission.addEventListener('change',()=>{if(!historyPermission.checked){s.controller?.abort();s.selected.clear();history.querySelectorAll('input').forEach(e=>e.checked=false);}});
  cancel.addEventListener('click',()=>{s.epoch++;s.controller?.abort();s.controller=null;send.disabled=false;cancel.disabled=true;status.textContent='أُلغي انتظار الرد؛ لا يمكن سحب ما وصل سابقًا.';});clear.addEventListener('click',reset);
  send.addEventListener('click',async()=>{
   if(!permission.checked){status.textContent='اختر موافقة الاتصال أولًا.';return;}if(busy){status.textContent='انتظر اكتمال الطلب أو إلغائه.';return;}
   let current;try{current=input();}catch(error){status.textContent='اكتب النص أو سياق الشعور (حتى 6000 حرف)، واختر الشعور وشدته.';return;}
   const extra=follow.value.trim();if(s.turns.length&&!extra){status.textContent='اكتب متابعة أو امسح الجلسة لطلب جديد.';return;}
-  const text=current.text+(extra?'\n\nمتابعة المستخدم: '+extra:''),records=historyPermission.checked?[...s.selected.values()]:[];
-  const body=JSON.stringify({...current,text,turns:s.turns,records:records.map(r=>({kind:r.kind,text:r.text})),consent:{cloud:true,history:historyPermission.checked,policyVersion:POLICY}});
-  if(text.length>6000||text.length+s.turns.reduce((n,t)=>n+t.text.length,0)+records.reduce((n,r)=>n+r.text.length,0)>14000||new TextEncoder().encode(body).length>32768){status.textContent='السياق طويل؛ قلّله أو امسح الجلسة. لم نحذفه بصمت.';return;}
+  const text=current.text+(extra?'\n\nمتابعة المستخدم: '+extra:'');
+  const body=JSON.stringify({...current,text,turns:s.turns,records:[],consent:{cloud:true,history:false,policyVersion:POLICY}});
+  if(text.length>6000||text.length+s.turns.reduce((n,t)=>n+t.text.length,0)>14000||new TextEncoder().encode(body).length>32768){status.textContent='النص طويل؛ قلّله أو امسح الجلسة ثم أعد المحاولة.';return;}
   if(!['https://localhost','capacitor://localhost','http://localhost'].includes(root.location.origin)){status.textContent='عنوان التطبيق يختلف عن الإعداد المتوقع؛ أوقفنا الاتصال للمراجعة.';return;}
   const signature=JSON.stringify(current),epoch=++s.epoch,c=new AbortController();s.controller=c;busy=true;send.disabled=save.disabled=true;cancel.disabled=false;s.reply=s.entry=null;output.textContent='';status.textContent='جارٍ التحقق من توفر القطرة الذكية…';
   try{
@@ -81,7 +70,7 @@ function mount(activity){
    if(response.provider!=='remote'||response.policyVersion!==POLICY||typeof response.requestId!=='string')throw Error('INVALID_RESPONSE');
    const reply=validate(response.data),rendered=format(reply);s.reply=reply;output.textContent='رد القطرة الذكية:\n\n'+rendered+(reply.safety==='support'?'\n\nعند خطر مباشر تواصل مع الطوارئ المحلية أو شخص موثوق؛ المساعد ليس خدمة طوارئ.':'');
    s.turns=[...s.turns,{role:'user',text:(extra||current.text).slice(0,1000)},{role:'assistant',text:rendered.slice(0,1000)}].slice(-6);
-   const now=new Date(),common={schemaVersion:1,createdAt:now.toISOString(),source:'mindful-minute',analysis:{method:'groq-structured-v1',requestId:response.requestId,policyVersion:POLICY,safety:reply.safety,historyRefs:records.map(r=>({kind:r.kind,id:r.id,revision:r.revision}))}};
+   const now=new Date(),common={schemaVersion:1,createdAt:now.toISOString(),source:'mindful-minute',analysis:{method:'groq-structured-v1',requestId:response.requestId,policyVersion:POLICY,safety:reply.safety}};
    s.entry=activity==='feelings'?{...common,activity,feeling:current.feeling,intensity:current.intensity,reason:current.text,reflection:rendered,followup:extra}:{...common,activity:'thought',category:'ترتيب فكرة',text:text,reflection:rendered,followup:extra};
    follow.value='';save.disabled=false;status.textContent='وصل الرد ولم يُحفظ تلقائيًا. زر الحفظ يضيفه إلى دفتر قطرة.';
   }catch(error){if(epoch===s.epoch)status.textContent=error.message==='CLOUD_AI_DISABLED'?'القطرة الذكية غير متاحة حاليًا.':error.message==='OPERATION_NOT_ALLOWED'?'يجب تفعيل الدخول المجهول في Firebase.':'تعذر إكمال الطلب. لم نقدّم ردًا بديلًا، ولا نعيد المحاولة تلقائيًا.';}
@@ -91,14 +80,48 @@ function mount(activity){
  const changed=()=>{if(s.controller||s.reply||s.turns.length)reset();};$(activity==='feelings'?'mmReason':'mmThought').addEventListener('input',changed);
  if(activity==='feelings'){$('mmIntensity').addEventListener('input',changed);$('mmFeelings').addEventListener('click',changed);}panel.addEventListener('toggle',()=>{if(!panel.open)reset();});panels.push({permission,screen,panel,reset});
 }
+function suppressLocal(){
+ const sheet=$('mindfulSheet');if(!sheet)return;
+ sheet.querySelectorAll('button').forEach(b=>{
+  const t=(b.textContent||'').trim();
+  if(t.includes('ترتيب الفكرة')||t.includes('أفرغ ذهنك')||t.includes('اختيار المقتطفات')){
+   const host=b.closest('.mm-panel')||b.closest('.mm-card')||b;b.hidden=true;
+  }
+ });
+}
 function boot(){
  if(!$('mindfulSheet')||!root.QatraMindfulData?.enabled)return;
  const style=el('style');style.textContent='.qatra-ai-panel{position:relative;margin-top:22px;padding:18px;border:1px solid color-mix(in srgb,var(--primary,#38bdf8) 28%,transparent);border-radius:22px;background:linear-gradient(145deg,rgba(56,189,248,.10),rgba(139,92,246,.08));box-shadow:0 18px 40px rgba(2,6,23,.16);backdrop-filter:blur(18px) saturate(1.15);overflow:hidden}.qatra-ai-panel::before{content:"";position:absolute;inset:-40% -20% auto;height:70%;background:radial-gradient(circle at 30% 20%,rgba(56,189,248,.22),transparent 60%);pointer-events:none}.qatra-ai-panel summary{position:relative;display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem;cursor:pointer}.qatra-ai-panel summary::before{content:"💧";font-size:1.1rem;filter:drop-shadow(0 0 8px rgba(56,189,248,.55))}.qatra-ai-panel>p:first-of-type{position:relative;margin-top:8px;color:color-mix(in srgb,currentColor 72%,transparent);font-size:.92rem}.qatra-ai-panel label{display:block;margin:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}.qatra-ai-panel button{font:inherit;color:inherit;background:rgba(255,255,255,.07);border:1px solid color-mix(in srgb,var(--primary,#38bdf8) 35%,transparent);border-radius:14px;padding:11px 14px;margin:4px;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}.qatra-ai-panel button:hover:not(:disabled){transform:translateY(-1px);background:rgba(56,189,248,.12);box-shadow:0 8px 22px rgba(56,189,248,.16)}.qatra-ai-panel button:disabled{opacity:.45}.qatra-ai-panel p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}.qatra-ai-panel textarea{width:100%;font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid color-mix(in srgb,var(--primary,#38bdf8) 22%,transparent);border-radius:14px;padding:12px}.qatra-ai-panel :focus-visible{outline:2px solid var(--primary,#38bdf8);outline-offset:2px}';document.head.appendChild(style);
- mount('feelings');mount('thought');new MutationObserver(()=>{for(const p of panels)if($('mindfulSheet').dataset.mmOpen!=='true'||!p.screen.classList.contains('is-active')||!p.panel.open)p.reset();}).observe($('mindfulSheet'),{attributes:true,subtree:true,attributeFilter:['class','style','data-mm-open','open']});
+ mount('feelings');mount('thought');suppressLocal();new MutationObserver(()=>{suppressLocal();for(const p of panels)if($('mindfulSheet').dataset.mmOpen!=='true'||!p.screen.classList.contains('is-active')||!p.panel.open)p.reset();}).observe($('mindfulSheet'),{attributes:true,subtree:true,childList:true,attributeFilter:['class','style','data-mm-open','open']});
  root.addEventListener('qatra-awareness-data-changed',()=>{identity=null;panels.forEach(p=>p.reset());});
 }
 root.QatraMindfulAI=Object.freeze({reset(){identity=null;panels.forEach(p=>p.reset());}});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+
+/* ===== نافذة احترافية ===== */
+(function dialog(){
+ if(root.QatraDialog)return;
+ function open(title,message,options={}){
+  return new Promise(resolve=>{
+   const backdrop=el('div');backdrop.className='qatra-dialog-backdrop';
+   const card=el('div');card.className='qatra-dialog';
+   const icon=el('div',options.danger?'⚠️':'ℹ️');icon.className='qatra-dialog-icon'+(options.danger?' danger':'');
+   const h=el('h3',title);const p=el('p',message);
+   const row=el('div');row.className='qatra-dialog-actions';
+   const cancel=el('button',options.cancelText||'إلغاء');cancel.className='qatra-dialog-btn';
+   const ok=el('button',options.confirmText||'تأكيد');ok.className='qatra-dialog-btn primary'+(options.danger?' danger':'');
+   row.append(cancel,ok);card.append(icon,h,p,row);backdrop.appendChild(card);document.body.appendChild(backdrop);
+   requestAnimationFrame(()=>backdrop.classList.add('show'));
+   const close=value=>{backdrop.classList.remove('show');setTimeout(()=>backdrop.remove(),220);resolve(value);};
+   cancel.addEventListener('click',()=>close(false));ok.addEventListener('click',()=>close(true));
+   backdrop.addEventListener('click',e=>{if(e.target===backdrop)close(false);});
+  });
+ }
+ const style=el('style');style.textContent='.qatra-dialog-backdrop{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(4,10,22,.55);backdrop-filter:blur(10px);opacity:0;transition:opacity .22s ease}.qatra-dialog-backdrop.show{opacity:1}.qatra-dialog{width:100%;max-width:380px;background:linear-gradient(160deg,rgba(20,32,52,.96),rgba(12,20,36,.98));border:1px solid rgba(131,218,208,.25);border-radius:26px;padding:24px;color:#eaf2fa;box-shadow:0 30px 70px rgba(0,0,0,.45);transform:translateY(14px) scale(.97);transition:transform .22s cubic-bezier(.2,.8,.2,1)}.qatra-dialog-backdrop.show .qatra-dialog{transform:none}.qatra-dialog-icon{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:22px;background:rgba(131,218,208,.14);margin-bottom:14px}.qatra-dialog-icon.danger{background:rgba(255,107,107,.14)}.qatra-dialog h3{margin:0 0 8px;font-size:18px;font-weight:900}.qatra-dialog p{margin:0 0 20px;font-size:14px;line-height:1.8;color:#bccbdd}.qatra-dialog-actions{display:flex;gap:10px}.qatra-dialog-btn{flex:1;padding:13px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#eaf2fa;font:inherit;font-weight:800;cursor:pointer}.qatra-dialog-btn.primary{background:linear-gradient(135deg,#0EA5E9,#8B5CF6);border-color:transparent;color:#fff}.qatra-dialog-btn.primary.danger{background:linear-gradient(135deg,#ef4444,#b91c1c)}';document.head.appendChild(style);
+ root.QatraDialog=Object.freeze({open});
+ root.confirm=message=>{root.QatraDialog.open('تأكيد الإجراء',message,{danger:true,confirmText:'حذف',cancelText:'إلغاء'});return false;};
+ root.alert=message=>{root.QatraDialog.open('تنبيه',message,{confirmText:'حسنًا'});};
+})();
 
 /* ===== دفتر قطرة ===== */
 (function notebook(){
@@ -174,14 +197,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if(!keys.length)return;
   const targets=entries.filter(e=>keys.includes(key(e)));
   if(!targets.length)return;
-  const message=keys.length===1?'هل تريد حذف هذا السجل نهائيًا؟':'هل تريد حذف '+keys.length+' سجل نهائيًا؟ لا يمكن التراجع.';
-  if(!root.confirm(message))return;
+  const ok=await root.QatraDialog.open(keys.length===1?'حذف السجل':'حذف السجلات',keys.length===1?'سيتم حذف هذا السجل نهائيًا من دفتر قطرة، ولا يمكن التراجع عن هذه الخطوة.':'سيتم حذف '+keys.length+' سجل نهائيًا من دفتر قطرة، ولا يمكن التراجع عن هذه الخطوة.',{danger:true,confirmText:'حذف نهائي',cancelText:'إلغاء'});
+  if(!ok)return;
   try{await root.QatraMindfulData.ready();
    for(const e of targets){try{await root.QatraMindfulStore.remove(e.kind,e.id,e.revision);}catch(err){console.warn('notebook delete failed',e.kind,e.id,err);}}
    keys.forEach(k=>selection.delete(k));
    root.dispatchEvent(new CustomEvent('qatra-notebook-updated'));
    await refresh();
-  }catch(error){root.alert('تعذر الحذف: '+(error?.message||'خطأ غير معروف'));}
+  }catch(error){root.QatraDialog.open('تعذر الحذف','حدث خطأ أثناء حذف السجلات. لم يتم حذف ما لم يُؤكد حذفه، ويمكنك المحاولة مرة أخرى.',{confirmText:'حسنًا'});}
  }
  function renderStats(){
   const days=new Set(entries.map(e=>dayKey(e.date)).filter(Boolean));
