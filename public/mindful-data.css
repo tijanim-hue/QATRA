@@ -11,3 +11,5 @@
 #mindfulSheet textarea::placeholder{color:#a8b8ce!important;opacity:.8}
 #mindfulSheet label:has(+textarea){margin-bottom:8px;font-weight:700}
 @media(prefers-reduced-motion:reduce){#mindfulSheet textarea{transition:none}}
+/* Preset feeling output is not an AI response. Preserve the AI response and input controls. */
+#mindfulSheet [data-mm-screen="feelings"] .mm-output:not(.qatra-ai-output){display:none!important}
