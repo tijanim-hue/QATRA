@@ -1,4 +1,4 @@
-/* Native-only opt-in client. No external network or identity storage at startup. */
+/* Cloud-only mindful AI and QATRA notebook. */
 (function(root){
 'use strict';
 if(!root.Capacitor?.isNativePlatform?.()||root.QatraMindfulAI)return;
@@ -43,12 +43,12 @@ function mount(activity){
  const permission=el('input'),historyPermission=el('input');permission.type=historyPermission.type='checkbox';
  function checkbox(input,text){const label=el('label');label.append(input,document.createTextNode(text));return label;}
  function button(text){const node=el('button',text);node.type='button';return node;}
- const pick=button('اختيار مقتطفات محلية'),send=button('إرسال النص الحالي'),cancel=button('إلغاء الطلب'),clear=button('مسح الجلسة والعودة للمحلي'),save=button('حفظ هذا الرد محليًا'),history=el('div'),output=el('p'),status=el('p'),follow=el('textarea');
+ const pick=button('اختيار مقتطفات'),send=button('إرسال النص الحالي'),cancel=button('إلغاء الطلب'),clear=button('مسح الجلسة'),save=button('حفظ هذا الرد في دفتر قطرة'),history=el('div'),output=el('p'),status=el('p'),follow=el('textarea');
  follow.id='qatra-ai-follow-'+activity;follow.maxLength=2000;follow.rows=3;const followLabel=el('label','متابعة أو توضيح للرد الأخير');followLabel.htmlFor=follow.id;
  status.setAttribute('role','status');status.setAttribute('aria-live','polite');cancel.disabled=save.disabled=true;
  panel.append(el('p','للتأمل لا للتشخيص أو العلاج. بعد الموافقة والإرسال يتصل التطبيق بخادم قطرة وبـ Firebase لهوية مؤقتة؛ ويُرسل النص والشعور والشدة وسياق الجلسة المختصر إلى Groq عبر الخادم. لا تكتب أسرارًا.'),checkbox(permission,' أوافق على الاتصال وإرسال النص الحالي وسياق الجلسة.'),checkbox(historyPermission,' أوافق على إرسال المقتطفات التي أحددها، حتى ثلاثة.'),pick,history,el('p','المتابعة تتضمن النص الأصلي وآخر ست رسائل مختصرة حتى 1000 حرف للرسالة. رموز الهوية في الذاكرة فقط؛ إعادة فتح التطبيق قد تنشئ حسابًا مجهولًا جديدًا. الإلغاء لا يسحب ما وصل إلى الخدمة.'),send,cancel,clear,status,output,followLabel,follow,save);screen.appendChild(panel);
  const s={epoch:0,controller:null,turns:[],reply:null,entry:null,selected:new Map(),saving:false};
- function reset(){s.epoch++;s.controller?.abort();s.controller=null;s.turns=[];s.reply=s.entry=null;s.selected.clear();history.replaceChildren();output.textContent=follow.value='';permission.checked=historyPermission.checked=false;send.disabled=false;cancel.disabled=save.disabled=true;status.textContent='الوضع المحلي نشط.';if(!panels.some(p=>p.permission.checked))identity=null;}
+ function reset(){s.epoch++;s.controller?.abort();s.controller=null;s.turns=[];s.reply=s.entry=null;s.selected.clear();history.replaceChildren();output.textContent=follow.value='';permission.checked=historyPermission.checked=false;send.disabled=false;cancel.disabled=save.disabled=true;status.textContent='جاهز للاتصال بالقطرة الذكية.';if(!panels.some(p=>p.permission.checked))identity=null;}
  function input(){const text=$(activity==='feelings'?'mmReason':'mmThought').value.trim(),feeling=activity==='feelings'?document.querySelector('#mmFeelings button[aria-pressed="true"]')?.textContent.trim():'',intensity=activity==='feelings'?Number($('mmIntensity').value):null;if(!text||text.length>6000||activity==='feelings'&&(!feeling||!Number.isInteger(intensity)||intensity<1||intensity>10))throw Error('INPUT');return {activity,text,feeling:feeling||'',intensity};}
  pick.addEventListener('click',async()=>{
   if(s.controller)return;const epoch=s.epoch;pick.disabled=true;
@@ -58,13 +58,13 @@ function mount(activity){
    if(epoch!==s.epoch)return;s.selected.clear();history.replaceChildren();history.appendChild(el('p','حتى 20 سجلًا لكل نوع. راجع المقتطف المعروض (حتى 1000 حرف) قبل تحديده. لا إرسال دون موافقة السجلات.'));
    if(!records.length)history.appendChild(el('p','لا توجد سجلات نصية للاختيار.'));
    records.forEach((record,index)=>{const check=el('input');check.type='checkbox';history.appendChild(checkbox(check,({feeling:'شعور',thought:'فكرة',note:'تدوينة'})[record.kind]+': '+record.text));check.addEventListener('change',()=>{if(s.controller){check.checked=s.selected.has(index);return;}if(check.checked&&s.selected.size>=3){check.checked=false;status.textContent='الحد ثلاثة مقتطفات.';return;}if(check.checked)s.selected.set(index,record);else s.selected.delete(index);});});
-  }catch(error){if(epoch===s.epoch)status.textContent='تعذرت قراءة السجلات؛ لم نستخدم مخزنًا بديلًا.';}finally{pick.disabled=false;}
+  }catch(error){if(epoch===s.epoch)status.textContent='تعذرت قراءة السجلات.';}finally{pick.disabled=false;}
  });
  permission.addEventListener('change',()=>{if(!permission.checked)reset();});
  historyPermission.addEventListener('change',()=>{if(!historyPermission.checked){s.controller?.abort();s.selected.clear();history.querySelectorAll('input').forEach(e=>e.checked=false);}});
  cancel.addEventListener('click',()=>{s.epoch++;s.controller?.abort();s.controller=null;send.disabled=false;cancel.disabled=true;status.textContent='أُلغي انتظار الرد؛ لا يمكن سحب ما وصل سابقًا.';});clear.addEventListener('click',reset);
  send.addEventListener('click',async()=>{
-  if(!permission.checked){status.textContent='اختر موافقة الاتصال أولًا، أو استخدم الوضع المحلي.';return;}if(busy){status.textContent='انتظر اكتمال الطلب أو إلغائه.';return;}
+  if(!permission.checked){status.textContent='اختر موافقة الاتصال أولًا.';return;}if(busy){status.textContent='انتظر اكتمال الطلب أو إلغائه.';return;}
   let current;try{current=input();}catch(error){status.textContent='اكتب النص أو سياق الشعور (حتى 6000 حرف)، واختر الشعور وشدته.';return;}
   const extra=follow.value.trim();if(s.turns.length&&!extra){status.textContent='اكتب متابعة أو امسح الجلسة لطلب جديد.';return;}
   const text=current.text+(extra?'\n\nمتابعة المستخدم: '+extra:''),records=historyPermission.checked?[...s.selected.values()]:[];
@@ -83,11 +83,11 @@ function mount(activity){
    s.turns=[...s.turns,{role:'user',text:(extra||current.text).slice(0,1000)},{role:'assistant',text:rendered.slice(0,1000)}].slice(-6);
    const now=new Date(),common={schemaVersion:1,id:'cloud-'+response.requestId,createdAt:now.toISOString(),source:'mindful-minute',analysis:{method:'groq-structured-v1',requestId:response.requestId,policyVersion:POLICY,safety:reply.safety,historyRefs:records.map(r=>({kind:r.kind,id:r.id,revision:r.revision}))}};
    s.entry=activity==='feelings'?{...common,activity,feeling:current.feeling,intensity:current.intensity,reason:current.text,reflection:rendered,followup:extra}:{...common,activity:'thought',category:'ترتيب فكرة',date:now.toLocaleString('ar'),text:'الفكرة الأصلية:\n'+text+'\n\nالرد السحابي:\n'+rendered};
-   follow.value='';save.disabled=false;status.textContent='وصل الرد ولم يُحفظ تلقائيًا. زر الحفظ لهذا الرد فقط.';
-  }catch(error){if(epoch===s.epoch)status.textContent=error.message==='CLOUD_AI_DISABLED'?'القطرة الذكية غير متاحة حاليًا؛ الوضع المحلي نشط.':error.message==='OPERATION_NOT_ALLOWED'?'يجب تفعيل الدخول المجهول في Firebase.':'تعذر إكمال الطلب. لم نقدّم ردًا محليًا على أنه سحابي، ولا نعيد المحاولة تلقائيًا.';}
+   follow.value='';save.disabled=false;status.textContent='وصل الرد ولم يُحفظ تلقائيًا. زر الحفظ يضيفه إلى دفتر قطرة.';
+  }catch(error){if(epoch===s.epoch)status.textContent=error.message==='CLOUD_AI_DISABLED'?'القطرة الذكية غير متاحة حاليًا.':error.message==='OPERATION_NOT_ALLOWED'?'يجب تفعيل الدخول المجهول في Firebase.':'تعذر إكمال الطلب. لم نقدّم ردًا بديلًا، ولا نعيد المحاولة تلقائيًا.';}
   finally{busy=false;if(epoch===s.epoch){s.controller=null;send.disabled=false;cancel.disabled=true;}}
  });
- save.addEventListener('click',async()=>{if(!s.entry||s.saving)return;const epoch=s.epoch,entry=s.entry;s.saving=true;save.disabled=true;try{await root.QatraMindfulData.add(activity==='feelings'?'qatra_feelings_log':'qatra_notebook',entry);if(epoch===s.epoch)status.textContent='حُفظ الرد محليًا في بيانات قطرة.';}catch(error){if(epoch===s.epoch){status.textContent='تعذر الحفظ؛ لم نستخدم مصدرًا بديلًا.';save.disabled=false;}}finally{s.saving=false;}});
+ save.addEventListener('click',async()=>{if(!s.entry||s.saving)return;const epoch=s.epoch,entry=s.entry;s.saving=true;save.disabled=true;try{await root.QatraMindfulData.add(activity==='feelings'?'qatra_feelings_log':'qatra_notebook',entry);if(epoch===s.epoch){status.textContent='حُفظ الرد في دفتر قطرة.';root.dispatchEvent(new CustomEvent('qatra-notebook-updated'));}}catch(error){if(epoch===s.epoch){status.textContent='تعذر الحفظ في دفتر قطرة.';save.disabled=false;}}finally{s.saving=false;}});
  const changed=()=>{if(s.controller||s.reply||s.turns.length)reset();};$(activity==='feelings'?'mmReason':'mmThought').addEventListener('input',changed);
  if(activity==='feelings'){$('mmIntensity').addEventListener('input',changed);$('mmFeelings').addEventListener('click',changed);}panel.addEventListener('toggle',()=>{if(!panel.open)reset();});panels.push({permission,screen,panel,reset});
 }
@@ -99,4 +99,93 @@ function boot(){
 }
 root.QatraMindfulAI=Object.freeze({reset(){identity=null;panels.forEach(p=>p.reset());}});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+
+/* ===== دفتر قطرة ===== */
+(function notebook(){
+ if(root.QatraNotebook)return;
+ const KINDS=[['feeling','شعور','💧'],['thought','فكرة','💭'],['note','تدوينة','📝'],['gratitude','امتنان','🙏'],['intention','نية','🎯']];
+ let overlay=null,list=null,stats=null,progress=null,fab=null,entries=[],filter='all',loaded=false,loading=false;
+ const dayKey=d=>{const x=new Date(d);return isNaN(x)?'':x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
+ function fmt(d){try{const x=new Date(d);if(isNaN(x))return '';return x.toLocaleDateString('ar',{weekday:'long',day:'numeric',month:'long'})+' • '+x.toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'});}catch{return '';}}
+ function css(){
+  if(document.getElementById('qatra-notebook-style'))return;
+  const s=el('style');s.id='qatra-notebook-style';
+  s.textContent=`.qatra-notebook-fab{position:fixed;bottom:104px;inset-inline-end:18px;z-index:1200;display:flex;align-items:center;gap:8px;padding:12px 16px;border:none;border-radius:999px;font:inherit;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(135deg,var(--primary,#0EA5E9),var(--secondary,#8B5CF6));box-shadow:0 12px 28px color-mix(in srgb,var(--primary,#0EA5E9) 35%,transparent);cursor:pointer}.qatra-notebook-fab:active{transform:scale(.96)}.qatra-notebook{position:fixed;inset:0;z-index:1600;display:none;flex-direction:column;background:var(--bg,#F4F7FB);color:var(--text,#1E293B);font-family:inherit}.qatra-notebook.open{display:flex}.qatra-notebook-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px 10px}.qatra-notebook-head h2{margin:0;font-size:20px;font-weight:900}.qatra-notebook-close{width:40px;height:40px;border:none;border-radius:14px;background:color-mix(in srgb,var(--primary,#0EA5E9) 12%,transparent);color:var(--primary,#0EA5E9);font-size:20px;font-weight:800;cursor:pointer}.qatra-notebook-body{flex:1;overflow-y:auto;padding:6px 20px 40px}.qn-hero{position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--primary,#0EA5E9) 25%,transparent);border-radius:26px;padding:20px;background:linear-gradient(145deg,rgba(56,189,248,.12),rgba(139,92,246,.10));margin-bottom:16px}.qn-hero h3{margin:0 0 6px;font-size:17px;font-weight:900}.qn-hero p{margin:0;font-size:13px;color:var(--text-dim,#64748B);line-height:1.7}.qn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.qn-stat{background:var(--surface,#fff);border:1px solid var(--border,rgba(0,0,0,.04));border-radius:18px;padding:14px}.qn-stat b{display:block;font-size:22px;font-weight:900;color:var(--primary,#0EA5E9)}.qn-stat span{font-size:12px;font-weight:700;color:var(--text-dim,#64748B)}.qn-progress{background:var(--surface,#fff);border:1px solid var(--border,rgba(0,0,0,.04));border-radius:18px;padding:16px;margin-bottom:16px}.qn-progress-row{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px}.qn-bar{height:8px;border-radius:99px;background:var(--border,rgba(0,0,0,.06));overflow:hidden}.qn-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary,#0EA5E9),var(--secondary,#8B5CF6));transition:width .6s cubic-bezier(.4,0,.2,1)}.qn-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:6px;scrollbar-width:none}.qn-chips::-webkit-scrollbar{display:none}.qn-chip{flex:none;padding:9px 14px;border-radius:999px;border:1px solid var(--border,rgba(0,0,0,.06));background:var(--surface,#fff);color:var(--text-dim,#64748B);font:inherit;font-size:13px;font-weight:700;cursor:pointer}.qn-chip.active{color:#fff;background:linear-gradient(135deg,var(--primary,#0EA5E9),var(--secondary,#8B5CF6));border-color:transparent}.qn-card{position:relative;background:var(--surface,#fff);border:1px solid var(--border,rgba(0,0,0,.05));border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow,0 10px 30px -10px rgba(0,0,0,.05))}.qn-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800;background:color-mix(in srgb,var(--primary,#0EA5E9) 12%,transparent);color:var(--primary,#0EA5E9);margin-bottom:8px}.qn-time{font-size:12px;font-weight:700;color:var(--text-dim,#64748B);margin-bottom:8px}.qn-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;font-size:14px}.qn-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.qn-tag{padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;background:color-mix(in srgb,var(--secondary,#8B5CF6) 12%,transparent);color:var(--secondary,#8B5CF6)}.qn-empty{text-align:center;padding:40px 10px;color:var(--text-dim,#64748B);font-weight:700;line-height:1.8}`;
+  document.head.appendChild(s);
+ }
+ function build(){
+  if(overlay)return;
+  css();
+  overlay=el('div');overlay.className='qatra-notebook';
+  const head=el('div');head.className='qn-hero';
+  const title=el('h2','دفتر قطرة');const close=el('button','✕');close.className='qatra-notebook-close';close.setAttribute('aria-label','إغلاق دفتر قطرة');
+  const headRow=el('div');headRow.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:12px';headRow.append(title,close);
+  const hero=el('div');hero.className='qn-hero';hero.append(el('h3','مساحتك الهادئة'),el('p','كل ما حفظته من مشاعر وأفكار وتأملات، مع مؤشرات تقدمك وإحصاءاتك في مكان واحد.'));
+  stats=el('div');stats.className='qn-grid';
+  progress=el('div');progress.className='qn-progress';
+  const chips=el('div');chips.className='qn-chips';
+  const all=[['all','الكل','✨'],...KINDS.map(k=>[k[0],k[1],k[2]])];
+  all.forEach(([key,label,icon])=>{const b=el('button',icon+' '+label);b.className='qn-chip'+(key==='all'?' active':'');b.addEventListener('click',()=>{filter=key;chips.querySelectorAll('.qn-chip').forEach(c=>c.classList.remove('active'));b.classList.add('active');render();});chips.appendChild(b);});
+  list=el('div');
+  const body=el('div');body.className='qatra-notebook-body';body.append(hero,stats,progress,chips,list);
+  overlay.append(headRow,body);document.body.appendChild(overlay);
+  close.addEventListener('click',()=>overlay.classList.remove('open'));
+  root.addEventListener('qatra-notebook-updated',()=>{if(overlay.classList.contains('open'))refresh();});
+  root.addEventListener('qatra-awareness-data-changed',()=>{loaded=false;if(overlay.classList.contains('open'))refresh();});
+ }
+ function statCard(value,label){const c=el('div');c.className='qn-stat';c.append(el('b',value),el('span',label));return c;}
+ function render(){
+  const items=filter==='all'?entries:entries.filter(e=>e.kind===filter);
+  list.replaceChildren();
+  if(!items.length){list.appendChild(el('p','لا توجد سجلات في هذا التصنيف بعد. ابدأ بتسجيل شعور أو فكرة، واحفظ رد القطرة الذكية ليظهر هنا.'));list.className='qn-empty';return;}
+  list.className='';
+  items.forEach(e=>{
+   const kind=KINDS.find(k=>k[0]===e.kind)||['note','تدوينة','📝'];
+   const card=el('div');card.className='qn-card';
+   card.appendChild(el('span',kind[2]+' '+kind[1])).className='qn-badge';
+   card.appendChild(el('div',fmt(e.date)||'—')).className='qn-time';
+   card.appendChild(el('p',e.text)).className='qn-text';
+   const meta=el('div');meta.className='qn-meta';
+   if(e.feeling)meta.appendChild(el('span','شعور: '+e.feeling)).className='qn-tag';
+   if(Number.isFinite(e.intensity))meta.appendChild(el('span','الشدة: '+e.intensity+'/10')).className='qn-tag';
+   if(e.reflection||e.analysis)meta.appendChild(el('span','رد القطرة الذكية')).className='qn-tag';
+   if(meta.children.length)card.appendChild(meta);
+   list.appendChild(card);
+  });
+ }
+ function renderStats(){
+  const today=dayKey(new Date()),days=new Set(entries.map(e=>dayKey(e.date)).filter(Boolean));
+  let streak=0,cursor=new Date();
+  if(!days.has(dayKey(cursor)))cursor.setDate(cursor.getDate()-1);
+  while(days.has(dayKey(cursor))){streak++;cursor.setDate(cursor.getDate()-1);}
+  const week=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);week.push(dayKey(d));}
+  const weekDays=new Set(week.filter(d=>days.has(d))).size;
+  const feelings=entries.filter(e=>e.kind==='feeling'&&Number.isFinite(e.intensity));
+  const avg=feelings.length?(feelings.reduce((n,e)=>n+e.intensity,0)/feelings.length).toFixed(1):'—';
+  stats.replaceChildren(statCard(entries.length,'إجمالي السجلات'),statCard(streak,'أيام متتابعة'),statCard(weekDays+'/7','هذا الأسبوع'),statCard(avg,'متوسط الشدة'));
+  progress.replaceChildren();
+  const row=el('div');row.className='qn-progress-row';row.append(el('span','تقدم الأسبوع'),el('span',weekDays+' من 7 أيام'));
+  const bar=el('div');bar.className='qn-bar';const fill=el('i');fill.style.width=Math.min(100,weekDays/7*100)+'%';bar.appendChild(fill);
+  progress.append(row,bar);
+ }
+ async function refresh(){
+  if(loading)return;loading=true;
+  if(!loaded){list.replaceChildren(el('p','جارٍ تحميل دفتر قطرة…'));list.className='qn-empty';}
+  const next=[];
+  for(const [kind] of KINDS){
+   try{const page=await root.QatraMindfulStore.list(kind,{limit:200});
+    for(const entry of page.entries||[]){const p=entry.payload||{};const text=p.text||p.reason||p.feeling||'';if(typeof text==='string'&&text.trim())next.push({kind,text:text.trim(),date:p.createdAt||entry.createdAt||entry.updatedAt,intensity:p.intensity,feeling:p.feeling,reflection:p.reflection,analysis:!!p.analysis});}
+   }catch{}
+  }
+  next.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  entries=next;loaded=true;loading=false;renderStats();render();
+ }
+ function open(){build();overlay.classList.add('open');refresh();}
+ function mountFab(){
+  if(fab||!root.QatraMindfulData?.enabled)return;
+  css();fab=el('button','📖 دفتر قطرة');fab.className='qatra-notebook-fab';fab.setAttribute('aria-label','فتح دفتر قطرة');fab.addEventListener('click',open);document.body.appendChild(fab);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountFab);else mountFab();
+ root.QatraNotebook=Object.freeze({open,refresh});
+})();
 })(globalThis);
