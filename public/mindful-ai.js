@@ -81,13 +81,13 @@ function mount(activity){
    if(response.provider!=='remote'||response.policyVersion!==POLICY||typeof response.requestId!=='string')throw Error('INVALID_RESPONSE');
    const reply=validate(response.data),rendered=format(reply);s.reply=reply;output.textContent='رد القطرة الذكية:\n\n'+rendered+(reply.safety==='support'?'\n\nعند خطر مباشر تواصل مع الطوارئ المحلية أو شخص موثوق؛ المساعد ليس خدمة طوارئ.':'');
    s.turns=[...s.turns,{role:'user',text:(extra||current.text).slice(0,1000)},{role:'assistant',text:rendered.slice(0,1000)}].slice(-6);
-   const now=new Date(),common={schemaVersion:1,id:'cloud-'+response.requestId,createdAt:now.toISOString(),source:'mindful-minute',analysis:{method:'groq-structured-v1',requestId:response.requestId,policyVersion:POLICY,safety:reply.safety,historyRefs:records.map(r=>({kind:r.kind,id:r.id,revision:r.revision}))}};
-   s.entry=activity==='feelings'?{...common,activity,feeling:current.feeling,intensity:current.intensity,reason:current.text,reflection:rendered,followup:extra}:{...common,activity:'thought',category:'ترتيب فكرة',date:now.toLocaleString('ar'),text:'الفكرة الأصلية:\n'+text+'\n\nالرد السحابي:\n'+rendered};
+   const now=new Date(),common={schemaVersion:1,createdAt:now.toISOString(),source:'mindful-minute',analysis:{method:'groq-structured-v1',requestId:response.requestId,policyVersion:POLICY,safety:reply.safety,historyRefs:records.map(r=>({kind:r.kind,id:r.id,revision:r.revision}))}};
+   s.entry=activity==='feelings'?{...common,activity,feeling:current.feeling,intensity:current.intensity,reason:current.text,reflection:rendered,followup:extra}:{...common,activity:'thought',category:'ترتيب فكرة',text:text,reflection:rendered,followup:extra};
    follow.value='';save.disabled=false;status.textContent='وصل الرد ولم يُحفظ تلقائيًا. زر الحفظ يضيفه إلى دفتر قطرة.';
   }catch(error){if(epoch===s.epoch)status.textContent=error.message==='CLOUD_AI_DISABLED'?'القطرة الذكية غير متاحة حاليًا.':error.message==='OPERATION_NOT_ALLOWED'?'يجب تفعيل الدخول المجهول في Firebase.':'تعذر إكمال الطلب. لم نقدّم ردًا بديلًا، ولا نعيد المحاولة تلقائيًا.';}
   finally{busy=false;if(epoch===s.epoch){s.controller=null;send.disabled=false;cancel.disabled=true;}}
  });
- save.addEventListener('click',async()=>{if(!s.entry||s.saving)return;const epoch=s.epoch,entry=s.entry;s.saving=true;save.disabled=true;try{await root.QatraMindfulData.ready();await root.QatraMindfulData.add(activity==='feelings'?'qatra_feelings_log':'qatra_notebook',entry);if(epoch===s.epoch){status.textContent='حُفظ الرد في دفتر قطرة.';root.dispatchEvent(new CustomEvent('qatra-notebook-updated'));}}catch(error){if(epoch===s.epoch){status.textContent='تعذر الحفظ في دفتر قطرة: '+(error?.message||'خطأ غير معروف');save.disabled=false;}}finally{s.saving=false;}});
+ save.addEventListener('click',async()=>{if(!s.entry||s.saving)return;const epoch=s.epoch,entry=s.entry;s.saving=true;save.disabled=true;try{await root.QatraMindfulData.ready();const saved=await root.QatraMindfulStore.put('note','ai-'+entry.analysis.requestId,entry,0);if(epoch===s.epoch){status.textContent='حُفظ الرد في دفتر قطرة.';root.dispatchEvent(new CustomEvent('qatra-notebook-updated'));}}catch(error){if(epoch===s.epoch){status.textContent='تعذر الحفظ في دفتر قطرة: '+(error?.message||'خطأ غير معروف');save.disabled=false;}}finally{s.saving=false;}});
  const changed=()=>{if(s.controller||s.reply||s.turns.length)reset();};$(activity==='feelings'?'mmReason':'mmThought').addEventListener('input',changed);
  if(activity==='feelings'){$('mmIntensity').addEventListener('input',changed);$('mmFeelings').addEventListener('click',changed);}panel.addEventListener('toggle',()=>{if(!panel.open)reset();});panels.push({permission,screen,panel,reset});
 }
@@ -103,7 +103,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 /* ===== دفتر قطرة ===== */
 (function notebook(){
  if(root.QatraNotebook)return;
- const SOURCES=[['qatra_feelings_log','شعور','💧'],['qatra_notebook','تأمل ذكي','🧠'],['feeling','شعور','💧'],['thought','فكرة','💭'],['note','تدوينة','📝'],['gratitude','امتنان','🙏'],['intention','نية','🎯']];
+ const SOURCES=[['feeling','شعور','💧'],['thought','فكرة','💭'],['session','جلسة','🧘'],['gratitude','امتنان','🙏'],['intention','نية','🎯'],['note','تأمل ذكي','🧠'],['achievement','إنجاز','🏆']];
  let overlay=null,list=null,stats=null,progress=null,entries=[],filter='all',loaded=false,loading=false,card=null;
  const dayKey=d=>{const x=new Date(d);return isNaN(x)?'':x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
  function fmt(d){try{const x=new Date(d);if(isNaN(x))return '';return x.toLocaleDateString('ar',{weekday:'long',day:'numeric',month:'long'})+' • '+x.toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'});}catch{return '';}}
@@ -119,7 +119,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   overlay=el('div');overlay.className='qatra-notebook';
   const title=el('h2','دفتر قطرة');const close=el('button','✕');close.className='qatra-notebook-close';close.setAttribute('aria-label','إغلاق دفتر قطرة');
   const headRow=el('div');headRow.className='qatra-notebook-head';headRow.append(title,close);
-  const hero=el('div');hero.className='qn-hero';hero.append(el('h3','مساحتك الهادئة'),el('p','كل ما حفظته من مشاعر وأفكار وتأملات، مع مؤشرات تقدمك وإحصاءاتك في مكان واحد.'));
+  const hero=el('div');hero.className='qn-hero';hero.append(el('h3','مساحتك الهادئة'),el('p','مشاعرك، أفكارك، نواياك، امتنانك، إنجازاتك، وردود القطرة الذكية — كلها مرتبة بتاريخها في مكان واحد.'));
   stats=el('div');stats.className='qn-grid';
   progress=el('div');progress.className='qn-progress';
   const chips=el('div');chips.className='qn-chips';
@@ -136,7 +136,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  function render(){
   const items=filter==='all'?entries:entries.filter(e=>e.kind===filter);
   list.replaceChildren();
-  if(!items.length){list.appendChild(el('p','لا توجد سجلات في هذا التصنيف بعد. ابدأ بتسجيل شعور أو فكرة، واحفظ رد القطرة الذكية ليظهر هنا.'));list.className='qn-empty';return;}
+  if(!items.length){list.appendChild(el('p','لا توجد سجلات في هذا التصنيف بعد. ابدأ بتسجيل شعور أو فكرة أو نية أو امتنان، وستظهر هنا بتاريخها.'));list.className='qn-empty';return;}
   list.className='';
   items.forEach(e=>{
    const kind=SOURCES.find(k=>k[0]===e.kind)||['note','تدوينة','📝'];
@@ -147,7 +147,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    const meta=el('div');meta.className='qn-meta';
    if(e.feeling){const t=el('span','شعور: '+e.feeling);t.className='qn-tag';meta.appendChild(t);}
    if(Number.isFinite(e.intensity)){const t=el('span','الشدة: '+e.intensity+'/10');t.className='qn-tag';meta.appendChild(t);}
-   if(e.reflection||e.analysis){const t=el('span','رد القطرة الذكية');t.className='qn-tag';meta.appendChild(t);}
+   if(e.ai){const t=el('span','رد القطرة الذكية');t.className='qn-tag';meta.appendChild(t);}
    if(meta.children.length)card.appendChild(meta);
    list.appendChild(card);
   });
@@ -159,7 +159,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   while(days.has(dayKey(cursor))){streak++;cursor.setDate(cursor.getDate()-1);}
   const week=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);week.push(dayKey(d));}
   const weekDays=new Set(week.filter(d=>days.has(d))).size;
-  const feelings=entries.filter(e=>Number.isFinite(e.intensity));
+  const feelings=entries.filter(e=>e.kind==='feeling'&&Number.isFinite(e.intensity));
   const avg=feelings.length?(feelings.reduce((n,e)=>n+e.intensity,0)/feelings.length).toFixed(1):'—';
   stats.replaceChildren(statCard(entries.length,'إجمالي السجلات'),statCard(streak,'أيام متتابعة'),statCard(weekDays+'/7','هذا الأسبوع'),statCard(avg,'متوسط الشدة'));
   progress.replaceChildren();
@@ -173,8 +173,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   const next=[];
   try{await root.QatraMindfulData.ready();}catch{}
   for(const [kind] of SOURCES){
-   try{const page=await root.QatraMindfulStore.list(kind,{limit:200});
-    for(const entry of page.entries||[]){const p=entry.payload||{};const text=p.text||p.reason||p.feeling||p.reflection||'';if(typeof text==='string'&&text.trim())next.push({kind,text:text.trim(),date:p.createdAt||entry.createdAt||entry.updatedAt,intensity:p.intensity,feeling:p.feeling,reflection:p.reflection,analysis:!!p.analysis});}
+   try{const page=await root.QatraMindfulStore.list(kind,{limit:100});
+    for(const entry of page.entries||[]){const p=entry.payload||{};const text=p.text||p.reason||p.feeling||p.reflection||p.title||'';if(typeof text==='string'&&text.trim())next.push({kind,text:text.trim(),date:p.createdAt||entry.createdAt||entry.updatedAt,intensity:p.intensity,feeling:p.feeling,ai:p.source==='mindful-minute'||!!p.analysis});}
    }catch{}
   }
   next.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
@@ -198,9 +198,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if(!host||host===document.body)host=node.parentElement;
   card=el('button');card.type='button';card.className='glass-card action-card';card.style.cssText='width:100%;text-align:start;border:none;cursor:pointer';
   const icon=el('div','📖');icon.className='card-icon';
-  const info=el('div');info.className='card-info';info.append(el('div','دفتر قطرة').cloneNode(true),el('div','سجلاتك وتقدمك في مكان واحد'));
-  info.firstChild.className='card-title';info.lastChild.className='card-sub';
-  card.append(icon,info);card.addEventListener('click',open);
+  const info=el('div');info.className='card-info';
+  const t=el('div','دفتر قطرة');t.className='card-title';
+  const sub=el('div','مشاعرك ونواياك وامتنانك وإنجازاتك وردود القطرة الذكية');sub.className='card-sub';
+  info.append(t,sub);card.append(icon,info);card.addEventListener('click',open);
   host.appendChild(card);
   return true;
  }
@@ -209,7 +210,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   if(injectCard())return;
   const timer=setInterval(()=>{if(injectCard())clearInterval(timer);},700);
   setTimeout(()=>clearInterval(timer),20000);
-  new MutationObserver(()=>{if(injectCard())observer.disconnect();}).observe(document.body,{childList:true,subtree:true});
   const observer=new MutationObserver(()=>{if(injectCard())observer.disconnect();});observer.observe(document.body,{childList:true,subtree:true});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mountCard);else mountCard();
