@@ -45,6 +45,15 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
+      - name: Prepare eight QATRA theme artworks
+        run: python3 scripts/prepare-theme-assets.py
+
+      - name: Upload theme dimensions report
+        uses: actions/upload-artifact@v4
+        with:
+          name: qatra-theme-dimensions
+          path: theme-assets-report.json
+
       - name: Sync Capacitor Android
         run: npx cap sync android
 
