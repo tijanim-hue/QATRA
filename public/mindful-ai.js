@@ -85,14 +85,15 @@ function suppressLocal(){
  sheet.querySelectorAll('button').forEach(b=>{
   const t=(b.textContent||'').trim();
   if(t.includes('ترتيب الفكرة')||t.includes('أفرغ ذهنك')||t.includes('اختيار المقتطفات')){
-   const host=b.closest('.mm-panel')||b.closest('.mm-card')||b;b.hidden=true;
+   const host=b.closest('.mm-panel')||b.closest('.mm-card')||b;if(!host.hidden)host.hidden=true;
   }
  });
 }
 function boot(){
  if(!$('mindfulSheet')||!root.QatraMindfulData?.enabled)return;
  const style=el('style');style.textContent='.qatra-ai-panel{position:relative;margin-top:22px;padding:18px;border:1px solid color-mix(in srgb,var(--primary,#38bdf8) 28%,transparent);border-radius:22px;background:linear-gradient(145deg,rgba(56,189,248,.10),rgba(139,92,246,.08));box-shadow:0 18px 40px rgba(2,6,23,.16);backdrop-filter:blur(18px) saturate(1.15);overflow:hidden}.qatra-ai-panel::before{content:"";position:absolute;inset:-40% -20% auto;height:70%;background:radial-gradient(circle at 30% 20%,rgba(56,189,248,.22),transparent 60%);pointer-events:none}.qatra-ai-panel summary{position:relative;display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem;cursor:pointer}.qatra-ai-panel summary::before{content:"💧";font-size:1.1rem;filter:drop-shadow(0 0 8px rgba(56,189,248,.55))}.qatra-ai-panel>p:first-of-type{position:relative;margin-top:8px;color:color-mix(in srgb,currentColor 72%,transparent);font-size:.92rem}.qatra-ai-panel label{display:block;margin:12px 0;white-space:pre-wrap;overflow-wrap:anywhere}.qatra-ai-panel button{font:inherit;color:inherit;background:rgba(255,255,255,.07);border:1px solid color-mix(in srgb,var(--primary,#38bdf8) 35%,transparent);border-radius:14px;padding:11px 14px;margin:4px;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}.qatra-ai-panel button:hover:not(:disabled){transform:translateY(-1px);background:rgba(56,189,248,.12);box-shadow:0 8px 22px rgba(56,189,248,.16)}.qatra-ai-panel button:disabled{opacity:.45}.qatra-ai-panel p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}.qatra-ai-panel textarea{width:100%;font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid color-mix(in srgb,var(--primary,#38bdf8) 22%,transparent);border-radius:14px;padding:12px}.qatra-ai-panel :focus-visible{outline:2px solid var(--primary,#38bdf8);outline-offset:2px}';document.head.appendChild(style);
- mount('feelings');mount('thought');suppressLocal();new MutationObserver(()=>{suppressLocal();for(const p of panels)if($('mindfulSheet').dataset.mmOpen!=='true'||!p.screen.classList.contains('is-active')||!p.panel.open)p.reset();}).observe($('mindfulSheet'),{attributes:true,subtree:true,childList:true,attributeFilter:['class','style','data-mm-open','open']});
+ mount('feelings');mount('thought');suppressLocal();
+ new MutationObserver(()=>{for(const p of panels)if($('mindfulSheet').dataset.mmOpen!=='true'||!p.screen.classList.contains('is-active')||!p.panel.open)p.reset();}).observe($('mindfulSheet'),{attributes:true,subtree:true,attributeFilter:['class','style','data-mm-open','open']});
  root.addEventListener('qatra-awareness-data-changed',()=>{identity=null;panels.forEach(p=>p.reset());});
 }
 root.QatraMindfulAI=Object.freeze({reset(){identity=null;panels.forEach(p=>p.reset());}});
