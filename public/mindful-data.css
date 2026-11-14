@@ -1,7 +1,13 @@
-/* Data controls only: existing mindful screens and icons are not restyled. */
+/* QATRA writing surfaces and settings visibility. Stored records are unchanged. */
 .mindful-data-panel{margin-top:20px;padding:16px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);font:inherit}
 .mindful-data-panel summary{cursor:pointer;font-weight:800;line-height:1.8}
 .mindful-data-panel p{font-size:12px;line-height:1.9;color:var(--text-dim)}
 .mindful-data-actions{display:flex;gap:8px;flex-wrap:wrap}
 .mindful-data-actions button{font:inherit;font-size:12px;border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--surface);color:var(--primary);cursor:pointer}
 .mindful-data-actions button:disabled{opacity:.5;cursor:wait}
+#mindfulDataPanel,#settingsSheet .qe-preference:has(#qe-wake-screen),#mindfulSheet .qatra-journal{display:none!important}
+#mindfulSheet textarea{box-sizing:border-box;width:100%;max-width:100%;min-height:144px;padding:18px 20px!important;border-radius:20px!important;border:1px solid rgba(150,176,214,.28)!important;background:linear-gradient(150deg,rgba(255,255,255,.075),rgba(9,22,43,.5))!important;color:#edf5ff!important;font-family:inherit;font-size:16px;line-height:1.9;caret-color:#83dad0;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 22px rgba(0,0,0,.08);resize:vertical;transition:border-color .18s ease,box-shadow .18s ease;scroll-margin-block:24px}
+#mindfulSheet textarea:focus{outline:2px solid transparent!important;border-color:#83dad0!important;box-shadow:0 0 0 3px rgba(131,218,208,.16),inset 0 1px 0 rgba(255,255,255,.08)!important}
+#mindfulSheet textarea::placeholder{color:#a8b8ce!important;opacity:.8}
+#mindfulSheet label:has(+textarea){margin-bottom:8px;font-weight:700}
+@media(prefers-reduced-motion:reduce){#mindfulSheet textarea{transition:none}}
