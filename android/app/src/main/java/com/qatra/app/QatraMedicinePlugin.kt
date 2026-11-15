@@ -56,7 +56,11 @@ class QatraMedicinePlugin : Plugin() {
             today.set(Calendar.MILLISECOND, 0)
             val scheduledAt = today.timeInMillis
             if (scheduledAt > System.currentTimeMillis()) {
-                db.ensureDose(id, scheduledAt)
+                val doseId = db.ensureDose(id, scheduledAt)
+                QatraMedicineReminderScheduler.schedule(
+                    context, doseId, call.getString("name").orEmpty(),
+                    "${call.getLong("doseMilli") / 1000.0} ${call.getString("unit").orEmpty()}", scheduledAt
+                )
                 created++
             }
         }
@@ -89,6 +93,7 @@ class QatraMedicinePlugin : Plugin() {
     @PluginMethod fun confirmDoseTaken(call: PluginCall) = execute(call) { db ->
         val id = call.getString("doseId").orEmpty()
         require(id.isNotBlank())
+        QatraMedicineReminderScheduler.cancel(context, id)
         JSObject().apply { put("recorded", db.confirmTaken(id)) }
     }
 
