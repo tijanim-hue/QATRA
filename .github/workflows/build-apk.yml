@@ -60,6 +60,7 @@ jobs:
           python3 scripts/prepare-experience-polish.py
           python3 scripts/prepare-drop-defaults.py
           python3 scripts/prepare-header-drop.py
+          python3 scripts/prepare-interaction-audio.py
 
       - name: Upload theme dimensions report
         uses: actions/upload-artifact@v4
