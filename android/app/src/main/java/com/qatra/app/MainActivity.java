@@ -8,6 +8,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(QatraPlugin.class);
         registerPlugin(QatraAwarenessPlugin.class);
         registerPlugin(QatraMedicinePlugin.class);
+        registerPlugin(QatraMedicineAlertsPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }
