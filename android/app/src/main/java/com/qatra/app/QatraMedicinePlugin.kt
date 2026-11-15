@@ -46,10 +46,23 @@ class QatraMedicinePlugin : Plugin() {
             call.getString("unit").orEmpty(), integer(call, "doseMilli"),
             integer(call, "openingStockMilli"), times
         )
-        JSObject().apply { put("id", id) }
+        var created = 0
+        val today = Calendar.getInstance()
+        for (time in times) {
+            val parts = time.split(":")
+            today.set(Calendar.HOUR_OF_DAY, parts[0].toInt())
+            today.set(Calendar.MINUTE, parts[1].toInt())
+            today.set(Calendar.SECOND, 0)
+            today.set(Calendar.MILLISECOND, 0)
+            val scheduledAt = today.timeInMillis
+            if (scheduledAt > System.currentTimeMillis()) {
+                db.ensureDose(id, scheduledAt)
+                created++
+            }
+        }
+        JSObject().apply { put("id", id); put("createdDoses", created) }
     }
 
-    /** Reads already-created occurrences; never creates doses or Android alarms. */
     @PluginMethod fun listTodayDoses(call: PluginCall) = execute(call) { db ->
         val day = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
