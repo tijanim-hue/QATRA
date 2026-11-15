@@ -41,9 +41,10 @@ class QatraMedicinePlugin : Plugin() {
         val times = (0 until values.length()).map { index ->
             values.get(index) as? String ?: throw IllegalArgumentException("dailyTimes")
         }
+        val doseMilli = integer(call, "doseMilli")
         val id = db.addMedicine(
             call.getString("name").orEmpty(), call.getString("strength").orEmpty(),
-            call.getString("unit").orEmpty(), integer(call, "doseMilli"),
+            call.getString("unit").orEmpty(), doseMilli,
             integer(call, "openingStockMilli"), times
         )
         var created = 0
@@ -59,7 +60,7 @@ class QatraMedicinePlugin : Plugin() {
                 val doseId = db.ensureDose(id, scheduledAt)
                 QatraMedicineReminderScheduler.schedule(
                     context, doseId, call.getString("name").orEmpty(),
-                    "${call.getLong("doseMilli") / 1000.0} ${call.getString("unit").orEmpty()}", scheduledAt
+                    "${doseMilli / 1000.0} ${call.getString("unit").orEmpty()}", scheduledAt
                 )
                 created++
             }
