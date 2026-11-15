@@ -6,65 +6,67 @@ import android.media.AudioManager
 import android.media.SoundPool
 import android.os.SystemClock
 import android.util.Log
+import android.view.HapticFeedbackConstants
+import android.view.SoundEffectConstants
+import android.view.View
 
-class QatraUiSounds(private val context:Context) {
-    private var pool:SoundPool?=SoundPool.Builder().setMaxStreams(3).setAudioAttributes(
+class QatraUiSounds(private val context:Context,private val feedbackView:(()->View?)?=null) {
+    private var pool:SoundPool?=SoundPool.Builder().setMaxStreams(1).setAudioAttributes(
         AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()).build()
-    private val ids=mutableMapOf<String,Int>()
-    private val loaded=mutableSetOf<Int>()
+    private var startupId=0
+    private var startupLoaded=false
     private var pendingStartup=false
-    private var pendingTapAt=-1L
-    private var lastTapAt=-1000L
 
     init {
         pool?.setOnLoadCompleteListener { _,id,result -> synchronized(this){
-            if(result==0)loaded.add(id)
-            if(pendingStartup&&ids["startup"]==id&&result==0){
-                pendingStartup=false
-                play("startup")
-            }
-            if(pendingTapAt>=0L&&ids["tap"]==id&&result==0){
-                val fresh=SystemClock.uptimeMillis()-pendingTapAt<=150L
-                pendingTapAt=-1L
-                if(fresh)play("tap")
+            if(result==0&&id==startupId){
+                startupLoaded=true
+                if(pendingStartup){pendingStartup=false;play("startup")}
             }
         }}
-        for((name,file) in mapOf("tap" to "qatra_ui_tap","startup" to "qatra_ui_startup")){
-            val resource=context.resources.getIdentifier(file,"raw",context.packageName)
-            if(resource!=0)ids[name]=pool?.load(context,resource,1)?:0
-        }
+        val resource=context.resources.getIdentifier("qatra_ui_startup","raw",context.packageName)
+        if(resource!=0)startupId=pool?.load(context,resource,1)?:0
     }
 
     @Synchronized fun play(name:String){
-        if(name!="tap"&&name!="startup")return
-        // Legacy UI-sound preferences must not silently disable requested action feedback.
-        // Startup retains its existing preference; action sounds follow the phone's audio policy.
-        if(name=="startup"&&!context.getSharedPreferences("QatraExperiencePrefs",Context.MODE_PRIVATE).getBoolean("uiSounds",true))return
-        val audio=context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        if(audio.ringerMode!=AudioManager.RINGER_MODE_NORMAL||audio.getStreamVolume(AudioManager.STREAM_SYSTEM)<=0)return
-        val id=ids[name]?:return
-        val now=SystemClock.uptimeMillis()
-        if(!loaded.contains(id)){
-            if(name=="startup")pendingStartup=true else pendingTapAt=now
+        if(name=="tap"){
+            feedbackView?.invoke()?.let{feedback(it)}
             return
         }
-        if(name=="tap"){
-            if(now-lastTapAt<45L)return
-            lastTapAt=now
-        }
-        try{
-            val volume=if(name=="startup").42f else .50f
-            pool?.play(id,volume,volume,1,0,1f)
-        }catch(e:Exception){Log.w("QatraUiSounds","Optional sound unavailable",e)}
+        if(name!="startup")return
+        if(!context.getSharedPreferences("QatraExperiencePrefs",Context.MODE_PRIVATE).getBoolean("uiSounds",true))return
+        val audio=context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        if(audio.ringerMode!=AudioManager.RINGER_MODE_NORMAL||audio.getStreamVolume(AudioManager.STREAM_SYSTEM)<=0)return
+        if(startupId==0)return
+        if(!startupLoaded){pendingStartup=true;return}
+        try{pool?.play(startupId,.42f,.42f,1,0,1f)}
+        catch(e:Exception){Log.w("QatraUiSounds","Optional startup sound unavailable",e)}
     }
 
     @Synchronized fun release(){
         pendingStartup=false
-        pendingTapAt=-1L
         pool?.release()
         pool=null
-        ids.clear()
-        loaded.clear()
+        startupLoaded=false
+        startupId=0
+    }
+
+    companion object {
+        private var lastFeedbackAt=-1000L
+        @Synchronized fun feedback(view:View){
+            val now=SystemClock.uptimeMillis()
+            if(now-lastFeedbackAt<45L)return
+            lastFeedbackAt=now
+            view.post {
+                if(!view.isAttachedToWindow)return@post
+                try{
+                    val audio=view.context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                    if(audio.ringerMode==AudioManager.RINGER_MODE_NORMAL)view.playSoundEffect(SoundEffectConstants.CLICK)
+                    // No IGNORE flags and no custom vibration pattern: Android owns the feedback.
+                    view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                }catch(e:Exception){Log.w("QatraUiSounds","System touch feedback unavailable",e)}
+            }
+        }
     }
 }
