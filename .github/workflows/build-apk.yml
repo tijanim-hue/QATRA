@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ mindful/phase-2-ai ]
 
 permissions:
   contents: read
@@ -64,6 +64,11 @@ jobs:
           python3 scripts/prepare-device-feedback.py
           python3 scripts/prepare-medicine.py
 
+      - name: Check medicine JavaScript syntax after preparation
+        run: |
+          node --check public/qatra-medicine.js
+          node --check public/qatra-medicine-management.js
+
       - name: Upload theme dimensions report
         uses: actions/upload-artifact@v4
         with:
@@ -72,6 +77,10 @@ jobs:
 
       - name: Sync Capacitor Android
         run: npx cap sync android
+
+      - name: Run Android debug unit tests
+        working-directory: ./android
+        run: ./gradlew testDebugUnitTest
 
       - name: Build Debug APK with explicitly bound persistent signing
         working-directory: ./android
@@ -91,3 +100,11 @@ jobs:
         with:
           name: qatra-build-identity
           path: qatra-build-identity.json
+
+      - name: Upload unit test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qatra-unit-test-reports
+          path: android/app/build/reports/tests/testDebugUnitTest/
+          if-no-files-found: ignore
