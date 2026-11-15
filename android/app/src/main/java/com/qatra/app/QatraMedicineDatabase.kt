@@ -122,6 +122,45 @@ class QatraMedicineDatabase(context: Context) : SQLiteOpenHelper(
         }
     }
 
+    /** Edits the medicine record without deleting historical doses or stock movements. */
+    fun updateMedicine(
+        id: String,
+        name: String,
+        strength: String,
+        unit: String,
+        doseMilli: Long,
+        dailyTimes: List<String>
+    ): Boolean {
+        require(id.isNotBlank())
+        require(name.trim().length in 1..160)
+        require(strength.length <= 160)
+        require(unit in setOf("tablet", "capsule", "ml", "drop", "other"))
+        require(doseMilli in 1L..1000000000000L)
+        require(dailyTimes.size in 1..24)
+        require(dailyTimes.distinct().size == dailyTimes.size)
+        require(dailyTimes.all { Regex("([01][0-9]|2[0-3]):[0-5][0-9]").matches(it) })
+        return transaction { db ->
+            val changed = db.update("medicines", ContentValues().apply {
+                put("name", name.trim())
+                put("strength", strength.trim())
+                put("unit", unit)
+                put("dose_milli", doseMilli)
+                put("daily_times_json", JSONArray(dailyTimes.sorted()).toString())
+            }, "id=?", arrayOf(id))
+            changed == 1
+        }
+    }
+
+    /** Archives without deleting doses, stock movements, or the medicine record. */
+    fun setArchived(id: String, archived: Boolean): Boolean {
+        require(id.isNotBlank())
+        return transaction { db ->
+            db.update("medicines", ContentValues().apply {
+                put("archived", if (archived) 1 else 0)
+            }, "id=?", arrayOf(id)) == 1
+        }
+    }
+
     /** Creates a concrete occurrence, not an Android alarm. Retries return the same ID. */
     fun ensureDose(medicineId: String, scheduledAt: Long): String {
         require(scheduledAt > 0)
@@ -152,9 +191,12 @@ class QatraMedicineDatabase(context: Context) : SQLiteOpenHelper(
     fun confirmTaken(doseId: String, takenAt: Long = System.currentTimeMillis()): Boolean {
         require(takenAt > 0 && takenAt <= System.currentTimeMillis())
         return transaction { db ->
-            db.rawQuery("SELECT medicine_id,quantity_milli,status,revision FROM doses WHERE id=?",
-                arrayOf(doseId)).use { dose ->
+            db.rawQuery(
+                "SELECT d.medicine_id,d.quantity_milli,d.status,d.revision,m.archived FROM doses d JOIN medicines m ON m.id=d.medicine_id WHERE d.id=?",
+                arrayOf(doseId)
+            ).use { dose ->
                 require(dose.moveToFirst()) { "Dose not found" }
+                require(dose.getInt(4) == 0) { "Medicine is archived" }
                 if (dose.getString(2) == "taken") return@transaction false
                 require(dose.getString(2) == "pending") { "Dose is not pending" }
                 val medicineId = dose.getString(0)
@@ -186,7 +228,7 @@ class QatraMedicineDatabase(context: Context) : SQLiteOpenHelper(
 
     fun listMedicines(): JSONArray {
         val result = JSONArray()
-        readableDatabase.rawQuery("SELECT id,name,strength,unit,dose_milli,stock_milli,daily_times_json,archived FROM medicines ORDER BY created_at DESC", null).use { row ->
+        readableDatabase.rawQuery("SELECT id,name,strength,unit,dose_milli,stock_milli,daily_times_json,archived FROM medicines ORDER BY archived ASC, created_at DESC", null).use { row ->
             while (row.moveToNext()) result.put(JSONObject().apply {
                 put("id", row.getString(0))
                 put("name", row.getString(1))
