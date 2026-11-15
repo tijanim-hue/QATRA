@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import java.util.concurrent.TimeUnit
 
@@ -44,9 +43,13 @@ object QatraMedicineReminderScheduler {
         }
     }
 
-    fun scheduleSnooze(context: Context, doseId: String, name: String, amount: String, originalScheduledAt: Long) {
-        scheduleAt(context, doseId, name, amount,
-            System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10), originalScheduledAt)
+    /** Existing notification actions retain their ten minute default. */
+    fun scheduleSnooze(context: Context, doseId: String, name: String, amount: String,
+        originalScheduledAt: Long, delayMinutes: Long = 10L): Long {
+        require(delayMinutes in 1L..1440L)
+        val target = Math.addExact(System.currentTimeMillis(), TimeUnit.MINUTES.toMillis(delayMinutes))
+        scheduleAt(context, doseId, name, amount, target, originalScheduledAt)
+        return target
     }
 
     fun cancel(context: Context, doseId: String) {
