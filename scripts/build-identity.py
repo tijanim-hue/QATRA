@@ -5,12 +5,16 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 root=Path(__file__).resolve().parents[1]
 baseline=json.loads((root/'.github/qatra-update-baseline.json').read_text())
 expected=baseline['certificate_sha256'].lower()
 def run(args):
-    return subprocess.check_output([str(x) for x in args],stderr=subprocess.STDOUT)
+    result=subprocess.run([str(x) for x in args],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    if result.returncode:
+        raise SystemExit('Tool failed: '+str(args[0])+'\n'+result.stderr.decode(errors='replace'))
+    return result.stdout
 def require(ok,message):
     if not ok:
         raise SystemExit(message)
@@ -18,8 +22,13 @@ def require(ok,message):
 if sys.argv[1]=='prepare':
     key=Path.home()/'.android/debug.keystore'
     require(key.is_file(),'Persistent keystore missing. Refusing to generate a replacement.')
-    certificate=run(['keytool','-exportcert','-keystore',key,'-storepass','android','-alias','androiddebugkey'])
-    actual=hashlib.sha256(certificate).hexdigest()
+    with tempfile.TemporaryDirectory(prefix='qatra-public-cert-') as folder:
+        certificate=Path(folder)/'certificate.der'
+        run(['keytool','-exportcert','-keystore',key,'-storepass','android','-alias','androiddebugkey','-file',certificate])
+        require(certificate.is_file() and certificate.stat().st_size>0,'Certificate export produced no DER file.')
+        actual=hashlib.sha256(certificate.read_bytes()).hexdigest()
+    print('Expected certificate SHA-256: '+expected,flush=True)
+    print('Exported certificate SHA-256: '+actual,flush=True)
     require(actual==expected,'Signing certificate differs from the user APK baseline. No replacement key will be generated.')
     number=int(os.environ['GITHUB_RUN_NUMBER'])
     attempt=int(os.environ.get('GITHUB_RUN_ATTEMPT','1'))
@@ -46,6 +55,8 @@ elif sys.argv[1]=='verify':
     apk=root/'android/app/build/outputs/apk/debug/app-debug.apk'
     signature=run([tool/'apksigner','verify','--verbose','--print-certs',apk]).decode()
     signers=re.findall(r'Signer #\d+ certificate SHA-256 digest:\s*([0-9a-fA-F]{64})',signature)
+    print('Expected certificate SHA-256: '+expected,flush=True)
+    print('APK certificate SHA-256: '+', '.join(signers),flush=True)
     require([s.lower() for s in signers]==[expected],'APK signing certificate differs from baseline. Artifact publication blocked.')
     metadata=run([tool/'aapt','dump','badging',apk]).decode()
     package=re.search(r"package: name='([^']+)' versionCode='(\d+)'",metadata)
