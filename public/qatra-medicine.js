@@ -7,6 +7,7 @@ const units={tablet:'حبة',capsule:'كبسولة',ml:'مل',drop:'قطرة',ot
 const q=s=>root.querySelector(s);
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const amount=(milli,unit)=>`${Number(milli/1000).toLocaleString('ar',{maximumFractionDigits:3})} ${units[unit]||'وحدة'}`;
+const pad=n=>String(n).padStart(2,'0');
 function status(text){q('#qmStatus').textContent=text;}
 async function native(method,data={}){
  const cap=window.Capacitor;
@@ -45,34 +46,58 @@ async function take(button){
  catch(_){status('تعذر إكمال العملية أو تحديث العرض. أعد فتح القسم للتحقق من السجل قبل إعادة المحاولة.');}
  finally{busy=false;if(button.isConnected)button.disabled=false;}
 }
+function createWheel(label,count,initial){
+ const wheel=document.createElement('div');wheel.className='qm-wheel';wheel.tabIndex=0;wheel.setAttribute('role','spinbutton');wheel.setAttribute('aria-label',label);wheel.setAttribute('aria-valuemin','0');wheel.setAttribute('aria-valuemax',String(count-1));wheel.setAttribute('aria-valuenow',String(initial));
+ const list=document.createElement('div');list.className='qm-wheel-list';
+ for(let i=0;i<count;i++){const item=document.createElement('div');item.className='qm-wheel-item';item.textContent=pad(i);list.appendChild(item);}
+ wheel.appendChild(list);
+ const caption=document.createElement('span');caption.className='qm-wheel-label';caption.textContent=label;wheel.appendChild(caption);
+ let value=initial,offset=0,drag=null;
+ const paint=()=>{list.style.transform=`translateY(${44*2-offset}px)`;list.querySelectorAll('.qm-wheel-item').forEach((item,index)=>item.classList.toggle('is-selected',index===value));wheel.setAttribute('aria-valuenow',String(value));};
+ const clamp=v=>((v%count)+count)%count;
+ const set=(next,animate=true)=>{value=clamp(next);offset=value*44;if(!animate)list.style.transition='none';paint();if(!animate)requestAnimationFrame(()=>list.style.transition='transform .18s ease-out');};
+ wheel.addEventListener('pointerdown',event=>{if(!event.isPrimary)return;drag={y:event.clientY,start:value};wheel.setPointerCapture(event.pointerId);list.style.transition='none';});
+ wheel.addEventListener('pointermove',event=>{if(!drag)return;offset=clamp(drag.start-Math.round((event.clientY-drag.y)/44))*44-(event.clientY-drag.y);list.style.transform=`translateY(${44*2-offset}px)`;});
+ const finish=event=>{if(!drag)return;drag=null;set(Math.round(offset/44));};
+ wheel.addEventListener('pointerup',finish);wheel.addEventListener('pointercancel',finish);
+ wheel.addEventListener('wheel',event=>{event.preventDefault();set(value+(event.deltaY>0?1:-1));},{passive:false});
+ wheel.addEventListener('keydown',event=>{
+  if(event.key==='ArrowUp'){event.preventDefault();set(value-1);}
+  if(event.key==='ArrowDown'){event.preventDefault();set(value+1);}
+  if(event.key==='Home'){event.preventDefault();set(0);}
+  if(event.key==='End'){event.preventDefault();set(count-1);}
+ });
+ set(initial,false);return {element:wheel,get:()=>value,set};
+}
 function openTimePicker(){
  if(!timePicker)return;
- const hour=timePicker.querySelector('#qmHour'),minute=timePicker.querySelector('#qmMinute');
- const now=new Date();hour.textContent=String(now.getHours()).padStart(2,'0');minute.textContent=String(now.getMinutes()).padStart(2,'0');
- timePicker.hidden=false;timePicker.querySelector('[data-time-cancel]').focus();
+ const now=new Date();
+ timePicker.dataset.hour=String(now.getHours());timePicker.dataset.minute=String(now.getMinutes());
+ timePicker.hidden=false;
+ timePicker.querySelector('[data-time-cancel]').focus();
 }
 function closeTimePicker(){if(timePicker)timePicker.hidden=true;}
-function adjustTime(field,step){
- if(!timePicker)return;
- const element=timePicker.querySelector(field==='hour'?'#qmHour':'#qmMinute');
- const maximum=field==='hour'?23:59;
- let value=Number(element.textContent)||0;
- value=(value+step+maximum+1)%(maximum+1);
- element.textContent=String(value).padStart(2,'0');
-}
 function installTimePicker(){
  timePicker=document.createElement('div');timePicker.id='qmTimePicker';timePicker.hidden=true;
  timePicker.setAttribute('role','dialog');timePicker.setAttribute('aria-modal','true');timePicker.setAttribute('aria-labelledby','qmTimeTitle');
- timePicker.innerHTML=`<div class="qm-time-card"><h3 id="qmTimeTitle">اختر وقت الجرعة</h3><div class="qm-time-controls"><button type="button" data-time="hour" data-step="-1">−</button><span class="qm-time-value" id="qmHour" aria-live="polite">08</span><span>:</span><span class="qm-time-value" id="qmMinute" aria-live="polite">00</span><button type="button" data-time="hour" data-step="1">+</button></div><div class="qm-time-buttons"><button type="button" data-time="hour" data-step="-1">ساعة −</button><button type="button" data-time="hour" data-step="1">ساعة +</button><button type="button" data-time="minute" data-step="-5">دقائق −5</button><button type="button" data-time="minute" data-step="5">دقائق +5</button></div><div class="qm-time-actions"><button type="button" data-time-cancel>إلغاء</button><button type="button" class="qm-primary" data-time-confirm>إضافة الوقت</button></div></div>`;
+ timePicker.innerHTML=`<div class="qm-time-card"><h3 id="qmTimeTitle">اختر وقت الجرعة</h3><div class="qm-preview" id="qmTimePreview">08:00</div><div class="qm-wheel-row"><div id="qmHourWheel"></div><div id="qmMinuteWheel"></div></div><div class="qm-time-actions"><button type="button" data-time-cancel>إلغاء</button><button type="button" class="qm-primary" data-time-confirm>إضافة الوقت</button></div></div>`;
  document.body.appendChild(timePicker);
+ const now=new Date();
+ const hourWheel=createWheel('الساعة',24,now.getHours());
+ const minuteWheel=createWheel('الدقائق',60,now.getMinutes());
+ timePicker.querySelector('#qmHourWheel').appendChild(hourWheel.element);
+ timePicker.querySelector('#qmMinuteWheel').appendChild(minuteWheel.element);
+ const preview=timePicker.querySelector('#qmTimePreview');
+ const update=()=>{preview.textContent=`${pad(hourWheel.get())}:${pad(minuteWheel.get())}`;};
+ hourWheel.element.addEventListener('pointerup',update);minuteWheel.element.addEventListener('pointerup',update);
+ hourWheel.element.addEventListener('wheel',update);minuteWheel.element.addEventListener('wheel',update);
+ hourWheel.element.addEventListener('keydown',update);minuteWheel.element.addEventListener('keydown',update);
+ update();
  timePicker.addEventListener('click',event=>{
   const target=event.target instanceof Element?event.target:null;if(!target)return;
-  const control=target.closest('[data-time]');
-  if(control)adjustTime(control.dataset.time,Number(control.dataset.step));
   if(target.closest('[data-time-cancel]'))closeTimePicker();
   if(target.closest('[data-time-confirm]')){
-   const hour=timePicker.querySelector('#qmHour').textContent,minute=timePicker.querySelector('#qmMinute').textContent;
-   const value=`${hour}:${minute}`,field=root.querySelector('[name=times]');
+   const value=`${pad(hourWheel.get())}:${pad(minuteWheel.get())}`,field=root.querySelector('[name=times]');
    const current=field.value.split(/[,،]/).map(t=>t.trim()).filter(Boolean);
    if(current.includes(value)){status('هذا الوقت مضاف بالفعل.');return;}
    if(current.length>=24){status('لا يمكن إضافة أكثر من 24 وقتًا للدواء.');return;}
@@ -82,7 +107,7 @@ function installTimePicker(){
  timePicker.addEventListener('keydown',event=>{
   if(event.key==='Escape'){event.preventDefault();closeTimePicker();return;}
   if(event.key!=='Tab')return;
-  const controls=[...timePicker.querySelectorAll('button')].filter(e=>!e.disabled&&e.getClientRects().length);
+  const controls=[...timePicker.querySelectorAll('button,.qm-wheel')].filter(e=>!e.disabled&&e.getClientRects().length);
   const first=controls[0],last=controls.at(-1);
   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
   else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
