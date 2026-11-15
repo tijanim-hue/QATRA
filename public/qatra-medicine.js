@@ -1,7 +1,8 @@
 (() => {
 'use strict';
 if(window.QatraMedicine)return;
-let root,timePicker,focusBefore,busy=false,plugin;
+let root,timePicker,focusBefore,busy=false,plugin,alerts;
+let settingsBusy=false,settingsReady=false,savedMode=null,settingsVersion=0;
 const inertBefore=new Map();
 const units={tablet:'حبة',capsule:'كبسولة',ml:'مل',drop:'قطرة',other:'وحدة'};
 const q=s=>root.querySelector(s);
@@ -9,11 +10,47 @@ const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>'
 const amount=(milli,unit)=>`${Number(milli/1000).toLocaleString('ar',{maximumFractionDigits:3})} ${units[unit]||'وحدة'}`;
 const pad=n=>String(n).padStart(2,'0');
 function status(text){q('#qmStatus').textContent=text;}
+function bridge(name){const cap=window.Capacitor;return cap?.Plugins?.[name]||(cap?.registerPlugin?cap.registerPlugin(name):null);}
 async function native(method,data={}){
- const cap=window.Capacitor;
- plugin=plugin||cap?.Plugins?.QatraMedicine||(cap?.registerPlugin?cap.registerPlugin('QatraMedicine'):null);
+ plugin=plugin||bridge('QatraMedicine');
  if(!plugin)throw Error('MEDICINE_BRIDGE_UNAVAILABLE');
  return plugin[method](data);
+}
+async function alertNative(method,data={}){
+ alerts=alerts||bridge('QatraMedicineAlerts');
+ if(!alerts)throw Error('MEDICINE_ALERT_BRIDGE_UNAVAILABLE');
+ return alerts[method](data);
+}
+function validMode(mode){return ['notification','overlay','both'].includes(mode);}
+function paintAlertSettings(result){
+ if(!validMode(result?.mode)||typeof result.overlayAvailable!=='boolean')throw Error('INVALID_SETTINGS');
+ savedMode=result.mode;settingsReady=true;q('#qmAlertMode').value=savedMode;
+ q('#qmAlertStatus').textContent=savedMode!=='notification'&&!result.overlayAvailable
+  ?'إذن الظهور فوق التطبيقات غير متاح. حُفظ اختيارك دون تغييره. العرض العائم لم يُربط بعد.'
+  :'هذا إعداد عام لجميع الأدوية. حُفظ الاختيار؛ تطبيقه على التنبيه العائم لم يكتمل بعد.';
+}
+async function loadAlertSettings(){
+ if(settingsBusy)return;
+ const version=++settingsVersion;settingsBusy=true;settingsReady=false;
+ q('#qmAlertMode').disabled=true;q('#qmAlertRetry').disabled=true;
+ q('#qmAlertStatus').textContent='جارٍ قراءة نمط التنبيه…';
+ try{const result=await alertNative('getSettings');if(version===settingsVersion)paintAlertSettings(result);}
+ catch(_){if(version===settingsVersion){q('#qmAlertMode').selectedIndex=-1;q('#qmAlertStatus').textContent='تعذر قراءة الإعداد؛ لم يُستبدل اختيارك المحفوظ.';}}
+ finally{if(version===settingsVersion){settingsBusy=false;q('#qmAlertMode').disabled=!settingsReady;q('#qmAlertRetry').disabled=false;}}
+}
+async function saveAlertSettings(){
+ if(settingsBusy||!settingsReady)return;
+ const requested=q('#qmAlertMode').value;if(!validMode(requested))return;
+ settingsBusy=true;q('#qmAlertMode').disabled=true;q('#qmAlertRetry').disabled=true;
+ q('#qmAlertStatus').textContent='جارٍ حفظ نمط التنبيه…';
+ try{
+  const result=await alertNative('setSettings',{mode:requested});
+  if(result?.saved!==true||result.mode!==requested)throw Error('SAVE_UNCONFIRMED');
+  paintAlertSettings(result);
+ }catch(_){
+  try{paintAlertSettings(await alertNative('getSettings'));q('#qmAlertStatus').textContent+=' لم يتأكد الحفظ المطلوب؛ المعروض هو الإعداد المقروء من الجهاز.';}
+  catch(_){settingsReady=false;q('#qmAlertMode').selectedIndex=-1;q('#qmAlertStatus').textContent='تعذر التحقق من الحفظ. أعد قراءة الإعداد قبل تغييره مجددًا.';}
+ }finally{settingsBusy=false;q('#qmAlertMode').disabled=!settingsReady;q('#qmAlertRetry').disabled=false;}
 }
 function quantity(value,positive){
  const text=String(value).trim();
@@ -33,10 +70,11 @@ async function open(){
  focusBefore=document.activeElement;
  for(const element of document.body.children){if(element!==root&&element!==timePicker&&element instanceof HTMLElement){inertBefore.set(element,element.inert);element.inert=true;}}
  root.hidden=false;q('[data-close]').focus();status('جارٍ قراءة البيانات…');
+ void loadAlertSettings();
  try{await refresh();status('');}catch(_){status('تعذر قراءة البيانات. لم تُستبدل بياناتك بقائمة فارغة.');}
 }
 function close(){
- if(!root)return;root.hidden=true;
+ if(!root)return;closeTimePicker();root.hidden=true;
  for(const [element,value] of inertBefore)element.inert=value;
  inertBefore.clear();if(focusBefore?.isConnected)focusBefore.focus();
 }
@@ -118,9 +156,12 @@ function install(){
  if(!entry)return;
  root=document.createElement('section');root.id='medicineSheet';root.hidden=true;
  root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','qmTitle');
- root.innerHTML=`<header><div><h2 id="qmTitle">قطرة دواء</h2><span class="qm-muted">إدارة الأدوية والمخزون</span></div><button type="button" data-close>رجوع</button></header><p id="qmStatus" role="status" aria-live="polite"></p><main><p class="qm-warning">هذه الحزمة تنشئ جرعات اليوم فقط. التذكيرات التلقائية والصور لم تُفعّل بعد.</p><section class="qm-panel"><h3>إضافة دواء</h3><form id="qmForm"><label>اسم الدواء<input name="medicineName" required maxlength="160" autocomplete="off"></label><label>التركيز كما على العبوة<input name="strength" maxlength="160" autocomplete="off"></label><label>الوحدة<select name="unit"><option value="tablet">حبة</option><option value="capsule">كبسولة</option><option value="ml">مل</option><option value="drop">قطرة</option><option value="other">وحدة</option></select></label><label>كمية الجرعة المسجّلة<input name="dose" type="number" min="0.001" max="1000000000" step="0.001" required inputmode="decimal"></label><div class="qm-row"><button type="button" data-quantity="0.25">ربع حبة</button><button type="button" data-quantity="0.5">نصف حبة</button><button type="button" data-quantity="1">حبة كاملة</button></div><p class="qm-muted">سجّل الجرعة وفق الوصفة. خيارات الكسر لا تعني أن دواءك قابل للتقسيم.</p><label>الكمية المتوفرة<input name="stock" type="number" min="0" max="1000000000" step="0.001" required inputmode="decimal"></label><label>أوقات الجرعات<button type="button" id="qmOpenTimePicker">اختر وقتًا</button><input name="times" placeholder="لم يتم اختيار وقت بعد" readonly required dir="ltr" autocomplete="off"></label><button type="submit" class="qm-primary">حفظ الدواء وإنشاء جرعات اليوم</button></form></section><h3>أدويتي ومخزوني</h3><div id="qmMedicines"></div><h3>جرعات اليوم</h3><div id="qmDoses"></div></main>`;
+ root.innerHTML=`<header><div><h2 id="qmTitle">قطرة دواء</h2><span class="qm-muted">إدارة الأدوية والمخزون</span></div><button type="button" data-close>رجوع</button></header><p id="qmStatus" role="status" aria-live="polite"></p><main><p class="qm-warning">تُنشأ هنا الجرعات القادمة لليوم فقط. اختيار نمط التنبيه محفوظ، لكن ربط العرض العائم لم يكتمل بعد. الصور غير مفعّلة.</p><section class="qm-panel" aria-labelledby="qmAlertTitle"><h3 id="qmAlertTitle">تنبيهات الأدوية</h3><label for="qmAlertMode">نمط التنبيه لجميع الأدوية</label><select id="qmAlertMode" disabled aria-describedby="qmAlertStatus"><option value="notification">إشعار</option><option value="overlay">قطرة عائمة</option><option value="both">كلاهما</option></select><p id="qmAlertStatus" role="status" aria-live="polite"></p><button type="button" id="qmAlertRetry">إعادة قراءة الإعداد</button></section><section class="qm-panel"><h3>إضافة دواء</h3><form id="qmForm"><label>اسم الدواء<input name="medicineName" required maxlength="160" autocomplete="off"></label><label>التركيز كما على العبوة<input name="strength" maxlength="160" autocomplete="off"></label><label>الوحدة<select name="unit"><option value="tablet">حبة</option><option value="capsule">كبسولة</option><option value="ml">مل</option><option value="drop">قطرة</option><option value="other">وحدة</option></select></label><label>كمية الجرعة المسجّلة<input name="dose" type="number" min="0.001" max="1000000000" step="0.001" required inputmode="decimal"></label><div class="qm-row"><button type="button" data-quantity="0.25">ربع حبة</button><button type="button" data-quantity="0.5">نصف حبة</button><button type="button" data-quantity="1">حبة كاملة</button></div><p class="qm-muted">سجّل الجرعة وفق الوصفة. خيارات الكسر لا تعني أن دواءك قابل للتقسيم.</p><label>الكمية المتوفرة<input name="stock" type="number" min="0" max="1000000000" step="0.001" required inputmode="decimal"></label><label>أوقات الجرعات<button type="button" id="qmOpenTimePicker">اختر وقتًا</button><input name="times" placeholder="لم يتم اختيار وقت بعد" readonly required dir="ltr" autocomplete="off"></label><button type="submit" class="qm-primary">حفظ الدواء وإنشاء جرعات اليوم</button></form></section><h3>أدويتي ومخزوني</h3><div id="qmMedicines"></div><h3>جرعات اليوم</h3><div id="qmDoses"></div></main>`;
  document.body.appendChild(root);entry.addEventListener('click',open);
  installTimePicker();
+ q('#qmAlertMode').selectedIndex=-1;
+ q('#qmAlertMode').addEventListener('change',saveAlertSettings);
+ q('#qmAlertRetry').addEventListener('click',loadAlertSettings);
  const form=q('#qmForm'),field=name=>form.elements.namedItem(name);
  function fractions(){root.querySelectorAll('[data-quantity]').forEach(b=>b.hidden=field('unit').value!=='tablet');}
  field('unit').addEventListener('change',()=>{field('dose').value='';fractions();});fractions();
@@ -141,7 +182,7 @@ function install(){
    payload={name,strength:field('strength').value.trim(),unit:field('unit').value,doseMilli:quantity(field('dose').value,true),openingStockMilli:quantity(field('stock').value,false),dailyTimes:times.sort()};
   }catch(_){status('تحقق من الاسم والكميات والأوقات. اختر وقتًا واحدًا على الأقل.');return;}
   busy=true;const save=form.querySelector('[type=submit]');save.disabled=true;
-  try{const result=await native('addMedicine',payload);form.reset();fractions();field('times').value='';status(`تم حفظ الدواء وإنشاء ${result.createdDoses} جرعة لليوم. لم تُفعّل تذكيرات بعد.`);try{await refresh();}catch(_){status('تم الحفظ، لكن تعذر تحديث العرض. أعد فتح القسم ولا تضف الدواء مرة ثانية.');}}
+  try{const result=await native('addMedicine',payload);form.reset();fractions();field('times').value='';status(`تم حفظ الدواء وإنشاء ${result.createdDoses} جرعة لليوم. العرض العائم لم يُربط بعد.`);try{await refresh();}catch(_){status('تم الحفظ، لكن تعذر تحديث العرض. أعد فتح القسم ولا تضف الدواء مرة ثانية.');}}
   catch(_){status('تعذر تأكيد الحفظ. أعد فتح القسم للتحقق قبل تكرار الإضافة.');}
   finally{busy=false;save.disabled=false;}
  });
