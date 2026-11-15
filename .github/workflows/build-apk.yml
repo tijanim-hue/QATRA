@@ -51,6 +51,7 @@ jobs:
           python3 scripts/prepare-theme-scroll.py
           python3 scripts/prepare-theme-refinements.py
           python3 scripts/prepare-navigation.py
+          python3 scripts/prepare-global-navigation.py
 
       - name: Upload theme dimensions report
         uses: actions/upload-artifact@v4
