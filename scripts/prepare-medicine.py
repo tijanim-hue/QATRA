@@ -1,5 +1,6 @@
 from pathlib import Path
 from html.parser import HTMLParser
+import runpy
 
 root = Path(__file__).resolve().parents[1]
 html_path = root/'public/index.html'
@@ -80,3 +81,4 @@ def patch(path, before, after):
 patch(root/'public/qatra-medicine.js','map(m=>`<article class="qm-panel">','map(m=>`<article class="qm-panel" data-medicine-id="${escape(m.id)}">')
 html_path.write_text(markup,encoding='utf-8')
 activity_path.write_text(source,encoding='utf-8')
+runpy.run_path(str(root/'scripts/prepare-medicine-picker.py'),run_name='__main__')
