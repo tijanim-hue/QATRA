@@ -45,13 +45,14 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Prepare eight QATRA theme artworks
+      - name: Prepare QATRA interface and experience
         run: |
           python3 scripts/prepare-theme-assets.py
           python3 scripts/prepare-theme-scroll.py
           python3 scripts/prepare-theme-refinements.py
           python3 scripts/prepare-navigation.py
           python3 scripts/prepare-global-navigation.py
+          python3 scripts/prepare-experience-polish.py
 
       - name: Upload theme dimensions report
         uses: actions/upload-artifact@v4
