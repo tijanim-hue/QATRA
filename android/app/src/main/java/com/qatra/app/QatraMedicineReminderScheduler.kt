@@ -38,7 +38,8 @@ object QatraMedicineReminderScheduler {
 
     fun scheduleSnooze(context: Context, doseId: String, name: String, amount: String, originalScheduledAt: Long) {
         val target = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10)
-        schedule(context, "$doseId:snooze", name, amount, target)
+        // Keep notification actions and cancellation linked to the stored dose.
+        schedule(context, doseId, name, amount, target)
     }
 
     fun cancel(context: Context, doseId: String) {
