@@ -8,6 +8,7 @@ class QatraMedicineActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val doseId = intent.getStringExtra(QatraMedicineReminderScheduler.EXTRA_DOSE_ID) ?: return
         if (doseId.isBlank()) return
+        if (!QatraMedicinePlugin.activeMedicineDose(context, doseId)) return
         val database = QatraMedicineDatabase(context)
         try {
             when (intent.action) {

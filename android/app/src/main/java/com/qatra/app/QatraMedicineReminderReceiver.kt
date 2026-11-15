@@ -17,6 +17,7 @@ class QatraMedicineReminderReceiver : BroadcastReceiver() {
         val amount = intent.getStringExtra(QatraMedicineReminderScheduler.EXTRA_AMOUNT) ?: return
         val scheduledAt = intent.getLongExtra(QatraMedicineReminderScheduler.EXTRA_SCHEDULED_AT, 0L)
         if (doseId.isBlank() || name.isBlank() || amount.isBlank() || scheduledAt <= 0L) return
+        if (!QatraMedicinePlugin.activeMedicineDose(context, doseId)) return
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
