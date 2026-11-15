@@ -82,3 +82,4 @@ patch(root/'public/qatra-medicine.js','map(m=>`<article class="qm-panel">','map(
 html_path.write_text(markup,encoding='utf-8')
 activity_path.write_text(source,encoding='utf-8')
 runpy.run_path(str(root/'scripts/prepare-medicine-picker.py'),run_name='__main__')
+runpy.run_path(str(root/'scripts/prepare-medicine-audio.py'),run_name='__main__')
