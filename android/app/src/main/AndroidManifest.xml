@@ -43,6 +43,7 @@
         </receiver>
         <receiver android:name=".QatraMedicineReminderReceiver" android:exported="false" />
         <receiver android:name=".QatraMedicineActionReceiver" android:exported="false" />
+        <service android:name=".QatraMedicineOverlayService" android:exported="false" />
         <service android:name=".QatraOverlayService" android:exported="false" />
         <service android:name=".PomodoroService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
             <activity android:name=".QatraScreenWakeActivity"
