@@ -86,14 +86,8 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(PENDING_MEDICINE, pendingMedicine);
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onDestroy() {
-        medicineHandler.removeCallbacksAndMessages(null);
-        super.onDestroy();
     }
 }
