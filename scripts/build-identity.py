@@ -64,7 +64,7 @@ elif sys.argv[1]=='verify':
     result=invoke([tool/'apksigner','verify','--verbose','--print-certs',apk])
     signature=(result.stdout+b'\n'+result.stderr).decode(errors='replace')
     print('apksigner public verification output:\n'+signature,flush=True)
-    pattern=r'^[ \t]*Signer\b[^\r\n]*?\bcertificate[ \t]+SHA-?256[ \t]+digest[ \t]*:[ \t]*([0-9a-fA-F: \t]+)[ \t]*$'
+    pattern=r'^[ \t]*(?:V\d+(?:\.\d+)?[ \t]+)?Signer\b[^\r\n]*?\bcertificate[ \t]+SHA-?256[ \t]+digest[ \t]*:[ \t]*([0-9a-fA-F: \t]+)[ \t]*$'
     values=re.findall(pattern,signature,flags=re.I|re.M)
     require(bool(values),'Unable to extract a certificate SHA-256 from apksigner output. This is a parsing failure, not proof of a certificate mismatch. Artifact publication blocked.')
     signers=[re.sub(r'[: \t]','',value).lower() for value in values]
