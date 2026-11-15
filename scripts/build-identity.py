@@ -20,16 +20,16 @@ def require(ok,message):
         raise SystemExit(message)
 
 if sys.argv[1]=='prepare':
-    key=Path.home()/'.android/debug.keystore'
+    key=(Path.home()/'.android/debug.keystore').resolve()
     require(key.is_file(),'Persistent keystore missing. Refusing to generate a replacement.')
     with tempfile.TemporaryDirectory(prefix='qatra-public-cert-') as folder:
         certificate=Path(folder)/'certificate.der'
         run(['keytool','-exportcert','-keystore',key,'-storepass','android','-alias','androiddebugkey','-file',certificate])
         require(certificate.is_file() and certificate.stat().st_size>0,'Certificate export produced no DER file.')
         actual=hashlib.sha256(certificate.read_bytes()).hexdigest()
-    print('Expected certificate SHA-256: '+expected,flush=True)
+    print('Pinned signing-line certificate SHA-256: '+expected,flush=True)
     print('Exported certificate SHA-256: '+actual,flush=True)
-    require(actual==expected,'Signing certificate differs from the user APK baseline. No replacement key will be generated.')
+    require(actual==expected,'Signing certificate differs from the pinned signing line. No replacement key will be generated.')
     number=int(os.environ['GITHUB_RUN_NUMBER'])
     attempt=int(os.environ.get('GITHUB_RUN_ATTEMPT','1'))
     require(number>0 and 1<=attempt<100,'Build counter outside supported range.')
@@ -45,7 +45,11 @@ if sys.argv[1]=='prepare':
     gradle.write_text(text)
     with open(os.environ['GITHUB_ENV'],'a') as out:
         out.write(f'QATRA_VERSION_CODE={code}\n')
-    print('Baseline signing certificate matched; versionCode='+str(code))
+        out.write(f'QATRA_KEYSTORE_FILE={key}\n')
+    print('Persistent signing line matched; versionCode='+str(code))
+    transition=baseline.get('transition',{})
+    if transition.get('requires_reinstall_from_previous_signing_line'):
+        print('NOTICE: This line is not an in-place update for the previous d4bb signing certificate. No uninstall is authorized by this build.')
 elif sys.argv[1]=='verify':
     sdk=Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT'])
     tools=[p for p in (sdk/'build-tools').iterdir() if (p/'apksigner').is_file() and (p/'aapt').is_file()]
@@ -55,9 +59,9 @@ elif sys.argv[1]=='verify':
     apk=root/'android/app/build/outputs/apk/debug/app-debug.apk'
     signature=run([tool/'apksigner','verify','--verbose','--print-certs',apk]).decode()
     signers=re.findall(r'Signer #\d+ certificate SHA-256 digest:\s*([0-9a-fA-F]{64})',signature)
-    print('Expected certificate SHA-256: '+expected,flush=True)
+    print('Pinned signing-line certificate SHA-256: '+expected,flush=True)
     print('APK certificate SHA-256: '+', '.join(signers),flush=True)
-    require([s.lower() for s in signers]==[expected],'APK signing certificate differs from baseline. Artifact publication blocked.')
+    require([s.lower() for s in signers]==[expected],'APK signing certificate differs from the pinned line. Artifact publication blocked.')
     metadata=run([tool/'aapt','dump','badging',apk]).decode()
     package=re.search(r"package: name='([^']+)' versionCode='(\d+)'",metadata)
     require(package is not None,'Unable to read APK package identity.')
@@ -65,8 +69,8 @@ elif sys.argv[1]=='verify':
     require(application==baseline['application_id'],'APK application ID changed. Artifact publication blocked.')
     require(code==int(os.environ['QATRA_VERSION_CODE']),'APK versionCode differs from the assigned build counter.')
     reference=baseline.get('reference_version_code')
-    require(reference is None or code>reference,'APK is not newer than the reference.')
-    report={'application_id':application,'version_code':code,'certificate_sha256':expected,'apk_sha256':hashlib.sha256(apk.read_bytes()).hexdigest(),'commit':os.environ.get('GITHUB_SHA'),'reference_version_code':reference,'note':'Reference APK versionCode was not present in the supplied certificate output. Installation over the existing app is not tested by this check.'}
+    require(reference is None or code>reference,'APK is not newer than the signing-line reference.')
+    report={'application_id':application,'signing_line':baseline.get('signing_line'),'version_code':code,'certificate_sha256':expected,'apk_sha256':hashlib.sha256(apk.read_bytes()).hexdigest(),'commit':os.environ.get('GITHUB_SHA'),'reference_version_code':reference,'transition':baseline.get('transition',{}),'note':'Certificate and package checks do not constitute an installation test, a backup verification, or authorization to uninstall the previous app.'}
     (root/'qatra-build-identity.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 else:

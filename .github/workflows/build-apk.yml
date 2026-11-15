@@ -44,7 +44,7 @@ jobs:
           mkdir -p "$HOME/.android"
           printf '%s' "$QATRA_DEBUG_KEYSTORE_B64" | base64 --decode > "$HOME/.android/debug.keystore"
 
-      - name: Match the installed-reference certificate and assign increasing version code
+      - name: Match the transition signing line and export its absolute keystore path
         run: python3 scripts/build-identity.py prepare
 
       - name: Install Dependencies
@@ -70,11 +70,11 @@ jobs:
       - name: Sync Capacitor Android
         run: npx cap sync android
 
-      - name: Build Debug APK
+      - name: Build Debug APK with explicitly bound persistent signing
         working-directory: ./android
         run: ./gradlew assembleDebug
 
-      - name: Block publication unless the actual APK matches the pinned identity
+      - name: Block publication unless the actual APK matches the pinned signing line
         run: python3 scripts/build-identity.py verify
 
       - name: Upload APK Artifact
@@ -83,7 +83,7 @@ jobs:
           name: qatra-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload public build identity report
+      - name: Upload public build identity and transition report
         uses: actions/upload-artifact@v4
         with:
           name: qatra-build-identity

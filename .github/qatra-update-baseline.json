@@ -1,7 +1,17 @@
 {
   "application_id": "com.qatra.app",
-  "certificate_sha256": "d4bb2c02e98d57a7ae98c35b2c7aaa12845337cefa3e1e7e6ed31bc3667bd4bb",
-  "reference_download": "qatra-debug-apk - 2026-11-15T145357.948/app-debug.apk",
-  "certificate_source": "User-provided apksigner verify --print-certs output",
-  "reference_version_code": null
+  "signing_line": "qatra-persistent-72ea4af4",
+  "certificate_sha256": "72ea4af4438d8885176e6efe89579ad3a30dbad1c9a7829b4d89b3eb2beacc9d",
+  "certificate_source": "Existing GitHub secret certificate matched by local Termux certificate export and reference workflow restoration log",
+  "reference_version_code": null,
+  "reference_download": null,
+  "transition": {
+    "previous_certificate_sha256": "d4bb2c02e98d57a7ae98c35b2c7aaa12845337cefa3e1e7e6ed31bc3667bd4bb",
+    "previous_reference_download": "qatra-debug-apk - 2026-11-15T145357.948/app-debug.apk",
+    "previous_run_id": "43726473808",
+    "requires_reinstall_from_previous_signing_line": true,
+    "uninstall_authorized": false,
+    "data_backup_confirmed": false,
+    "update_installation_proven": false
+  }
 }
