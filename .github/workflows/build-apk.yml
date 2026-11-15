@@ -5,8 +5,12 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    if: github.ref == 'refs/heads/mindful/phase-2-ai'
     name: Build Android App
     runs-on: ubuntu-latest
 
@@ -26,21 +30,22 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Restore persistent QATRA debug signing key
+      - name: Restore the existing signing key without generating a replacement
         shell: bash
         env:
           QATRA_DEBUG_KEYSTORE_B64: ${{ secrets.QATRA_DEBUG_KEYSTORE_B64 }}
         run: |
           set -euo pipefail
           if [ -z "${QATRA_DEBUG_KEYSTORE_B64}" ]; then
-            echo "Missing QATRA_DEBUG_KEYSTORE_B64 repository secret. Refusing to generate a new key."
+            echo "Persistent signing key missing. Build blocked."
             exit 1
           fi
           umask 077
           mkdir -p "$HOME/.android"
           printf '%s' "$QATRA_DEBUG_KEYSTORE_B64" | base64 --decode > "$HOME/.android/debug.keystore"
-          keytool -list -keystore "$HOME/.android/debug.keystore" \
-            -storepass android -alias androiddebugkey
+
+      - name: Match the installed-reference certificate and assign increasing version code
+        run: python3 scripts/build-identity.py prepare
 
       - name: Install Dependencies
         run: npm install
@@ -54,6 +59,7 @@ jobs:
           python3 scripts/prepare-global-navigation.py
           python3 scripts/prepare-experience-polish.py
           python3 scripts/prepare-drop-defaults.py
+          python3 scripts/prepare-header-drop.py
 
       - name: Upload theme dimensions report
         uses: actions/upload-artifact@v4
@@ -68,8 +74,17 @@ jobs:
         working-directory: ./android
         run: ./gradlew assembleDebug
 
+      - name: Block publication unless the actual APK matches the pinned identity
+        run: python3 scripts/build-identity.py verify
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: qatra-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload public build identity report
+        uses: actions/upload-artifact@v4
+        with:
+          name: qatra-build-identity
+          path: qatra-build-identity.json

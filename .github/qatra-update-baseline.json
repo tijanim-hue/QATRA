@@ -1,0 +1,7 @@
+{
+  "application_id": "com.qatra.app",
+  "certificate_sha256": "d4bb2c02e98d57a7ae98c35b2c7aaa12845337cefa3e1e7e6ed31bc3667bd4bb",
+  "reference_download": "qatra-debug-apk - 2026-11-15T145357.948/app-debug.apk",
+  "certificate_source": "User-provided apksigner verify --print-certs output",
+  "reference_version_code": null
+}
