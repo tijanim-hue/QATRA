@@ -10,11 +10,15 @@ import tempfile
 root=Path(__file__).resolve().parents[1]
 baseline=json.loads((root/'.github/qatra-update-baseline.json').read_text())
 expected=baseline['certificate_sha256'].lower()
-def run(args):
-    result=subprocess.run([str(x) for x in args],stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+def invoke(args):
+    environment=dict(os.environ,LC_ALL='C',LANG='C')
+    result=subprocess.run([str(x) for x in args],stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=environment)
     if result.returncode:
-        raise SystemExit('Tool failed: '+str(args[0])+'\n'+result.stderr.decode(errors='replace'))
-    return result.stdout
+        output=(result.stdout+b'\n'+result.stderr).decode(errors='replace')
+        raise SystemExit('Tool failed: '+str(args[0])+'\n'+output)
+    return result
+def run(args):
+    return invoke(args).stdout
 def require(ok,message):
     if not ok:
         raise SystemExit(message)
@@ -57,11 +61,20 @@ elif sys.argv[1]=='verify':
     tools.sort(key=lambda p:tuple(int(x) for x in re.findall(r'\d+',p.name)))
     tool=tools[-1]
     apk=root/'android/app/build/outputs/apk/debug/app-debug.apk'
-    signature=run([tool/'apksigner','verify','--verbose','--print-certs',apk]).decode()
-    signers=re.findall(r'Signer #\d+ certificate SHA-256 digest:\s*([0-9a-fA-F]{64})',signature)
+    result=invoke([tool/'apksigner','verify','--verbose','--print-certs',apk])
+    signature=(result.stdout+b'\n'+result.stderr).decode(errors='replace')
+    print('apksigner public verification output:\n'+signature,flush=True)
+    pattern=r'^[ \t]*Signer\b[^\r\n]*?\bcertificate[ \t]+SHA-?256[ \t]+digest[ \t]*:[ \t]*([0-9a-fA-F: \t]+)[ \t]*$'
+    values=re.findall(pattern,signature,flags=re.I|re.M)
+    require(bool(values),'Unable to extract a certificate SHA-256 from apksigner output. This is a parsing failure, not proof of a certificate mismatch. Artifact publication blocked.')
+    signers=[re.sub(r'[: \t]','',value).lower() for value in values]
+    require(all(re.fullmatch(r'[0-9a-f]{64}',value) for value in signers),'Invalid certificate fingerprint format. Artifact publication blocked.')
+    counts=re.findall(r'^[ \t]*Number of signers:[ \t]*(\d+)[ \t]*$',signature,flags=re.I|re.M)
+    require(all(int(count)==1 for count in counts),'Unexpected signer count. Artifact publication blocked.')
+    actual=set(signers)
     print('Pinned signing-line certificate SHA-256: '+expected,flush=True)
-    print('APK certificate SHA-256: '+', '.join(signers),flush=True)
-    require([s.lower() for s in signers]==[expected],'APK signing certificate differs from the pinned line. Artifact publication blocked.')
+    print('APK certificate SHA-256: '+', '.join(sorted(actual)),flush=True)
+    require(actual=={expected},'APK signing certificate differs from the pinned line. Artifact publication blocked.')
     metadata=run([tool/'aapt','dump','badging',apk]).decode()
     package=re.search(r"package: name='([^']+)' versionCode='(\d+)'",metadata)
     require(package is not None,'Unable to read APK package identity.')
@@ -70,7 +83,7 @@ elif sys.argv[1]=='verify':
     require(code==int(os.environ['QATRA_VERSION_CODE']),'APK versionCode differs from the assigned build counter.')
     reference=baseline.get('reference_version_code')
     require(reference is None or code>reference,'APK is not newer than the signing-line reference.')
-    report={'application_id':application,'signing_line':baseline.get('signing_line'),'version_code':code,'certificate_sha256':expected,'apk_sha256':hashlib.sha256(apk.read_bytes()).hexdigest(),'commit':os.environ.get('GITHUB_SHA'),'reference_version_code':reference,'transition':baseline.get('transition',{}),'note':'Certificate and package checks do not constitute an installation test, a backup verification, or authorization to uninstall the previous app.'}
+    report={'application_id':application,'signing_line':baseline.get('signing_line'),'version_code':code,'certificate_sha256':next(iter(actual)),'apk_sha256':hashlib.sha256(apk.read_bytes()).hexdigest(),'commit':os.environ.get('GITHUB_SHA'),'reference_version_code':reference,'transition':baseline.get('transition',{}),'note':'Certificate and package checks do not constitute an installation test, a backup verification, or authorization to uninstall the previous app.'}
     (root/'qatra-build-identity.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report,indent=2))
 else:
