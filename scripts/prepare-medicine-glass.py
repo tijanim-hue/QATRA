@@ -26,7 +26,11 @@ styles='''
 #medicineSheet #qmMedicines > .qm-panel button{min-height:44px;padding:8px 12px;border-radius:12px}
 '''
 edit('public/qatra-medicine.css',lambda s:s if marker in s else s+'\n'+marker+styles)
+edit('android/app/src/main/java/com/qatra/app/QatraMedicinePlugin.kt',lambda s:replace_checked(s,"AND (status!='pending' OR medicine_id IN (SELECT id FROM medicines WHERE archived=0))","AND medicine_id IN (SELECT id FROM medicines WHERE archived=0)"))
+edit('public/qatra-medicine.js',lambda s:replace_checked(s,'map(d=>`<article class="qm-panel">','map(d=>`<article class="qm-panel" data-dose-id="${escape(d.id)}">'))
 p=root/'public/qatra-medicine-deletion.js'
 s=p.read_text(encoding='utf-8')
-extra=(root/'public/qatra-medicine-polish.js').read_text(encoding='utf-8')
-if '/* qatra-medicine-polish-v1 */' not in s:p.write_text(s+'\n'+extra,encoding='utf-8')
+for filename,marker in [('qatra-medicine-polish.js','/* qatra-medicine-polish-v1 */'),('qatra-medicine-dashboard.js','/* qatra-medicine-dashboard-v1 */')]:
+ extra=(root/'public'/filename).read_text(encoding='utf-8')
+ if marker not in s:s+='\n'+extra
+p.write_text(s,encoding='utf-8')
