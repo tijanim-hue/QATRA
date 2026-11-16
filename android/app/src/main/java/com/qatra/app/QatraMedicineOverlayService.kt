@@ -191,6 +191,12 @@ class QatraMedicineOverlayService : Service() {
                 activeId=id;scene=root;cardReady=false;expiresAt=SystemClock.uptimeMillis()+20000L
                 manager.addView(root,params)
                 root.post{if(scene===root)root.start()}
+                Thread({
+                    val image=try{QatraMedicineImages.backgroundForDose(applicationContext,id)}catch(_:Exception){null}
+                    handler.post{
+                        if(activeId==id&&scene===root&&image!=null){content.background=image;content.clipToOutline=true}
+                    }
+                },"qatra-medicine-image").start()
                 handler.postDelayed(check,1000L)
                 return
             }catch(_:Exception){clearScene();QatraMedicineReminderReceiver.notifyDose(this,dose)}
