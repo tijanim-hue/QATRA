@@ -3,6 +3,7 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 java=root/'android/app/src/main/java/com/qatra/app'
 activity=java/'MainActivity.java'
+plugin=java/'QatraMedicineGlassPlugin.kt'
 html=root/'public/index.html'
 a=activity.read_text(encoding='utf-8')
 h=html.read_text(encoding='utf-8')
@@ -10,11 +11,18 @@ def replace_first(text,before,after):
     if before not in text:
         raise SystemExit('Missing medicine glass anchor: '+before[:80])
     return text.replace(before,after,1)
-if 'registerPlugin(QatraMedicineGlassPlugin.class);' not in a:
-    a=replace_first(a,'registerPlugin(QatraMedicineImagesPlugin.class);','registerPlugin(QatraMedicineImagesPlugin.class);\n        registerPlugin(QatraMedicineGlassPlugin.class);')
-if 'src="qatra-medicine-glass.js"' in h:
-    raise SystemExit('Duplicate medicine glass script.')
-h=replace_first(h,'</head>','<script defer src="qatra-medicine-glass.js"></script>\n</head>')
+if not plugin.exists():
+    if 'registerPlugin(QatraMedicineGlassPlugin.class);' in a:
+        a=a.replace('        registerPlugin(QatraMedicineGlassPlugin.class);\n','')
+    if 'src="qatra-medicine-glass.js"' in h:
+        raise SystemExit('Duplicate medicine glass script.')
+    h=replace_first(h,'</head>','<script defer src="qatra-medicine-glass.js"></script>\n</head>')
+else:
+    if 'registerPlugin(QatraMedicineGlassPlugin.class);' not in a:
+        a=replace_first(a,'registerPlugin(QatraMedicineImagesPlugin.class);','registerPlugin(QatraMedicineImagesPlugin.class);\n        registerPlugin(QatraMedicineGlassPlugin.class);')
+    if 'src="qatra-medicine-glass.js"' in h:
+        raise SystemExit('Duplicate medicine glass script.')
+    h=replace_first(h,'</head>','<script defer src="qatra-medicine-glass.js"></script>\n</head>')
 ui=r'''
 (() => {
 'use strict';
