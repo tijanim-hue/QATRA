@@ -86,3 +86,4 @@ runpy.run_path(str(root/'scripts/prepare-medicine-audio.py'),run_name='__main__'
 runpy.run_path(str(root/'scripts/prepare-medicine-cleanup.py'),run_name='__main__')
 runpy.run_path(str(root/'scripts/prepare-medicine-images.py'),run_name='__main__')
 runpy.run_path(str(root/'scripts/prepare-medicine-deletion.py'),run_name='__main__')
+runpy.run_path(str(root/'scripts/prepare-medicine-glass.py'),run_name='__main__')
