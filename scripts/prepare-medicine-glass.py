@@ -6,17 +6,15 @@ activity=java/'MainActivity.java'
 html=root/'public/index.html'
 a=activity.read_text(encoding='utf-8')
 h=html.read_text(encoding='utf-8')
-def once(text,before,after):
-    if text.count(before)!=1:
-        raise SystemExit('Ambiguous medicine glass anchor: '+before[:80])
+def replace_first(text,before,after):
+    if before not in text:
+        raise SystemExit('Missing medicine glass anchor: '+before[:80])
     return text.replace(before,after,1)
-if 'content.background=image;content.clipToOutline=true' not in a:
-    a=once(a,'content.background=image;content.clipToOutline=true','content.background=image;content.clipToOutline=true')
 if 'registerPlugin(QatraMedicineGlassPlugin.class);' not in a:
-    a=once(a,'registerPlugin(QatraMedicineImagesPlugin.class);','registerPlugin(QatraMedicineImagesPlugin.class);\n        registerPlugin(QatraMedicineGlassPlugin.class);')
+    a=replace_first(a,'registerPlugin(QatraMedicineImagesPlugin.class);','registerPlugin(QatraMedicineImagesPlugin.class);\n        registerPlugin(QatraMedicineGlassPlugin.class);')
 if 'src="qatra-medicine-glass.js"' in h:
     raise SystemExit('Duplicate medicine glass script.')
-h=once(h,'</head>','<script defer src="qatra-medicine-glass.js"></script>\n</head>')
+h=replace_first(h,'</head>','<script defer src="qatra-medicine-glass.js"></script>\n</head>')
 ui=r'''
 (() => {
 'use strict';
