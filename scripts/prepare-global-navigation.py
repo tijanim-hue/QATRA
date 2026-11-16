@@ -69,3 +69,5 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)reset();});
 })();
 '''
 app.write_text(source,encoding='utf-8')
+import runpy
+runpy.run_path(str(root/'scripts/prepare-news.py'),run_name='__main__')
