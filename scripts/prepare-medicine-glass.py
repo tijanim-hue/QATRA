@@ -1,5 +1,7 @@
 from pathlib import Path
 import re
+from html import escape as html_escape, unescape
+from html.parser import HTMLParser
 root=Path(__file__).resolve().parents[1]
 def edit(relative,transform):
  p=root/relative;s=p.read_text(encoding='utf-8');p.write_text(transform(s),encoding='utf-8')
@@ -30,7 +32,35 @@ edit('android/app/src/main/java/com/qatra/app/QatraMedicinePlugin.kt',lambda s:r
 edit('public/qatra-medicine.js',lambda s:replace_checked(s,'map(d=>`<article class="qm-panel">','map(d=>`<article class="qm-panel" data-dose-id="${escape(d.id)}">'))
 p=root/'public/qatra-medicine-deletion.js'
 s=p.read_text(encoding='utf-8')
-for filename,marker in [('qatra-medicine-polish.js','/* qatra-medicine-polish-v1 */'),('qatra-medicine-dashboard.js','/* qatra-medicine-dashboard-v1 */')]:
+for filename,marker in [('qatra-medicine-polish.js','/* qatra-medicine-polish-v1 */'),('qatra-medicine-dashboard.js','/* qatra-medicine-dashboard-v1 */'),('qatra-medicine-entry.js','/* qatra-medicine-entry-v1 */')]:
  extra=(root/'public'/filename).read_text(encoding='utf-8')
  if marker not in s:s+='\n'+extra
+p.write_text(s,encoding='utf-8')
+def overlay(s):
+ s=replace_checked(s,'line("وقت جرعة ${dose.name}",22f)','line("حان وقت جرعتك",22f)\n                line(dose.name,20f)')
+ s=replace_checked(s,'line("الجرعة المسجّلة: ${dose.amount}",18f)','line("الجرعة: ${dose.amount}",18f)')
+ pattern=r'                button\(content,"فتح قسم الأدوية"\)\{.*?\n                \}\n                button\(content,"إغلاق"\)\{next\(\)\}\n'
+ if 'button(content,"فتح قسم الأدوية")' in s:
+  s,count=re.subn(pattern,'',s,flags=re.S)
+  if count!=1:raise SystemExit('Unexpected overlay navigation block')
+ return replace_checked(s,'                root.addView(card,FrameLayout.LayoutParams(width,ViewGroup.LayoutParams.WRAP_CONTENT,Gravity.CENTER))','                root.setOnClickListener { if(cardReady&&!actionBusy&&activeId==id)next() }\n                root.addView(card,FrameLayout.LayoutParams(width,ViewGroup.LayoutParams.WRAP_CONTENT,Gravity.CENTER))')
+edit('android/app/src/main/java/com/qatra/app/QatraMedicineOverlayService.kt',overlay)
+class Policy(HTMLParser):
+ def __init__(self):super().__init__(convert_charrefs=True);self.changes=[]
+ def handle_starttag(self,tag,attrs):
+  a=dict(attrs)
+  if tag!='meta' or a.get('http-equiv','').lower()!='content-security-policy':return
+  policy=a.get('content','');parts=[x.strip() for x in policy.split(';') if x.strip()]
+  rules={x.split()[0]:x.split()[1:] for x in parts};allowed=rules.get('connect-src',rules.get('default-src',[]))
+  origin='https://clinicaltables.nlm.nih.gov'
+  if origin in allowed:return
+  tokens=[x for x in allowed if x!="'none'"]+[origin]
+  updated='connect-src '+' '.join(tokens)
+  parts=[updated if x.split()[0]=='connect-src' else x for x in parts]
+  if 'connect-src' not in rules:parts.append(updated)
+  old=self.get_starttag_text();new=re.sub(r'''\bcontent\s*=\s*(["']).*?\1''',lambda _: 'content="'+html_escape('; '.join(parts),quote=True)+'"',old,count=1,flags=re.I|re.S)
+  if old==new:raise SystemExit('Could not update CSP content')
+  self.changes.append((old,new))
+p=root/'public/index.html';s=p.read_text(encoding='utf-8');policy=Policy();policy.feed(s)
+for old,new in policy.changes:s=replace_checked(s,old,new)
 p.write_text(s,encoding='utf-8')
