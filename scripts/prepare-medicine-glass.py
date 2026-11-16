@@ -11,17 +11,17 @@ def once(text,before,after):
     if text.count(before)!=1:
         raise SystemExit('Ambiguous medicine glass anchor: '+before[:80])
     return text.replace(before,after,1)
-if '#qatraMedicineSheet .qm-panel' not in c:
+if '#medicineSheet .qm-panel' not in c:
     c+='''
-#qatraMedicineSheet .qm-panel{position:relative;overflow:hidden;border-radius:26px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.05));backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15);box-shadow:0 18px 44px rgba(2,6,23,.30),inset 0 1px 0 rgba(255,255,255,.16)}
-#qatraMedicineSheet .qm-panel::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 42%);pointer-events:none}
-#qatraMedicineSheet .qm-panel>*{position:relative;z-index:1}
-#qatraMedicineSheet .qm-panel button{border-radius:16px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:inherit;transition:transform .18s ease,background .18s ease,border-color .18s ease}
-#qatraMedicineSheet .qm-panel button:hover{background:rgba(255,255,255,.17);border-color:rgba(255,255,255,.28)}
-#qatraMedicineSheet .qm-panel button:active{transform:scale(.98)}
-#qatraMedicineSheet .qm-delete{border-color:rgba(248,113,113,.45)!important;background:rgba(248,113,113,.10)!important;color:#fecaca!important}
-#qatraMedicineSheet .qm-photo{border-color:rgba(255,255,255,.24)!important;box-shadow:0 10px 24px rgba(2,6,23,.25)}
-#qatraMedicineSheet [data-photo-ready]{border-radius:26px}
+#medicineSheet .qm-panel{position:relative;overflow:hidden;border-radius:26px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.05));backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15);box-shadow:0 18px 44px rgba(2,6,23,.30),inset 0 1px 0 rgba(255,255,255,.16)}
+#medicineSheet .qm-panel::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 42%);pointer-events:none}
+#medicineSheet .qm-panel>*{position:relative;z-index:1}
+#medicineSheet .qm-panel button{border-radius:16px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:inherit;transition:transform .18s ease,background .18s ease,border-color .18s ease}
+#medicineSheet .qm-panel button:hover{background:rgba(255,255,255,.17);border-color:rgba(255,255,255,.28)}
+#medicineSheet .qm-panel button:active{transform:scale(.98)}
+#medicineSheet .qm-delete{border-color:rgba(248,113,113,.45)!important;background:rgba(248,113,113,.10)!important;color:#fecaca!important}
+#medicineSheet .qm-photo{border-color:rgba(255,255,255,.24)!important;box-shadow:0 10px 24px rgba(2,6,23,.25)}
+#medicineSheet [data-photo-ready]{border-radius:26px}
 '''
 (css).write_text(c,encoding='utf-8')
 if 'src="qatra-medicine-glass.js"' in h:
