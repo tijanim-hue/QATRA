@@ -1,43 +1,56 @@
 from pathlib import Path
 
 root=Path(__file__).resolve().parents[1]
-css=root/'public/qatra-medicine.css'
+java=root/'android/app/src/main/java/com/qatra/app'
+activity=java/'MainActivity.java'
 html=root/'public/index.html'
-service=root/'android/app/src/main/java/com/qatra/app/QatraMedicineOverlayService.kt'
-c=css.read_text(encoding='utf-8') if css.exists() else ''
+a=activity.read_text(encoding='utf-8')
 h=html.read_text(encoding='utf-8')
-s=service.read_text(encoding='utf-8')
 def once(text,before,after):
     if text.count(before)!=1:
         raise SystemExit('Ambiguous medicine glass anchor: '+before[:80])
     return text.replace(before,after,1)
-if '#medicineSheet .qm-panel' not in c:
-    c+='''
-#medicineSheet .qm-panel{position:relative;overflow:hidden;border-radius:26px;border:1px solid rgba(255,255,255,.16);background:linear-gradient(145deg,rgba(255,255,255,.13),rgba(255,255,255,.05));backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15);box-shadow:0 18px 44px rgba(2,6,23,.30),inset 0 1px 0 rgba(255,255,255,.16)}
-#medicineSheet .qm-panel::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 42%);pointer-events:none}
-#medicineSheet .qm-panel>*{position:relative;z-index:1}
-#medicineSheet .qm-panel button{border-radius:16px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:inherit;transition:transform .18s ease,background .18s ease,border-color .18s ease}
-#medicineSheet .qm-panel button:hover{background:rgba(255,255,255,.17);border-color:rgba(255,255,255,.28)}
-#medicineSheet .qm-panel button:active{transform:scale(.98)}
-#medicineSheet .qm-delete{border-color:rgba(248,113,113,.45)!important;background:rgba(248,113,113,.10)!important;color:#fecaca!important}
-#medicineSheet .qm-photo{border-color:rgba(255,255,255,.24)!important;box-shadow:0 10px 24px rgba(2,6,23,.25)}
-#medicineSheet [data-photo-ready]{border-radius:26px}
-'''
-(css).write_text(c,encoding='utf-8')
+if 'content.background=image;content.clipToOutline=true' not in a:
+    a=once(a,'content.background=image;content.clipToOutline=true','content.background=image;content.clipToOutline=true')
+if 'registerPlugin(QatraMedicineGlassPlugin.class);' not in a:
+    a=once(a,'registerPlugin(QatraMedicineImagesPlugin.class);','registerPlugin(QatraMedicineImagesPlugin.class);\n        registerPlugin(QatraMedicineGlassPlugin.class);')
 if 'src="qatra-medicine-glass.js"' in h:
     raise SystemExit('Duplicate medicine glass script.')
 h=once(h,'</head>','<script defer src="qatra-medicine-glass.js"></script>\n</head>')
-(root/'public/qatra-medicine-glass.js').write_text('''(() => {
+ui=r'''
+(() => {
 'use strict';
-if(window.QatraMedicineGlass)return;window.QatraMedicineGlass=true;
-const root=document.getElementById('medicineSheet');if(!root)return;
-const sheet=root.querySelector('.qm-sheet,.sheet,.modal,dialog');if(!sheet)return;
-sheet.classList.add('qatra-glass');
-sheet.style.setProperty('--glass-border','rgba(255,255,255,.18)');
-sheet.style.setProperty('--glass-blur','22px');
-})();''',encoding='utf-8')
-anchor='content.background=image;content.clipToOutline=true'
-if anchor in s:
-    s=once(s,anchor,'content.background=image;content.clipToOutline=true;content.elevation=18f;content.outlineProvider=object:android.view.ViewOutlineProvider(){override fun getOutline(view:android.view.View,outline:android.graphics.Outline){outline.setRoundRect(0,0,view.width,view.height,24f*view.resources.displayMetrics.density)}}')
-service.write_text(s,encoding='utf-8')
+if(window.QatraMedicineGlassUI)return;
+window.QatraMedicineGlassUI=true;
+let plugin;
+async function native(method,data){
+ const cap=window.Capacitor;plugin=plugin||cap?.Plugins?.QatraMedicineGlass||cap?.registerPlugin?.('QatraMedicineGlass');
+ if(!plugin)throw Error('bridge');return plugin[method](data);
+}
+function start(){
+ const root=document.getElementById('medicineSheet'),container=document.getElementById('qmMedicines');if(!root||!container)return;
+ const say=text=>{root.querySelector('#qmStatus').textContent=text;};
+ const style=document.createElement('style');style.textContent='#medicineSheet .qm-glass{margin-top:10px;width:100%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:16px;padding:10px 14px;font:inherit;cursor:pointer}#medicineSheet .qm-glass:disabled{opacity:.55;cursor:default}';document.head.appendChild(style);
+ function scan(){for(const card of container.querySelectorAll('[data-medicine-id]')){
+  if(card.dataset.glassReady)continue;card.dataset.glassReady='true';
+  const id=card.dataset.medicineId;
+  const name=card.querySelector('.card-title')?.textContent?.trim()||'هذا الدواء';
+  const button=document.createElement('button');button.type='button';button.className='qm-glass';button.textContent='تصميم زجاجي';
+  button.addEventListener('click',async()=>{
+   if(button.disabled)return;
+   if(!window.confirm('تطبيق التصميم الزجاجي على '+name+'؟'))return;
+   button.disabled=true;button.textContent='جارٍ التطبيق…';
+   try{const result=await native('applyGlass',{id});if(result.applied!==true)throw Error('glass');
+    card.classList.add('glass');say('تم تطبيق التصميم الزجاجي على '+name+'.');
+   }catch(_){button.disabled=false;button.textContent='تصميم زجاجي';say('تعذر تطبيق التصميم الزجاجي. أعد فتح القسم وحاول مرة أخرى.');}
+  });
+  card.append(button);
+ }}
+ new MutationObserver(scan).observe(container,{childList:true});scan();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+'''
+(root/'public/qatra-medicine-glass.js').write_text(ui,encoding='utf-8')
+activity.write_text(a,encoding='utf-8')
 html.write_text(h,encoding='utf-8')
