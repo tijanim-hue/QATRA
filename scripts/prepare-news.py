@@ -34,3 +34,5 @@ if '.QatraCultureAlarmReceiver' not in s:
 patch('public/qatra-news.js','c.refresh.disabled=c.home.disabled=c.policy.disabled=false;if(sheet.open)load(c);','c.refresh.disabled=c.home.disabled=c.policy.disabled=false;window.QatraCultureSchedule?.mount({panel,language:lang,source:()=>c.source.value,field:()=>c.field.value,controls:[c.source,c.field],current:()=>current(c)});if(sheet.open)load(c);')
 for old,new in [('جدولة الخلفية غير مفعّلة.','المواعيد التقريبية تُضبط أدناه.'),('No full articles or background scheduling.','No full articles. Scheduling uses downloaded articles.'),('Aucun article complet ni programmation en arrière-plan.','Aucun article complet. La programmation utilise les articles téléchargés.'),('Sin artículos completos ni programación en segundo plano.','Sin artículos completos. La programación usa artículos descargados.'),('Keine vollständigen Artikel oder Hintergrundplanung.','Keine vollständigen Artikel. Die Planung nutzt heruntergeladene Artikel.')]:
  patch('public/qatra-news.js',old,new)
+import runpy
+runpy.run_path(str(root/'scripts/prepare-culture-background.py'),run_name='__main__')
