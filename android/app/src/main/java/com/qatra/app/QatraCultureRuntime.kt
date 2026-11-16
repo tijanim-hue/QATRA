@@ -115,7 +115,10 @@ object QatraCultureRuntime {
         if(QatraMedicineOverlayService.culturePriorityActive){schedule(c,15*60000L);return};schedule(c);deliver(c)
     }
     fun scene(c:Context,d:JSONObject,close:()->Unit):View {
-        fun dp(x:Int)=(x*c.resources.displayMetrics.density).toInt();val l=d.getString("language")
+        fun dp(x: Int): Int {
+            return (x * c.resources.displayMetrics.density).toInt()
+        }
+        val l = d.getString("language")
         val root=FrameLayout(c).apply{setBackgroundColor(0x77000000);setOnClickListener{close()}}
         val content=LinearLayout(c).apply{orientation=LinearLayout.VERTICAL;layoutDirection=if(l=="ar")View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR;setPadding(dp(22),dp(20),dp(22),dp(20));background=GradientDrawable(GradientDrawable.Orientation.TL_BR,intArrayOf(0xF21D354F.toInt(),0xF20F192B.toInt())).apply{cornerRadius=dp(24).toFloat();setStroke(dp(1).coerceAtLeast(1),0x668ACFEF)}}
         fun line(text:String,size:Float){content.addView(TextView(c).apply{this.text=text;textSize=size;setTextColor(Color.WHITE);setPadding(0,dp(5),0,dp(5))},LinearLayout.LayoutParams(-1,-2))}
