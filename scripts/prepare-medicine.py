@@ -87,3 +87,7 @@ runpy.run_path(str(root/'scripts/prepare-medicine-cleanup.py'),run_name='__main_
 runpy.run_path(str(root/'scripts/prepare-medicine-images.py'),run_name='__main__')
 runpy.run_path(str(root/'scripts/prepare-medicine-deletion.py'),run_name='__main__')
 runpy.run_path(str(root/'scripts/prepare-medicine-glass.py'),run_name='__main__')
+consumer=root/'public/qatra-medicine-deletion.js'
+prepared=consumer.read_text(encoding='utf-8')
+if '/* qatra-medicine-schedule-v1 */' not in prepared:
+    consumer.write_text(prepared+'\n'+(root/'public/qatra-medicine-schedule.js').read_text(encoding='utf-8'),encoding='utf-8')
