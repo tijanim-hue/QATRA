@@ -23,7 +23,7 @@ class QatraMedicineDeletionPlugin : Plugin() {
                 try{
                     db.beginTransaction()
                     try{
-                        db.execSQL("DELETE FROM reminder_schedules WHERE dose_id IN (SELECT id FROM doses WHERE medicine_id=?)",arrayOf(id))
+                        db.execSQL("DELETE FROM stock_movements WHERE medicine_id=?",arrayOf(id))
                         db.execSQL("DELETE FROM doses WHERE medicine_id=? AND status!='taken'",arrayOf(id))
                         db.execSQL("DELETE FROM medicines WHERE id=?",arrayOf(id))
                         db.setTransactionSuccessful()
