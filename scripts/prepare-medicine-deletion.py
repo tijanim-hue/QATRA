@@ -10,7 +10,10 @@ def once(text,before,after):
     if text.count(before)!=1:
         raise SystemExit('Ambiguous medicine deletion anchor: '+before[:80])
     return text.replace(before,after,1)
-a=once(a,'registerPlugin(QatraMedicineImagesPlugin.class);','registerPlugin(QatraMedicineImagesPlugin.class);\n        registerPlugin(QatraMedicineDeletionPlugin.class);')
+if 'registerPlugin(QatraMedicineImagesPlugin.class);' not in a:
+    a=once(a,'registerPlugin(QatraMedicineAlertsPlugin.class);','registerPlugin(QatraMedicineAlertsPlugin.class);\n        registerPlugin(QatraMedicineImagesPlugin.class);')
+if 'registerPlugin(QatraMedicineDeletionPlugin.class);' not in a:
+    a=once(a,'registerPlugin(QatraMedicineImagesPlugin.class);','registerPlugin(QatraMedicineImagesPlugin.class);\n        registerPlugin(QatraMedicineDeletionPlugin.class);')
 if 'src="qatra-medicine-deletion.js"' in h:
     raise SystemExit('Duplicate medicine deletion script.')
 h=once(h,'</head>','<script defer src="qatra-medicine-deletion.js"></script>\n</head>')
